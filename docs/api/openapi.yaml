@@ -1,0 +1,833 @@
+openapi: 3.0.4
+info:
+  title: CultureAtlas AI API
+  version: 0.1.0
+  description: |
+    Hợp đồng HTTP giữa Angular frontend và FastAPI backend.
+
+    - **Content API** — không dùng LLM, chỉ trả nội dung `published`.
+    - **AI API** — hỏi đáp RAG có trích dẫn (SSE) và so sánh văn hoá.
+    - **Admin API** — duyệt nội dung, nguồn, phản hồi, đồng bộ dữ liệu (JWT, vai trò `editor` / `admin`).
+
+    Lỗi theo RFC 7807 (`application/problem+json`).
+  license:
+    name: CC BY 4.0 (tài liệu)
+security:
+  - {}
+  - bearerAuth: []
+servers:
+  - url: http://localhost:8000/api
+    description: Docker Compose local
+tags:
+  - name: Countries
+    description: Danh sách & hồ sơ quốc gia
+  - name: Content
+    description: Bài viết, claim, nguồn, chủ đề
+  - name: Heritage
+    description: Di sản UNESCO
+  - name: Search
+    description: Tìm kiếm toàn văn
+  - name: Quiz
+    description: Câu hỏi & đáp án
+  - name: Feedback
+    description: Báo cáo sai
+  - name: AI
+    description: AI Guide & so sánh
+  - name: Auth
+    description: Xác thực JWT
+  - name: Admin - Review
+    description: Duyệt nội dung
+  - name: Admin - Content
+    description: Soạn nội dung
+  - name: Admin - Sources
+    description: Nguồn & giấy phép
+  - name: Admin - Feedback
+    description: Xử lý báo cáo
+  - name: Admin - Operations
+    description: Độ phủ, đồng bộ, benchmark
+  - name: Admin - Users
+    description: Người dùng & vai trò
+
+paths:
+  # ───────────────────────── Content API ─────────────────────────
+  /countries:
+    get:
+      tags: [Countries]
+      operationId: listCountries
+      summary: Danh sách quốc gia
+      parameters:
+        - { name: region, in: query, schema: { type: string }, example: Đông Á }
+        - $ref: '#/components/parameters/Lang'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/CountrySummary' } }
+              example:
+                - { iso2: JP, name: Nhật Bản, region: Đông Á, flag: 🇯🇵, coverage: 88, featured: true }
+  /countries/{iso}:
+    get:
+      tags: [Countries]
+      operationId: getCountry
+      summary: Hồ sơ quốc gia
+      parameters: [{ $ref: '#/components/parameters/Iso' }, { $ref: '#/components/parameters/Lang' }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/CountryProfile' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /countries/{iso}/entries:
+    get:
+      tags: [Content]
+      operationId: listCountryEntries
+      summary: Bài viết đã xuất bản theo danh mục
+      parameters:
+        - $ref: '#/components/parameters/Iso'
+        - { name: category, in: query, schema: { $ref: '#/components/schemas/CategoryCode' } }
+        - $ref: '#/components/parameters/Lang'
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/EntrySummary' } } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /entries/{id}:
+    get:
+      tags: [Content]
+      operationId: getEntry
+      summary: Chi tiết bài viết + claim + nguồn
+      parameters: [{ $ref: '#/components/parameters/Id' }, { $ref: '#/components/parameters/Lang' }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/EntryDetail' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /heritage:
+    get:
+      tags: [Heritage]
+      operationId: listHeritage
+      summary: Di sản UNESCO
+      parameters:
+        - { name: country, in: query, schema: { type: string, pattern: '^[A-Z]{2}$' } }
+        - { name: type, in: query, schema: { type: string, enum: [tangible, intangible] } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/HeritageItem' } } } } }
+  /search:
+    get:
+      tags: [Search]
+      operationId: search
+      summary: Tìm kiếm nội dung (không dấu được)
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string, minLength: 2 }, example: nhat ban tang qua }
+        - { name: country, in: query, schema: { type: string } }
+        - { name: category, in: query, schema: { $ref: '#/components/schemas/CategoryCode' } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/SearchPage' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /sources/{id}:
+    get:
+      tags: [Content]
+      operationId: getSource
+      summary: Chi tiết nguồn và giấy phép
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Source' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /themes:
+    get:
+      tags: [Content]
+      operationId: listThemes
+      summary: Chủ đề xuyên quốc gia
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: object, properties: { slug: { type: string }, title: { type: string }, countryCount: { type: integer } } }
+  /festivals:
+    get:
+      tags: [Content]
+      operationId: listFestivalsByMonth
+      summary: Lễ hội theo tháng
+      parameters: [{ name: month, in: query, required: true, schema: { type: integer, minimum: 1, maximum: 12 } }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: object, properties: { entryId: { type: integer }, name: { type: string }, country: { type: string }, dateText: { type: string } } }
+  /quizzes:
+    get:
+      tags: [Quiz]
+      operationId: listQuizQuestions
+      summary: Bộ câu hỏi đã duyệt
+      parameters:
+        - { name: country, in: query, schema: { type: string } }
+        - { name: category, in: query, schema: { $ref: '#/components/schemas/CategoryCode' } }
+        - { name: difficulty, in: query, schema: { type: string, enum: [easy, medium, hard] } }
+        - { name: limit, in: query, schema: { type: integer, default: 10, maximum: 30 } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/QuizQuestion' } } } } }
+  /quizzes/{id}/attempts:
+    post:
+      tags: [Quiz]
+      operationId: submitQuizAnswer
+      summary: Gửi đáp án và nhận giải thích
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [answerIndex], properties: { answerIndex: { type: integer, minimum: 0 } } } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/QuizResult' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /feedback:
+    post:
+      tags: [Feedback]
+      operationId: createFeedback
+      summary: Báo cáo sai / góp ý
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/FeedbackCreate' } } }
+      responses:
+        '201': { description: Đã ghi nhận, content: { application/json: { schema: { $ref: '#/components/schemas/Feedback' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  # ───────────────────────── AI API ─────────────────────────
+  /ai/chat:
+    post:
+      tags: [AI]
+      operationId: chat
+      summary: Hỏi AI Cultural Guide (RAG, có trích dẫn)
+      description: |
+        Mặc định trả **Server-Sent Events**: các sự kiện `token` (văn bản), `citation`, rồi `final` chứa `ChatAnswer` đầy đủ.
+        Gửi `Accept: application/json` để nhận một `ChatAnswer` không streaming.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChatRequest' }
+            example: { message: "Văn hoá tặng quà ở Việt Nam và Nhật Bản khác nhau thế nào?", sessionId: 7b8f3c1e-1a2b-4c3d-9e8f-001122334455, level: normal, context: { country: JP, category: gift_giving } }
+      responses:
+        '200':
+          description: Câu trả lời
+          headers:
+            X-RateLimit-Remaining: { schema: { type: integer } }
+          content:
+            text/event-stream:
+              schema: { type: string }
+              example: "event: token\ndata: {\"text\":\"Ở Nhật Bản, quà thường\"}\n\nevent: final\ndata: {...ChatAnswer}\n\n"
+            application/json:
+              schema: { $ref: '#/components/schemas/ChatAnswer' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '503': { $ref: '#/components/responses/Unavailable' }
+  /ai/chat/messages/{id}/rating:
+    post:
+      tags: [AI]
+      operationId: rateChatMessage
+      summary: Đánh giá câu trả lời
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [rating], properties: { rating: { type: integer, enum: [-1, 1] } } } } }
+      responses:
+        '204': { description: Đã lưu }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /ai/compare:
+    post:
+      tags: [AI]
+      operationId: compareCultures
+      summary: So sánh 2 quốc gia × 1 chủ đề
+      description: Trả bản đã duyệt (cache) nếu có; nếu không, sinh bản nháp gắn `reviewed = false`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CompareRequest' }
+            example: { countryA: VN, countryB: JP, topic: gift_giving, lang: vi }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Comparison' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  # ───────────────────────── Auth ─────────────────────────
+  /auth/login:
+    post:
+      tags: [Auth]
+      operationId: login
+      summary: Đăng nhập
+      security: []
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [email, password], properties: { email: { type: string, format: email }, password: { type: string, format: password } } } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/TokenResponse' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /auth/me:
+    get:
+      tags: [Auth]
+      operationId: getMe
+      summary: Thông tin người dùng hiện tại
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ───────────────────────── Admin API ─────────────────────────
+  /admin/review-queue:
+    get:
+      tags: [Admin - Review]
+      operationId: listReviewQueue
+      summary: Hàng đợi duyệt
+      x-roles: [editor, admin]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: type, in: query, schema: { type: string, enum: [entry, claim, quiz_question, comparison] } }
+        - { name: origin, in: query, schema: { type: string, enum: [editor, ai_generated, imported] } }
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/ContentStatus' } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/ReviewPage' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/review/{targetType}/{id}/decision:
+    post:
+      tags: [Admin - Review]
+      operationId: decideReview
+      summary: Duyệt / yêu cầu sửa / từ chối
+      x-roles: [editor, admin]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: targetType, in: path, required: true, schema: { type: string, enum: [entry, claim, quiz_question, comparison] } }
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision]
+              properties:
+                decision: { type: string, enum: [approve, request_changes, reject] }
+                reason: { type: string, description: Bắt buộc khi reject }
+      responses:
+        '200': { description: Trạng thái mới, content: { application/json: { schema: { type: object, properties: { status: { $ref: '#/components/schemas/ContentStatus' } } } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+  /admin/entries:
+    post:
+      tags: [Admin - Content]
+      operationId: createEntry
+      summary: Tạo bài viết (draft)
+      x-roles: [editor, admin]
+      security: [{ bearerAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/EntryUpsert' } } } }
+      responses:
+        '201': { description: Đã tạo (draft), content: { application/json: { schema: { $ref: '#/components/schemas/EntryDetail' } } } }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+  /admin/entries/{id}:
+    put:
+      tags: [Admin - Content]
+      operationId: updateEntry
+      summary: Cập nhật bài viết
+      x-roles: [editor, admin]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/EntryUpsert' } } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/EntryDetail' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /admin/entries/{id}/claims:
+    post:
+      tags: [Admin - Content]
+      operationId: addClaim
+      summary: Thêm claim kèm nguồn
+      x-roles: [editor, admin]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ClaimUpsert' } } } }
+      responses:
+        '201': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Claim' } } } }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+  /admin/sources:
+    get:
+      tags: [Admin - Sources]
+      operationId: listSources
+      summary: Danh sách nguồn
+      x-roles: [editor, admin]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: q, in: query, schema: { type: string } }, { $ref: '#/components/parameters/Page' }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Source' } } } } }
+    post:
+      tags: [Admin - Sources]
+      operationId: createSource
+      summary: Thêm nguồn
+      x-roles: [editor, admin]
+      security: [{ bearerAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/SourceUpsert' } } } }
+      responses:
+        '201': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Source' } } } }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /admin/feedback:
+    get:
+      tags: [Admin - Feedback]
+      operationId: listFeedback
+      summary: Danh sách báo cáo sai
+      x-roles: [editor, admin]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: status, in: query, schema: { type: string, enum: [open, in_progress, resolved, dismissed] } }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Feedback' } } } } }
+  /admin/feedback/{id}:
+    patch:
+      tags: [Admin - Feedback]
+      operationId: updateFeedback
+      summary: Cập nhật trạng thái báo cáo
+      x-roles: [editor, admin]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, properties: { status: { type: string, enum: [in_progress, resolved, dismissed] }, note: { type: string } } } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Feedback' } } } }
+  /admin/coverage:
+    get:
+      tags: [Admin - Operations]
+      operationId: getCoverage
+      summary: Độ phủ quốc gia × danh mục
+      x-roles: [editor, admin]
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Ma trận quốc gia × danh mục
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: object, properties: { iso2: { type: string }, category: { $ref: '#/components/schemas/CategoryCode' }, publishedClaims: { type: integer } } }
+  /admin/ai/drafts:
+    post:
+      tags: [Admin - Content]
+      operationId: generateDrafts
+      summary: Sinh nháp quiz / so sánh bằng AI (vào hàng đợi ở trạng thái draft)
+      x-roles: [editor, admin]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind]
+              properties:
+                kind: { type: string, enum: [quiz, comparison] }
+                entryIds: { type: array, items: { type: integer } }
+                difficulty: { type: string, enum: [easy, medium, hard] }
+                n: { type: integer, default: 5, maximum: 20 }
+                compare: { $ref: '#/components/schemas/CompareRequest' }
+      responses:
+        '202': { description: Đã nhận, content: { application/json: { schema: { type: object, properties: { jobId: { type: string } } } } } }
+  /admin/ingestion/runs:
+    get:
+      tags: [Admin - Operations]
+      operationId: listIngestionRuns
+      summary: Nhật ký đồng bộ
+      x-roles: [admin]
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/IngestionRun' } } } } }
+    post:
+      tags: [Admin - Operations]
+      operationId: triggerIngestion
+      summary: Kích hoạt đồng bộ nguồn
+      x-roles: [admin]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [source], properties: { source: { type: string, enum: [rest_countries, unesco_whc, unesco_ich, natural_earth, wikidata] } } } } }
+      responses:
+        '202': { description: Đã xếp lịch, content: { application/json: { schema: { $ref: '#/components/schemas/IngestionRun' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /admin/benchmark/runs:
+    get:
+      tags: [Admin - Operations]
+      operationId: listBenchmarkRuns
+      summary: Kết quả benchmark RAG
+      x-roles: [admin]
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: integer }
+                    createdAt: { type: string, format: date-time }
+                    gitSha: { type: string }
+                    citationCorrectness: { type: number }
+                    recallAt8: { type: number }
+                    refusalAccuracy: { type: number }
+                    p95TtftMs: { type: integer }
+  /admin/users:
+    get:
+      tags: [Admin - Users]
+      operationId: listUsers
+      summary: Danh sách người dùng
+      x-roles: [admin]
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/User' } } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/users/{id}:
+    patch:
+      tags: [Admin - Users]
+      operationId: updateUser
+      summary: Đổi vai trò / khoá người dùng
+      x-roles: [admin]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, properties: { role: { $ref: '#/components/schemas/UserRole' }, isActive: { type: boolean } } } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    Iso: { name: iso, in: path, required: true, schema: { type: string, pattern: '^[A-Za-z]{2}$' }, example: JP }
+    Id: { name: id, in: path, required: true, schema: { type: integer, format: int64, minimum: 1 } }
+    Lang: { name: lang, in: query, schema: { type: string, enum: [vi, en], default: vi } }
+    Page: { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+    PageSize: { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+  responses:
+    BadRequest: { description: Yêu cầu không hợp lệ, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    Unauthorized: { description: Chưa xác thực, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    Forbidden: { description: Không đủ quyền, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    NotFound: { description: Không tìm thấy, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    Conflict: { description: Xung đột trạng thái, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    Unprocessable: { description: Vi phạm quy tắc nghiệp vụ (ví dụ claim thiếu nguồn), content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    TooManyRequests: { description: Vượt giới hạn lượt, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    Unavailable: { description: Nhà cung cấp LLM không phản hồi, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+  schemas:
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri, example: 'https://cultureatlas.example/problems/claim-without-source' }
+        title: { type: string, example: Claim cannot be published without a source }
+        status: { type: integer, example: 422 }
+        detail: { type: string }
+        instance: { type: string }
+        errors: { type: object, additionalProperties: { type: array, items: { type: string } } }
+    CategoryCode:
+      type: string
+      enum: [greetings, etiquette, food_dining, gift_giving, festivals, religion_beliefs, clothing, arts_music, family_life, heritage, business_culture, taboos]
+    ContentStatus: { type: string, enum: [draft, in_review, published, flagged, archived] }
+    ClaimScope: { type: string, enum: [common_practice, historical_tradition, regional, community_specific] }
+    Confidence: { type: string, enum: [verified, partially_supported, unverified] }
+    UserRole: { type: string, enum: [learner, editor, admin] }
+    CountrySummary:
+      type: object
+      required: [iso2, name, region, coverage]
+      properties:
+        iso2: { type: string }
+        name: { type: string }
+        region: { type: string }
+        flag: { type: string }
+        coverage: { type: integer, minimum: 0, maximum: 100 }
+        featured: { type: boolean }
+    CountryProfile:
+      allOf:
+        - $ref: '#/components/schemas/CountrySummary'
+        - type: object
+          properties:
+            nameEn: { type: string }
+            capital: { type: string }
+            languages: { type: array, items: { type: string } }
+            currencies: { type: array, items: { type: string } }
+            neighbors: { type: array, items: { type: string } }
+            categories:
+              type: array
+              items: { type: object, properties: { code: { $ref: '#/components/schemas/CategoryCode' }, entryCount: { type: integer } } }
+            firstTimeTips:
+              type: array
+              maxItems: 5
+              items: { type: object, properties: { text: { type: string }, sourceIds: { type: array, items: { type: integer } } } }
+    EntrySummary:
+      type: object
+      properties:
+        id: { type: integer }
+        category: { $ref: '#/components/schemas/CategoryCode' }
+        title: { type: string }
+        summary: { type: string }
+        updatedAt: { type: string, format: date }
+    EntryDetail:
+      allOf:
+        - $ref: '#/components/schemas/EntrySummary'
+        - type: object
+          properties:
+            countryIso: { type: string }
+            status: { $ref: '#/components/schemas/ContentStatus' }
+            version: { type: integer }
+            claims: { type: array, items: { $ref: '#/components/schemas/Claim' } }
+            sources: { type: array, items: { $ref: '#/components/schemas/Source' } }
+    Claim:
+      type: object
+      required: [id, text, scope, confidence, sources]
+      properties:
+        id: { type: integer }
+        text: { type: string }
+        scope: { $ref: '#/components/schemas/ClaimScope' }
+        region: { type: string, nullable: true }
+        period: { type: string }
+        confidence: { $ref: '#/components/schemas/Confidence' }
+        sources:
+          type: array
+          minItems: 1
+          items: { type: object, properties: { sourceId: { type: integer }, evidenceExcerpt: { type: string }, locator: { type: string } } }
+    ClaimUpsert:
+      type: object
+      required: [text, scope, sources]
+      properties:
+        text: { type: string, minLength: 10 }
+        scope: { $ref: '#/components/schemas/ClaimScope' }
+        region: { type: string }
+        period: { type: string }
+        sources:
+          type: array
+          minItems: 1
+          items: { type: object, required: [sourceId, evidenceExcerpt], properties: { sourceId: { type: integer }, evidenceExcerpt: { type: string }, locator: { type: string } } }
+    EntryUpsert:
+      type: object
+      required: [countryIso, category, titleVi]
+      properties:
+        countryIso: { type: string }
+        category: { $ref: '#/components/schemas/CategoryCode' }
+        titleVi: { type: string }
+        titleEn: { type: string }
+        summary: { type: string }
+        content: { type: string }
+        tags: { type: array, items: { type: string } }
+        version: { type: integer, description: Khoá lạc quan khi cập nhật }
+    Source:
+      type: object
+      required: [id, title, publisher, url, license, reliabilityTier, retrievedAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        publisher: { type: string }
+        url: { type: string, format: uri }
+        sourceType: { type: string, enum: [api_dataset, official_site, museum, academic, editorial, encyclopedia] }
+        license: { type: string }
+        reliabilityTier: { type: string, enum: [official, museum, academic, community] }
+        retrievedAt: { type: string, format: date }
+    SourceUpsert:
+      type: object
+      required: [title, publisher, url, sourceType, license, reliabilityTier, retrievedAt]
+      properties:
+        title: { type: string }
+        publisher: { type: string }
+        url: { type: string, format: uri }
+        sourceType: { type: string, enum: [api_dataset, official_site, museum, academic, editorial, encyclopedia] }
+        license: { type: string }
+        reliabilityTier: { type: string, enum: [official, museum, academic, community] }
+        retrievedAt: { type: string, format: date }
+    HeritageItem:
+      type: object
+      properties:
+        id: { type: integer }
+        unescoId: { type: string }
+        name: { type: string }
+        type: { type: string, enum: [tangible, intangible] }
+        listType: { type: string }
+        inscribedYear: { type: integer }
+        countries: { type: array, items: { type: string } }
+        lat: { type: number }
+        lng: { type: number }
+        attribution: { type: string, example: UNESCO World Heritage Centre — CC BY-SA 4.0 }
+    SearchPage:
+      type: object
+      properties:
+        total: { type: integer }
+        page: { type: integer }
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              kind: { type: string, enum: [country, entry, heritage, theme] }
+              id: { type: string }
+              title: { type: string }
+              snippet: { type: string }
+              countryIso: { type: string }
+    QuizQuestion:
+      type: object
+      properties:
+        id: { type: integer }
+        countryIso: { type: string }
+        category: { $ref: '#/components/schemas/CategoryCode' }
+        difficulty: { type: string, enum: [easy, medium, hard] }
+        question: { type: string }
+        options: { type: array, minItems: 2, maxItems: 4, items: { type: string } }
+    QuizResult:
+      type: object
+      properties:
+        correct: { type: boolean }
+        answerIndex: { type: integer }
+        explanation: { type: string }
+        sourceIds: { type: array, items: { type: integer } }
+        entryId: { type: integer }
+    FeedbackCreate:
+      type: object
+      required: [targetType, targetId, type]
+      properties:
+        targetType: { type: string, enum: [entry, claim, chat_message, comparison, quiz_question] }
+        targetId: { type: integer }
+        type: { type: string, enum: [factual_error, stereotype, missing_source, other] }
+        comment: { type: string, maxLength: 1000 }
+    Feedback:
+      allOf:
+        - $ref: '#/components/schemas/FeedbackCreate'
+        - type: object
+          properties:
+            id: { type: integer }
+            status: { type: string, enum: [open, in_progress, resolved, dismissed] }
+            createdAt: { type: string, format: date-time }
+    ChatRequest:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string, minLength: 2, maxLength: 1000 }
+        sessionId: { type: string, format: uuid }
+        level: { type: string, enum: [simple, normal, deep], default: normal }
+        lang: { type: string, enum: [vi, en] }
+        context:
+          type: object
+          properties:
+            country: { type: string }
+            category: { $ref: '#/components/schemas/CategoryCode' }
+            entryId: { type: integer }
+    Citation:
+      type: object
+      required: [id, sourceId, title, url]
+      properties:
+        id: { type: string, example: c1 }
+        sourceId: { type: integer }
+        chunkId: { type: integer }
+        title: { type: string }
+        publisher: { type: string }
+        url: { type: string, format: uri }
+        license: { type: string }
+        excerpt: { type: string }
+    ChatAnswer:
+      type: object
+      required: [messageId, answer, citations, confidence]
+      properties:
+        messageId: { type: integer }
+        sessionId: { type: string, format: uuid }
+        answer: { type: string, description: 'Markdown; ý có nguồn gắn [c#]' }
+        citations: { type: array, items: { $ref: '#/components/schemas/Citation' } }
+        confidence: { type: string, enum: [supported, inferred, insufficient] }
+        route: { type: string, enum: [structured, rag, compare, refused] }
+        followUpQuestions: { type: array, maxItems: 3, items: { type: string } }
+        unsupportedPoints: { type: array, items: { type: string } }
+      example:
+        messageId: 1042
+        answer: Ở Nhật Bản, quà thường được trao bằng hai tay [c1] …
+        citations: [{ id: c1, sourceId: 42, chunkId: 9001, title: Japanese etiquette & manners, url: 'https://www.japan.travel', excerpt: Gifts are usually presented … }]
+        confidence: supported
+        route: rag
+        followUpQuestions: ["Ở Nhật, nên tránh những món quà nào?"]
+        unsupportedPoints: []
+    CompareRequest:
+      type: object
+      required: [countryA, countryB, topic]
+      properties:
+        countryA: { type: string, example: VN }
+        countryB: { type: string, example: JP }
+        topic: { $ref: '#/components/schemas/CategoryCode' }
+        lang: { type: string, enum: [vi, en], default: vi }
+    SourcedText:
+      type: object
+      nullable: true
+      description: null ⇒ "Chưa đủ nguồn để kết luận"
+      properties:
+        text: { type: string }
+        sourceIds: { type: array, minItems: 1, items: { type: integer } }
+    Comparison:
+      type: object
+      properties:
+        countryA: { type: string }
+        countryB: { type: string }
+        topic: { $ref: '#/components/schemas/CategoryCode' }
+        reviewed: { type: boolean }
+        reviewedBy: { type: string, nullable: true }
+        similarities: { type: array, items: { $ref: '#/components/schemas/SourcedText' } }
+        rows:
+          type: array
+          items:
+            type: object
+            properties:
+              aspect: { type: string }
+              a: { $ref: '#/components/schemas/SourcedText' }
+              b: { $ref: '#/components/schemas/SourcedText' }
+        context: { type: string }
+        caveats: { type: array, items: { type: string } }
+        insufficient: { type: array, items: { type: string } }
+        sources: { type: array, items: { $ref: '#/components/schemas/Source' } }
+    ReviewItem:
+      type: object
+      properties:
+        id: { type: integer }
+        type: { type: string, enum: [entry, claim, quiz_question, comparison] }
+        title: { type: string }
+        countryIso: { type: string }
+        origin: { type: string, enum: [editor, ai_generated, imported] }
+        status: { $ref: '#/components/schemas/ContentStatus' }
+        updatedAt: { type: string, format: date-time }
+    ReviewPage:
+      type: object
+      properties:
+        total: { type: integer }
+        items: { type: array, items: { $ref: '#/components/schemas/ReviewItem' } }
+    IngestionRun:
+      type: object
+      properties:
+        id: { type: integer }
+        sourceName: { type: string }
+        status: { type: string, enum: [running, succeeded, failed] }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time, nullable: true }
+        recordsIn: { type: integer }
+        recordsChanged: { type: integer }
+        errors: { type: array, items: { type: string } }
+    TokenResponse:
+      type: object
+      properties:
+        accessToken: { type: string }
+        tokenType: { type: string, example: Bearer }
+        expiresAt: { type: string, format: date-time }
+        user: { $ref: '#/components/schemas/User' }
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string, format: email }
+        displayName: { type: string }
+        role: { $ref: '#/components/schemas/UserRole' }
+        locale: { type: string }
+        isActive: { type: boolean }

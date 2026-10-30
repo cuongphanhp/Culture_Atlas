@@ -1,0 +1,63 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>CultureAtlas AI — Mind map</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Lora:wght@700&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #fbf8f3; font-family: 'Be Vietnam Pro', sans-serif; }
+  #map { position: relative; width: 2600px; }
+  svg { position: absolute; inset: 0; }
+  .root { position: absolute; transform: translate(-50%, -50%); text-align: center; color: #fff; padding: 26px 40px; border-radius: 28px;
+    background: linear-gradient(135deg, #c2552d, #8f3a1d); box-shadow: 0 12px 40px rgb(194 85 45 / .35); }
+  .root h1 { font-family: 'Lora', serif; font-size: 46px; margin: 0; }
+  .root p { margin: 6px 0 0; font-size: 17px; opacity: .9; }
+  .root .globe { font-size: 40px; }
+  .branch { position: absolute; transform: translateY(-50%); display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-radius: 16px;
+    color: #fff; font-weight: 700; font-size: 23px; box-shadow: 0 6px 18px rgb(0 0 0 / .14); white-space: nowrap; }
+  .branch .ic { font-size: 26px; width: 40px; height: 40px; display: grid; place-items: center; background: rgb(255 255 255 / .2); border-radius: 12px; }
+  .branch .tag { font-size: 12px; font-weight: 600; background: rgb(255 255 255 / .25); padding: 2px 8px; border-radius: 999px; }
+  .leaf { position: absolute; transform: translateY(-100%); font-size: 17px; color: #1f2a37; padding: 0 4px 5px; white-space: nowrap; font-weight: 500; }
+  .left.leaf { text-align: right; }
+  .legend { position: absolute; left: 40px; bottom: 26px; font-size: 15px; color: #6b7280; display: flex; gap: 18px; }
+  .legend b { color: #1f2a37; }
+</style></head>
+<body><div id="map"><svg id="svg"></svg></div>
+<script>
+fetch(new URLSearchParams(location.search).get('data') || 'mindmap-data.json').then(r => r.json()).then(data => {
+  const map = document.getElementById('map'), svg = document.getElementById('svg');
+  const W = 2600, CX = W / 2, LEAF_H = 46, GAP = 34;
+  const sides = { right: data.branches.filter(b => b.side === 'right'), left: data.branches.filter(b => b.side === 'left') };
+  const h = s => s.reduce((a, b) => a + b.children.length * LEAF_H + GAP, -GAP);
+  const H = Math.max(h(sides.right), h(sides.left)) + 160, CY = H / 2;
+  map.style.height = H + 'px'; svg.setAttribute('width', W); svg.setAttribute('height', H);
+  const el = (tag, cls, html, x, y) => { const e = document.createElement(tag); e.className = cls; e.innerHTML = html; e.style.left = x + 'px'; e.style.top = y + 'px'; map.appendChild(e); return e; };
+  const path = (d, color, w, op = 1) => { const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', d); p.setAttribute('fill', 'none');
+    p.setAttribute('stroke', color); p.setAttribute('stroke-width', w); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('opacity', op); svg.appendChild(p); };
+  const root = el('div', 'root', `<div class="globe">🌏</div><h1>${data.root}</h1><p>${data.subtitle}</p>`, CX, CY);
+  const rootW = root.offsetWidth / 2;
+  for (const side of ['right', 'left']) {
+    const dir = side === 'right' ? 1 : -1;
+    let y = CY - h(sides[side]) / 2;
+    for (const b of sides[side]) {
+      const bh = b.children.length * LEAF_H, by = y + bh / 2;
+      const bx = CX + dir * (rootW + 90);
+      const node = el('div', 'branch ' + side, `<span class="ic">${b.icon}</span>${b.title}<span class="tag">${b.tag}</span>`, 0, by);
+      node.style.background = b.color;
+      const nw = node.offsetWidth;
+      node.style.left = (dir > 0 ? bx : bx - nw) + 'px';
+      const sx = CX + dir * (rootW - 20);
+      path(`M ${sx} ${CY} C ${sx + dir * 90} ${CY}, ${bx - dir * 90} ${by}, ${bx} ${by}`, b.color, 7, .9);
+      const ex = bx + dir * nw, lx = ex + dir * 70;
+      b.children.forEach((c, i) => {
+        const ly = y + i * LEAF_H + LEAF_H / 2 + 12;
+        const leaf = el('div', 'leaf ' + side, c, 0, ly);
+        const lw = leaf.offsetWidth;
+        leaf.style.left = (dir > 0 ? lx : lx - lw) + 'px';
+        leaf.style.borderBottom = `3px solid ${b.color}`;
+        path(`M ${ex} ${by} C ${ex + dir * 40} ${by}, ${lx - dir * 40} ${ly}, ${lx} ${ly}`, b.color, 3, .8);
+      });
+      y += bh + GAP;
+    }
+  }
+  el('div', 'legend', data.legend || '<span><b>MVP</b>: Explorer · AI Guide · Comparison · Quiz · Quản trị</span><span><b>Sau MVP</b>: Scenario · Passport</span>', 40, H - 50);
+  document.body.dataset.ready = '1';
+});
+</script></body></html>

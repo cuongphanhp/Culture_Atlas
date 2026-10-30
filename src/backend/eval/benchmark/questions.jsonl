@@ -1,0 +1,2 @@
+{"id": "q001", "group": "explain", "lang": "vi", "question": "Vì sao người Nhật thường trao quà bằng hai tay?", "expected_sources": [42, 51]}
+{"id": "q002", "group": "insufficient", "lang": "vi", "question": "Tập quán cưới hỏi của một làng cụ thể ở Kyoto?", "expect_refusal": true}

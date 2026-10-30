@@ -1,0 +1,1878 @@
+{
+ "generatedAt": "2026-10-30",
+ "sources": {
+  "unesco_whc": {
+   "name": "UNESCO World Heritage List (DataHub whc001)",
+   "license": "CC BY-SA 4.0",
+   "url": "https://data.unesco.org/explore/dataset/whc001/",
+   "records": 1273
+  },
+  "unesco_ich": {
+   "name": "UNESCO Intangible Heritage Lists (DataHub ich001)",
+   "license": "CC BY-SA 4.0",
+   "url": "https://data.unesco.org/explore/dataset/ich001/",
+   "records": 849
+  },
+  "smithsonian": {
+   "name": "Smithsonian Open Access",
+   "license": "CC0 (chỉ bản ghi Open Access)",
+   "url": "https://www.si.edu/openaccess"
+  },
+  "europeana": {
+   "name": "Europeana Search API",
+   "license": "Theo từng bản ghi (trường rights)",
+   "url": "https://pro.europeana.eu/page/apis"
+  },
+  "scale": {
+   "name": "SCALE Cultural Data (Google Research)",
+   "license": "Chưa công bố giấy phép — chỉ tham khảo taxonomy",
+   "url": "https://github.com/google-research-datasets/SCALE-Cultural-Data"
+  },
+  "rest_countries": {
+   "name": "REST Countries v5",
+   "license": "MPL-2.0; v5 yêu cầu bearer token",
+   "url": "https://restcountries.com"
+  }
+ },
+ "countries": {
+  "VN": {
+   "worldHeritage": {
+    "total": 9,
+    "cultural": 6,
+    "natural": 2,
+    "items": [
+     {
+      "id": "678",
+      "name": "Complex of Hué Monuments",
+      "category": "Cultural",
+      "year": 1993,
+      "summary": "Established as the capital of unified Viet Nam in 1802, Hué was not only the political but also the cultural and religious centre under the Nguyen dynasty until 1945. The Perfume River winds its way through the Capital…",
+      "url": "https://whc.unesco.org/en/list/678"
+     },
+     {
+      "id": "948",
+      "name": "Hoi An Ancient Town",
+      "category": "Cultural",
+      "year": 1999,
+      "summary": "Hoi An Ancient Town is an exceptionally well-preserved example of a South-East Asian trading port dating from the 15th to the 19th century. Its buildings and its street plan reflect the influences, both indigenous and…",
+      "url": "https://whc.unesco.org/en/list/948"
+     },
+     {
+      "id": "949",
+      "name": "My Son Sanctuary",
+      "category": "Cultural",
+      "year": 1999,
+      "summary": "Between the 4th and 13th centuries a unique culture which owed its spiritual origins to Indian Hinduism developed on the coast of contemporary Viet Nam. This is graphically illustrated by the remains of a series of…",
+      "url": "https://whc.unesco.org/en/list/949"
+     },
+     {
+      "id": "1328",
+      "name": "Central Sector of the Imperial Citadel of Thang Long - Hanoi",
+      "category": "Cultural",
+      "year": 2010,
+      "summary": "The Thang Long Imperial Citadel was built in the 11th century by the Ly Viet Dynasty, marking the independence of the Dai Viet. It was constructed on the remains of a Chinese fortress dating from the 7th century, on…",
+      "url": "https://whc.unesco.org/en/list/1328"
+     },
+     {
+      "id": "1358",
+      "name": "Citadel of the Ho Dynasty",
+      "category": "Cultural",
+      "year": 2011,
+      "summary": "The 14th -century Ho Dynasty citadel, built according to the feng shui principles, testifies to the flowering of neo-Confucianism in late 14th century Viet Nam and its spread to other parts of east Asia. According to…",
+      "url": "https://whc.unesco.org/en/list/1358"
+     },
+     {
+      "id": "1732",
+      "name": "Yen Tu-Vinh Nghiem-Con Son, Kiep Bac Complex of Monuments and Landscapes",
+      "category": "Cultural",
+      "year": 2025,
+      "summary": "The property comprises 12 sites across forested mountains, lowlands, and river valleys. Centred on the Yen Tu Mountain Range, it was home to the Tran Dynasty during the 13th and 14th centuries and the birthplace of Truc…",
+      "url": "https://whc.unesco.org/en/list/1732"
+     }
+    ]
+   },
+   "intangibleHeritage": {
+    "total": 17,
+    "items": [
+     {
+      "ref": "1737",
+      "name": "Craft of making Đông Hồ Folk woodblock printings",
+      "year": 2025,
+      "list": "USL",
+      "summary": "Đông Hồ Folk woodblock printing is the practice of creating colourful prints using carved wooden blocks, observed in a village forming part of Bắc Ninh province. The themes of these prints often include worship,…",
+      "url": "https://ich.unesco.org/en/USL/01737"
+     },
+     {
+      "ref": "1999",
+      "name": "Festival of Bà Chúa Xứ Goddess at Sam Mountain",
+      "year": 2024,
+      "list": "RL",
+      "summary": "The festival of Bà Chúa Xứ Goddess at Sam Mountain takes place from the 22nd to the 27th day of the fourth lunar month. Observed by the Kinh, Khmer, Cham and Hoa communities in Châu Đốc city, it entails performing…",
+      "url": "https://ich.unesco.org/en/RL/01999"
+     },
+     {
+      "ref": "1574",
+      "name": "Art of pottery-making of Chăm people",
+      "year": 2022,
+      "list": "USL",
+      "summary": "Chăm pottery products are mainly household utensils, religious objects and fine art works, including jars, pots, trays and vases. They are made by women and viewed as an expression of individual creativity based on the…",
+      "url": "https://ich.unesco.org/en/USL/01574"
+     },
+     {
+      "ref": "1575",
+      "name": "Art of Xòe dance of the Tai people in Viet Nam",
+      "year": 2021,
+      "list": "RL",
+      "summary": "Xòe is a form of Vietnamese dancing with movements that symbolize human activities in ritual, culture, life and work. It is performed at rituals, weddings, village festivals and community events. There are three main…",
+      "url": "https://ich.unesco.org/en/RL/01575"
+     },
+     {
+      "ref": "1379",
+      "name": "Practices of Then by Tày, Nùng and Thái ethnic groups in Viet Nam",
+      "year": 2019,
+      "list": "RL",
+      "summary": "Then, an essential ritual practice in the spiritual life of the Tày, Nùng and Thái ethnic groups in Viet Nam, reflects concepts about human beings, the natural world and the universe. Then ceremonies describe a journey…",
+      "url": "https://ich.unesco.org/en/RL/01379"
+     },
+     {
+      "ref": "1222",
+      "name": "The art of Bài Chòi in Central Viet Nam",
+      "year": 2017,
+      "list": "RL",
+      "summary": "The art of Bài Chòi in Central Viet Nam is a diverse art combining music, poetry, acting, painting and literature. It takes two main forms: ‘Bài Chòi games’ and ‘Bài Chòi performance’. Bài Chòi games involve a card game…",
+      "url": "https://ich.unesco.org/en/RL/01222"
+     }
+    ]
+   },
+   "museumObjects": [
+    {
+     "title": "Robert F. Kennedy",
+     "unit": "National Portrait Gallery",
+     "thumbnail": "images/objects/vn-si-0.jpg",
+     "url": "https://npg.si.edu/object/npg_NPG.69.54",
+     "license": "CC0"
+    },
+    {
+     "title": "House Beautiful: Giacometti, from the series House Beautiful: Bringing the War Home",
+     "unit": "Smithsonian American Art Museum",
+     "thumbnail": "images/objects/vn-si-1.jpg",
+     "url": "https://americanart.si.edu/collections/search/artwork/?id=117049",
+     "license": "CC0"
+    }
+   ],
+   "europeana": [
+    {
+     "title": "costume",
+     "provider": "Museum of Ethnography",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcollections.smvk.se%2Fcarlotta-em%2Fweb%2Fimage%2Fzoom%2F1230160%2F1935.50.3735.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91619/SMVK_EM_objekt_1230158",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+     "title": "tygstycke, slips, dräkt, garment, costume, garb",
+     "provider": "Museum of Ethnography",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcollections.smvk.se%2Fcarlotta-em%2Fweb%2Fimage%2Fzoom%2F1237145%2F1935.32.0284_alt.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91619/SMVK_EM_objekt_1237143",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+     "title": "Shoulder shell, costume, garment, garb, scarf",
+     "provider": "Museum of Ethnography",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcollections.smvk.se%2Fcarlotta-em%2Fweb%2Fimage%2Fzoom%2F1252081%2F1976.03.0012.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91619/SMVK_EM_objekt_1252076",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+     "title": "Earring, khyen bac",
+     "provider": "Museum of Ethnography",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcollections.smvk.se%2Fcarlotta-em%2Fweb%2Fimage%2Fzoom%2F3319423%2F1935.50.3840.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91619/SMVK_EM_objekt_1014773",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    }
+   ],
+   "scale": null
+  },
+  "TH": {
+   "worldHeritage": {
+    "total": 9,
+    "cultural": 6,
+    "natural": 3,
+    "items": [
+     {
+      "id": "576",
+      "name": "Historic City of Ayutthaya",
+      "category": "Cultural",
+      "year": 1991,
+      "summary": "Founded c. 1350, Ayutthaya became the second Siamese capital after Sukhothai. It was destroyed by the Burmese in the 18th century. Its remains, characterized by the prang (reliquary towers) and gigantic monasteries,…",
+      "url": "https://whc.unesco.org/en/list/576"
+     },
+     {
+      "id": "574",
+      "name": "Historic Town of Sukhothai and Associated Historic Towns",
+      "category": "Cultural",
+      "year": 1991,
+      "summary": "Sukhothai was the capital of the first Kingdom of Siam in the 13th and 14th centuries. It has a number of fine monuments, illustrating the beginnings of Thai architecture. The great civilization which evolved in the…",
+      "url": "https://whc.unesco.org/en/list/574"
+     },
+     {
+      "id": "575",
+      "name": "Ban Chiang Archaeological Site",
+      "category": "Cultural",
+      "year": 1992,
+      "summary": "Ban Chiang is considered the most important prehistoric settlement so far discovered in South-East Asia. It marks an important stage in human cultural, social and technological evolution. The site presents the earliest…",
+      "url": "https://whc.unesco.org/en/list/575"
+     },
+     {
+      "id": "1662",
+      "name": "The Ancient Town of Si Thep and its Associated Dvaravati Monuments",
+      "category": "Cultural",
+      "year": 2023,
+      "summary": "This is a serial property of three component parts: a distinctive twin-town site, featuring an Inner and Outer Town surrounded by moats; the massive Khao Klang Nok ancient monument; and the Khao Thamorrat Cave ancient…",
+      "url": "https://whc.unesco.org/en/list/1662"
+     },
+     {
+      "id": "1507",
+      "name": "Phu Phrabat, a testimony to the Sīma stone tradition of the Dvaravati period",
+      "category": "Cultural",
+      "year": 2024,
+      "summary": "The property illustrates the Sīma stone tradition of the Dvaravati period (7th-11th centuries CE). While sacred boundary markers for areas of Theravada Buddhist monastic practice vary in materials, extensive use of…",
+      "url": "https://whc.unesco.org/en/list/1507"
+     },
+     {
+      "id": "1761",
+      "name": "Wat Phra Mahathat Woramahawihan, Nakhon Si Thammarat",
+      "category": "Cultural",
+      "year": 2026,
+      "summary": "Wat Phra Mahathat Woramahawihan (or Phra Mahathat monastery), located in Nakhon Si Thammarat Province in Peninsular Thailand on a narrow ridge between the Pacific and Indian oceans, has served as a major regional…",
+      "url": "https://whc.unesco.org/en/list/1761"
+     }
+    ]
+   },
+   "intangibleHeritage": {
+    "total": 6,
+    "items": [
+     {
+      "ref": "1879",
+      "name": "Tomyum Kung",
+      "year": 2024,
+      "list": "RL",
+      "summary": "Tomyum Kung is a traditional prawn soup from Thailand. The prawns are boiled with herbs, including lemongrass, kaffir lime leaves, galangal root and shallots, then seasoned with local condiments. It has a recognizable…",
+      "url": "https://ich.unesco.org/en/RL/01879"
+     },
+     {
+      "ref": "2090",
+      "name": "Kebaya: knowledge, skills, traditions and practices",
+      "year": 2024,
+      "list": "RL",
+      "summary": "Kebaya is a front-opening top often adorned with intricate embroidery and worn with fasteners such as brooches or buttons. It comes in various lengths and can be worn with a matching sarong. Kebaya is a way of dressing…",
+      "url": "https://ich.unesco.org/en/RL/02090"
+     },
+     {
+      "ref": "1719",
+      "name": "Songkran in Thailand, traditional Thai New Year festival",
+      "year": 2023,
+      "list": "RL",
+      "summary": "In Thailand, Songkran refers to the sun’s annual passing into the Aries constellation, the first sign of the Zodiac, which marks the traditional start of the new year. Occurring in mid-April after the rice harvest, it…",
+      "url": "https://ich.unesco.org/en/RL/01719"
+     },
+     {
+      "ref": "1587",
+      "name": "Nora, dance drama in southern Thailand",
+      "year": 2021,
+      "list": "RL",
+      "summary": "Nora is a lively and acrobatic form of dance theatre and improvisational singing from southern Thailand. Performances normally include a long oral invocation, followed by a presentation by a lead character who dances…",
+      "url": "https://ich.unesco.org/en/RL/01587"
+     },
+     {
+      "ref": "1384",
+      "name": "Nuad Thai, traditional Thai massage",
+      "year": 2019,
+      "list": "RL",
+      "summary": "Nuad Thai, traditional Thai massage is regarded as part of the art, science and culture of traditional Thai healthcare. As a non-medicinal remedy and manual therapy, it involves bodily manipulation in which the…",
+      "url": "https://ich.unesco.org/en/RL/01384"
+     },
+     {
+      "ref": "1385",
+      "name": "Khon, masked dance drama in Thailand",
+      "year": 2018,
+      "list": "RL",
+      "summary": "Khon, the Khon Masked Dance Drama in Thailand, is a performing art that combines musical, vocal, literary, dance, ritual and handicraft elements. Khon performances – which involve graceful dance movements, instrumental…",
+      "url": "https://ich.unesco.org/en/RL/01385"
+     }
+    ]
+   },
+   "museumObjects": [
+    {
+     "title": "Textile",
+     "unit": "Cooper Hewitt, Smithsonian Design Museum",
+     "thumbnail": "images/objects/th-si-0.jpg",
+     "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/151764",
+     "license": "CC0"
+    },
+    {
+     "title": "Sarong",
+     "unit": "Cooper Hewitt, Smithsonian Design Museum",
+     "thumbnail": "images/objects/th-si-1.jpg",
+     "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/156225",
+     "license": "CC0"
+    }
+   ],
+   "europeana": [
+    {
+     "title": "Donmuang, Siam",
+     "provider": "Postmuseum",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fmm.dimu.org%2Fimage%2F042uK2Xo3XDM%3Fdimension%3D1200x1200&type=IMAGE",
+     "url": "https://www.europeana.eu/item/916120/pm_photo_POST011545",
+     "rights": "http://creativecommons.org/publicdomain/mark/1.0/"
+    },
+    {
+     "title": "Siam [Thailand]. Palmyra palms, Siam.",
+     "provider": "Wellcome Collection",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fiiif.wellcomecollection.org%2Fimage%2FL0031019.jpg%2Ffull%2F500%2C%2F0%2Fdefault.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/9200579/jzkhcbs5",
+     "rights": "http://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+     "title": "Siam",
+     "provider": "Postmuseum",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fmm.dimu.org%2Fimage%2F042uK2Xo3X4W%3Fdimension%3D1200x1200&type=IMAGE",
+     "url": "https://www.europeana.eu/item/916120/pm_photo_POST011542",
+     "rights": "http://creativecommons.org/publicdomain/mark/1.0/"
+    },
+    {
+     "title": "Siam",
+     "provider": "Wellcome Collection",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fiiif.wellcomecollection.org%2Fimage%2FL0056218.jpg%2Ffull%2F500%2C%2F0%2Fdefault.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/9200579/yqmc4gd7",
+     "rights": "http://creativecommons.org/licenses/by/4.0/"
+    }
+   ],
+   "scale": {
+    "cuisine": [
+     "khanom thuai",
+     "red curry",
+     "nam khaeng sai",
+     "boat noodles",
+     "hoi lai pad nam phrik phao",
+     "mi krop"
+    ],
+    "holidays_and_festivals": [
+     "children's day",
+     "constitution day (thailand)",
+     "mother's day",
+     "youth day",
+     "chakri memorial day",
+     "railway workers' day"
+    ],
+    "clothing_and_accessories": [
+     "traditional thai clothing",
+     "silk brocade purses",
+     "suea krui",
+     "suea pat",
+     "traditional thai warrior helmets",
+     "betel nut sets"
+    ],
+    "landmarks": [
+     "khon kaen sports school stadium",
+     "vimanmek mansion",
+     "thailand-cambodia friendship bridge (aranyaprathet - poipet)",
+     "phra pathommachedi national museum",
+     "pavilion of regalia, royal decorations and coins",
+     "taksin maharat bridge"
+    ],
+    "counts": {
+     "cuisine": 100,
+     "holidays_and_festivals": 69,
+     "clothing_and_accessories": 81,
+     "landmarks": 100
+    }
+   }
+  },
+  "JP": {
+   "worldHeritage": {
+    "total": 27,
+    "cultural": 22,
+    "natural": 5,
+    "items": [
+     {
+      "id": "660",
+      "name": "Buddhist Monuments in the Horyu-ji Area",
+      "category": "Cultural",
+      "year": 1993,
+      "summary": "There are around 48 Buddhist monuments in the Horyu-ji area, in Nara Prefecture. Several date from the late 7th or early 8th century, making them some of the oldest surviving wooden buildings in the world. These…",
+      "url": "https://whc.unesco.org/en/list/660"
+     },
+     {
+      "id": "661",
+      "name": "Himeji-jo",
+      "category": "Cultural",
+      "year": 1993,
+      "summary": "Himeji-jo is the finest surviving example of early 17th-century Japanese castle architecture, comprising 83 buildings with highly developed systems of defence and ingenious protection devices dating from the beginning…",
+      "url": "https://whc.unesco.org/en/list/661"
+     },
+     {
+      "id": "688",
+      "name": "Historic Monuments of Ancient Kyoto (Kyoto, Uji and Otsu Cities)",
+      "category": "Cultural",
+      "year": 1994,
+      "summary": "Built in A.D. 794 on the model of the capitals of ancient China, Kyoto was the imperial capital of Japan from its foundation until the middle of the 19th century. As the centre of Japanese culture for more than 1,000…",
+      "url": "https://whc.unesco.org/en/list/688"
+     },
+     {
+      "id": "734",
+      "name": "Historic Villages of Shirakawa-go and Gokayama",
+      "category": "Cultural",
+      "year": 1995,
+      "summary": "Located in a mountainous region that was cut off from the rest of the world for a long period of time, these villages with their Gassho-style houses subsisted on the cultivation of mulberry trees and the rearing of…",
+      "url": "https://whc.unesco.org/en/list/734"
+     },
+     {
+      "id": "775",
+      "name": "Hiroshima Peace Memorial (Genbaku Dome)",
+      "category": "Cultural",
+      "year": 1996,
+      "summary": "The Hiroshima Peace Memorial (Genbaku Dome) was the only structure left standing in the area where the first atomic bomb exploded on 6 August 1945. Through the efforts of many people, including those of the city of…",
+      "url": "https://whc.unesco.org/en/list/775"
+     },
+     {
+      "id": "776",
+      "name": "Itsukushima Shinto Shrine",
+      "category": "Cultural",
+      "year": 1996,
+      "summary": "The island of Itsukushima, in the Seto inland sea, has been a holy place of Shintoism since the earliest times. The first shrine buildings here were probably erected in the 6th century. The present shrine dates from the…",
+      "url": "https://whc.unesco.org/en/list/776"
+     }
+    ]
+   },
+   "intangibleHeritage": {
+    "total": 23,
+    "items": [
+     {
+      "ref": "2291",
+      "name": "Washi, craftsmanship of traditional Japanese hand-made paper",
+      "year": 2025,
+      "list": "RL",
+      "summary": "Washi craftsmanship refers to the traditional practice of making paper by hand using the fibres of the paper mulberry plant. The fibres are first separated, then soaked in clear river water to thicken before being…",
+      "url": "https://ich.unesco.org/en/RL/02291"
+     },
+     {
+      "ref": "2292",
+      "name": "Yama, Hoko, Yatai, float festivals in Japan",
+      "year": 2025,
+      "list": "RL",
+      "summary": "Yama, Hoko and Yatai float festivals are held annually in various regions to pray to the gods for peace and protection from natural disasters. A traditional practice that showcases the diversity of local cultures, the…",
+      "url": "https://ich.unesco.org/en/RL/02292"
+     },
+     {
+      "ref": "2293",
+      "name": "Traditional skills, techniques and knowledge for the conservation and transmission of wooden architecture in Japan",
+      "year": 2025,
+      "list": "RL",
+      "summary": "The conservation and transmission of wooden architecture consists in a set of traditional skills, techniques and knowledge to build new wooden structures and restore existing ones. This includes skills such as…",
+      "url": "https://ich.unesco.org/en/RL/02293"
+     },
+     {
+      "ref": "1977",
+      "name": "Traditional knowledge and skills of sake-making with koji mold in Japan",
+      "year": 2024,
+      "list": "RL",
+      "summary": "Sake is an alcoholic beverage made from grains and water that is deeply rooted in Japanese culture. Craftspeople use koji mould to convert the starch in the ingredients into sugar. They oversee the process to make sure…",
+      "url": "https://ich.unesco.org/en/RL/01977"
+     },
+     {
+      "ref": "1701",
+      "name": "Furyu-odori, ritual dances imbued with people’s hopes and prayers",
+      "year": 2022,
+      "list": "RL",
+      "summary": "Furyu-odori in Japan refers to various ritual folk dances, characterized by eye-catching costumes and lively dances and music. These local dances have been performed for centuries, primarily in rural areas. With life in…",
+      "url": "https://ich.unesco.org/en/RL/01701"
+     },
+     {
+      "ref": "1271",
+      "name": "Raiho-shin, ritual visits of deities in masks and costumes",
+      "year": 2018,
+      "list": "RL",
+      "summary": "Raiho-shin rituals take place annually in various regions of Japan – especially in the Tohoku, Hokuriku, Kyushu and Okinawa regions – on days that mark the beginning of the year or when the seasons change. Such rituals…",
+      "url": "https://ich.unesco.org/en/RL/01271"
+     }
+    ]
+   },
+   "museumObjects": [
+    {
+     "title": "Interior, Japan",
+     "unit": "Cooper Hewitt, Smithsonian Design Museum",
+     "thumbnail": "images/objects/jp-si-0.jpg",
+     "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/13141",
+     "license": "CC0"
+    },
+    {
+     "title": "Fishing boats, Japan",
+     "unit": "Cooper Hewitt, Smithsonian Design Museum",
+     "thumbnail": "images/objects/jp-si-1.jpg",
+     "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/13131",
+     "license": "CC0"
+    },
+    {
+     "title": "View of Japan",
+     "unit": "Cooper Hewitt, Smithsonian Design Museum",
+     "thumbnail": "images/objects/jp-si-2.jpg",
+     "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/13096",
+     "license": "CC0"
+    },
+    {
+     "title": "One of Sixteen Scenes of the Death and Burial of a Man",
+     "unit": "Cooper Hewitt, Smithsonian Design Museum",
+     "thumbnail": "images/objects/jp-si-3.jpg",
+     "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/15894",
+     "license": "CC0"
+    }
+   ],
+   "europeana": [
+    {
+     "title": "woodcut, ukiyo-e",
+     "provider": "Museum of Ethnography",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcollections.smvk.se%2Fcarlotta-em%2Fweb%2Fimage%2Fzoom%2F1171698%2F1896.05.0005.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91619/SMVK_EM_objekt_1000829",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+     "title": "woodcut, ukiyo-e",
+     "provider": "Museum of Ethnography",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcollections.smvk.se%2Fcarlotta-em%2Fweb%2Fimage%2Fzoom%2F1144062%2F1946.09.0006.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91619/SMVK_EM_objekt_1000846",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+     "title": "träsnitt, ukiyo-e",
+     "provider": "Museum of Ethnography",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcollections.smvk.se%2Fcarlotta-em%2Fweb%2Fimage%2Fzoom%2F1144041%2F1946.09.0001.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91619/SMVK_EM_objekt_1000833",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+     "title": "träsnitt, ukiyo-e",
+     "provider": "Museum of Ethnography",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcollections.smvk.se%2Fcarlotta-em%2Fweb%2Fimage%2Fzoom%2F1144065%2F1946.09.0003.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91619/SMVK_EM_objekt_1000840",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    }
+   ],
+   "scale": {
+    "cuisine": [
+     "kishimen",
+     "tofu steak",
+     "unadon",
+     "cream stew",
+     "onigiri senbei",
+     "shirako"
+    ],
+    "holidays_and_festivals": [
+     "zassetsu",
+     "mother's day",
+     "the emperor's birthday",
+     "bon festival",
+     "parinirvana day",
+     "hinamatsuri"
+    ],
+    "clothing_and_accessories": [
+     "kanzashi (woman's hair ornament) with a design",
+     "netsuke (toggle) in the form of a lotus leaf",
+     "netsuke depicting an inlaid gaming piece",
+     "netsuke (toggle) in the form of a cicada",
+     "job interview suit",
+     "kaimaki"
+    ],
+    "landmarks": [
+     "fukuoka prefectural road route 724",
+     "tokiwa park",
+     "coca-cola west hiroshima stadium",
+     "meiji university liberty tower",
+     "aomori prefecture route 128",
+     "usa public library"
+    ],
+    "counts": {
+     "cuisine": 100,
+     "holidays_and_festivals": 68,
+     "clothing_and_accessories": 99,
+     "landmarks": 100
+    }
+   }
+  },
+  "KR": {
+   "worldHeritage": {
+    "total": 17,
+    "cultural": 15,
+    "natural": 2,
+    "items": [
+     {
+      "id": "736",
+      "name": "Seokguram Grotto and Bulguksa Temple",
+      "category": "Cultural",
+      "year": 1995,
+      "summary": "Established in the 8th century on the slopes of Mount Toham, the Seokguram Grotto contains a monumental statue of the Buddha looking at the sea in the bhumisparsha mudra position. With the surrounding portrayals of…",
+      "url": "https://whc.unesco.org/en/list/736"
+     },
+     {
+      "id": "737",
+      "name": "Haeinsa Temple Janggyeong Panjeon, the Depositories for the Tripitaka Koreana Woodblocks",
+      "category": "Cultural",
+      "year": 1995,
+      "summary": "The Temple of Haeinsa, on Mount Gaya, is home to the Tripitaka Koreana , the most complete collection of Buddhist texts, engraved on 80,000 woodblocks between 1237 and 1248. The buildings of Janggyeong Panjeon, which…",
+      "url": "https://whc.unesco.org/en/list/737"
+     },
+     {
+      "id": "738",
+      "name": "Jongmyo Shrine",
+      "category": "Cultural",
+      "year": 1995,
+      "summary": "Jongmyo is the oldest and most authentic of the Confucian royal shrines to have been preserved. Dedicated to the forefathers of the Joseon dynasty (1392–1910), the shrine has existed in its present form since the 16th…",
+      "url": "https://whc.unesco.org/en/list/738"
+     },
+     {
+      "id": "816",
+      "name": "Changdeokgung Palace Complex",
+      "category": "Cultural",
+      "year": 1997,
+      "summary": "In the early 15th century, the King Taejong ordered the construction of a new palace at an auspicious site. A Bureau of Palace Construction was set up to create the complex, consisting of a number of official and…",
+      "url": "https://whc.unesco.org/en/list/816"
+     },
+     {
+      "id": "817",
+      "name": "Hwaseong Fortress",
+      "category": "Cultural",
+      "year": 1997,
+      "summary": "When the Joseon King Jeongjo moved his father's tomb to Suwon at the end of the 18th century, he surrounded it with strong defensive works, laid out according to the precepts of an influential military architect of the…",
+      "url": "https://whc.unesco.org/en/list/817"
+     },
+     {
+      "id": "977",
+      "name": "Gochang, Hwasun and Ganghwa Dolmen Sites",
+      "category": "Cultural",
+      "year": 2000,
+      "summary": "The prehistoric cemeteries at Gochang, Hwasun, and Ganghwa contain many hundreds of examples of dolmens - tombs from the 1st millennium BC constructed of large stone slabs. They form part of the Megalithic culture,…",
+      "url": "https://whc.unesco.org/en/list/977"
+     }
+    ]
+   },
+   "intangibleHeritage": {
+    "total": 23,
+    "items": [
+     {
+      "ref": "1975",
+      "name": "Knowledge, beliefs and practices related to jang making in the Republic of Korea",
+      "year": 2024,
+      "list": "RL",
+      "summary": "Jang are fermented sauces – such as soybean paste, soy sauce and red chili paste – that form the basis of the Korean diet. The practice entails the entire process of making, keeping and consuming jang, from preparing…",
+      "url": "https://ich.unesco.org/en/RL/01975"
+     },
+     {
+      "ref": "1742",
+      "name": "Talchum, mask dance drama in the Republic of Korea",
+      "year": 2022,
+      "list": "RL",
+      "summary": "Talchum is a performing art that encompasses dance, music and theatre. An ensemble of six to ten musicians accompanies masked performers who humorously explore social issues through dramatic combinations of songs,…",
+      "url": "https://ich.unesco.org/en/RL/01742"
+     },
+     {
+      "ref": "1708",
+      "name": "Falconry, a living human heritage",
+      "year": 2021,
+      "list": "RL",
+      "summary": "Falconry is the traditional art and practice of training and flying falcons (and sometimes eagles, hawks, buzzards and other birds of prey). It has been practised for over 4000 years. The practice of falconry in early…",
+      "url": "https://ich.unesco.org/en/RL/01708"
+     },
+     {
+      "ref": "882",
+      "name": "Yeondeunghoe, lantern lighting festival in the Republic of Korea",
+      "year": 2020,
+      "list": "RL",
+      "summary": "Yeondeunghoe, lantern lighting festival, takes place throughout the Republic of Korea. As the eighth day of the fourth lunar month (Buddha’s birthday) approaches, the entire country lights up with colourful lanterns.…",
+      "url": "https://ich.unesco.org/en/RL/00882"
+     },
+     {
+      "ref": "1533",
+      "name": "Traditional Korean wrestling (Ssirum/Ssireum)",
+      "year": 2018,
+      "list": "RL",
+      "summary": "-VIDEO:42131-MED-R-\n__Democratic People’s Republic of Korea__\nSsirum (wrestling) is a physical game practised popularly in all regions of the Democratic People’s Republic of Korea, where two opponents try to push each…",
+      "url": "https://ich.unesco.org/en/RL/01533"
+     },
+     {
+      "ref": "1068",
+      "name": "Culture of Jeju Haenyeo (women divers)",
+      "year": 2016,
+      "list": "RL",
+      "summary": "In Jeju Island, there is a community of women, some aged in their 80s, which goes diving 10m under the sea to gather shellfish, such as abalone or sea urchins for a living without the help of oxygen masks. With…",
+      "url": "https://ich.unesco.org/en/RL/01068"
+     }
+    ]
+   },
+   "museumObjects": [],
+   "europeana": [
+    {
+     "title": "Sports in Korea",
+     "provider": "Estonian Sports and Olympic Museum",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fwww.muis.ee%2Fdigitaalhoidla%2Fapi%2Fmeedia%2Foriginaal%3Fid%3Daedf55be-5e41-4777-8bfe-9341ba2786a5&type=IMAGE",
+     "url": "https://www.europeana.eu/item/401/item_LSUH33OAHDIBN5ZNYZ22Y4BKKJ24SJXD",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+     "title": "Manpo, Manchuriet, North Korea",
+     "provider": "Postmuseum",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fmm.dimu.org%2Fimage%2F042uK2Jrsnr7%3Fdimension%3D1200x1200&type=IMAGE",
+     "url": "https://www.europeana.eu/item/916120/pm_photo_POST008682",
+     "rights": "http://creativecommons.org/publicdomain/mark/1.0/"
+    },
+    {
+     "title": "Letter from Korea Olympic Committee",
+     "provider": "Estonian Sports and Olympic Museum",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fwww.muis.ee%2Fdigitaalhoidla%2Fapi%2Fmeedia%2Foriginaal%3Fid%3D747267ed-91e1-45ee-b609-dde9909b708c&type=IMAGE",
+     "url": "https://www.europeana.eu/item/401/item_BQNZUK3WHGMMCVNOWBEE4DYDR57ZRNMX",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+     "title": "Swedish Field Hospital in Korea.",
+     "provider": "Army Museum",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fmm.dimu.org%2Fimage%2F032ykUgeXnFR%3Fdimension%3D1200x1200&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91616/arme_photo_AMA0010239",
+     "rights": "http://creativecommons.org/publicdomain/mark/1.0/"
+    }
+   ],
+   "scale": {
+    "cuisine": [
+     "jatguksu",
+     "tornado potato",
+     "corn cheese",
+     "rabokki",
+     "yeolmu-kimchi",
+     "ramyeon"
+    ],
+    "holidays_and_festivals": [
+     "newspaper day",
+     "singmogil",
+     "pepero day",
+     "fire service day",
+     "constitution day",
+     "parents' day"
+    ],
+    "clothing_and_accessories": [
+     "lightstick",
+     "gold necklaces of the queen consort of king muryeong",
+     "monk hanam's robes",
+     "hong jinjong's clothing",
+     "oejae lee dan-ha's and his wife's clothes",
+     "gumi geumgangsa geumran gasa"
+    ],
+    "landmarks": [
+     "yangyang international airport",
+     "gyujangjeonun",
+     "byuksung college",
+     "gojijip",
+     "seoul finance center",
+     "cheo inseong"
+    ],
+    "counts": {
+     "cuisine": 92,
+     "holidays_and_festivals": 38,
+     "clothing_and_accessories": 82,
+     "landmarks": 100
+    }
+   }
+  },
+  "CN": {
+   "worldHeritage": {
+    "total": 61,
+    "cultural": 42,
+    "natural": 15,
+    "items": [
+     {
+      "id": "439",
+      "name": "Imperial Palaces of the Ming and Qing Dynasties in Beijing and Shenyang",
+      "category": "Cultural",
+      "year": 1987,
+      "summary": "Seat of supreme power for over five centuries (1416-1911), the Forbidden City in Beijing, with its landscaped gardens and many buildings (whose nearly 10,000 rooms contain furniture and works of art), constitutes a…",
+      "url": "https://whc.unesco.org/en/list/439"
+     },
+     {
+      "id": "441",
+      "name": "Mausoleum of the First Qin Emperor",
+      "category": "Cultural",
+      "year": 1987,
+      "summary": "No doubt thousands of statues still remain to be unearthed at this archaeological site, which was not discovered until 1974. Qin (d. 210 B.C.), the first unifier of China, is buried, surrounded by the famous terracotta…",
+      "url": "https://whc.unesco.org/en/list/441"
+     },
+     {
+      "id": "449",
+      "name": "Peking Man Site at Zhoukoudian",
+      "category": "Cultural",
+      "year": 1987,
+      "summary": "Scientific work at the site, which lies 42 km south-west of Beijing, is still underway. So far, it has led to the discovery of the remains of Sinanthropus pekinensis, who lived in the Middle Pleistocene, along with…",
+      "url": "https://whc.unesco.org/en/list/449"
+     },
+     {
+      "id": "440",
+      "name": "Mogao Caves",
+      "category": "Cultural",
+      "year": 1987,
+      "summary": "Situated at a strategic point along the Silk Route, at the crossroads of trade as well as religious, cultural and intellectual influences, the 492 cells and cave sanctuaries in Mogao are famous for their statues and…",
+      "url": "https://whc.unesco.org/en/list/440"
+     },
+     {
+      "id": "438",
+      "name": "The Great Wall",
+      "category": "Cultural",
+      "year": 1987,
+      "summary": "In c. 220 B.C., under Qin Shi Huang, sections of earlier fortifications were joined together to form a united defence system against invasions from the north. Construction continued up to the Ming dynasty (1368–1644),…",
+      "url": "https://whc.unesco.org/en/list/438"
+     },
+     {
+      "id": "705",
+      "name": "Ancient Building Complex in the Wudang Mountains",
+      "category": "Cultural",
+      "year": 1994,
+      "summary": "The palaces and temples which form the nucleus of this group of secular and religious buildings exemplify the architectural and artistic achievements of China's Yuan, Ming and Qing dynasties. Situated in the scenic…",
+      "url": "https://whc.unesco.org/en/list/705"
+     }
+    ]
+   },
+   "intangibleHeritage": {
+    "total": 45,
+    "items": [
+     {
+      "ref": "2224",
+      "name": "Hezhen Yimakan storytelling",
+      "year": 2025,
+      "list": "RL",
+      "summary": "When the element was first inscribed, only five storytellers were still capable of performing certain Yimakan cantos, and the traditional practices associated with the Hezhen oral narratives faced several threats. This…",
+      "url": "https://ich.unesco.org/en/RL/02224"
+     },
+     {
+      "ref": "2474",
+      "name": "Safeguarding programme for Hezhen Yimakan storytelling",
+      "year": 2025,
+      "list": "Art18",
+      "summary": "At the time of the initial inscription, only five storytellers were still capable of performing certain Yimakan cantos, and the traditional practices associated with the Hezhen oral narratives faced several threats. In…",
+      "url": "https://ich.unesco.org/en/Art18/02474"
+     },
+     {
+      "ref": "2153",
+      "name": "Traditional Li textile techniques: spinning, dyeing, weaving and embroidering",
+      "year": 2024,
+      "list": "RL",
+      "summary": "The traditional Li textile techniques of spinning, dyeing, weaving and embroidering are employed by women of the Li ethnic group of Hainan Province, China, to make clothing and other daily necessities out of cotton,…",
+      "url": "https://ich.unesco.org/en/RL/02153"
+     },
+     {
+      "ref": "2155",
+      "name": "Qiang New Year festival",
+      "year": 2024,
+      "list": "RL",
+      "summary": "Held on the first day of the tenth lunar month, the Qiang New Year Festival is an occasion for the Qiang people of China’s Sichuan Province to express their gratitude and reverence, reaffirm their harmonious and…",
+      "url": "https://ich.unesco.org/en/RL/02155"
+     },
+     {
+      "ref": "2156",
+      "name": "Traditional design and practices for building Chinese wooden arch bridges",
+      "year": 2024,
+      "list": "RL",
+      "summary": "Wooden arch bridges are found in Fujian Province and Zhejiang Province, along China’s southeast coast. The traditional design and practices for building these bridges combine the use of wood, traditional architectural…",
+      "url": "https://ich.unesco.org/en/RL/02156"
+     },
+     {
+      "ref": "2126",
+      "name": "Spring festival, social practices of the Chinese people in celebration of traditional new year",
+      "year": 2024,
+      "list": "RL",
+      "summary": "In China, the spring festival marks the beginning of the new year. It falls on the first day of the first month of the Chinese calendar and involves a variety of social practices to usher in the new year, pray for good…",
+      "url": "https://ich.unesco.org/en/RL/02126"
+     }
+    ]
+   },
+   "museumObjects": [
+    {
+     "title": "Tall China Cabinet with Eagle Motif",
+     "unit": "Cooper Hewitt, Smithsonian Design Museum",
+     "thumbnail": "images/objects/cn-si-0.jpg",
+     "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/216088",
+     "license": "CC0"
+    },
+    {
+     "title": "Design for China Cabinet of Mahogany and Inlay, Sept. 13, 1906",
+     "unit": "Cooper Hewitt, Smithsonian Design Museum",
+     "thumbnail": "images/objects/cn-si-1.jpg",
+     "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/216121",
+     "license": "CC0"
+    },
+    {
+     "title": "Design for China Cabinet in Mahogany on Pear-Shaped Feet",
+     "unit": "Cooper Hewitt, Smithsonian Design Museum",
+     "thumbnail": "images/objects/cn-si-2.jpg",
+     "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/216090",
+     "license": "CC0"
+    },
+    {
+     "title": "Map of China",
+     "unit": "Cooper Hewitt, Smithsonian Design Museum",
+     "thumbnail": "images/objects/cn-si-3.jpg",
+     "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/123332",
+     "license": "CC0"
+    }
+   ],
+   "europeana": [
+    {
+     "title": "Still Life with a Chinese Porcelain Bowl",
+     "provider": "National Gallery of Denmark",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fapi.smk.dk%2Fapi%2Fv1%2Fthumbnail%2Fd3668588-1832-40f0-b1b8-91d692e43054.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/2020903/KMS384",
+     "rights": "http://creativecommons.org/publicdomain/mark/1.0/"
+    },
+    {
+     "title": "Hiina portselankausike hieroglüüfidega puitkarbis",
+     "provider": "Estonian War Museum",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fwww.muis.ee%2Fdigitaalhoidla%2Fapi%2Fmeedia%2Foriginaal%3Fid%3Da293e7c3-e75a-4dac-9f98-84a91fcf489b&type=IMAGE",
+     "url": "https://www.europeana.eu/item/401/item_SQAN4RSIHXARTHO2XQRIQDFI3S3KVUK2",
+     "rights": "http://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+     "title": "Chinese porcelain collection in the Wilanów palace.",
+     "provider": "Mazowsze Digital Library",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=http%3A%2F%2Fmbc.cyfrowemazowsze.pl%2FContent%2F54215%2F00058160-0001.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/0940415/_nnTtVpZ",
+     "rights": "http://creativecommons.org/publicdomain/mark/1.0/"
+    },
+    {
+     "title": "Twee Chinese figuren",
+     "provider": "Rijksmuseum",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Flh3.googleusercontent.com%2FeSwe6TBpkl_nG8_AD42o_echsNotEP9EvdDIgi0isEM6mz3jWiPyZopNRec1IPkbYg2LjdYH6HDUFCHkXDDzN7bLxXw%3Ds0&type=IMAGE",
+     "url": "https://www.europeana.eu/item/90402/BK_17505_B",
+     "rights": "http://creativecommons.org/publicdomain/mark/1.0/"
+    }
+   ],
+   "scale": {
+    "cuisine": [
+     "tanghulu",
+     "doubao",
+     "roast goose",
+     "biangbiang noodles",
+     "tandyr kebab",
+     "chaogan"
+    ],
+    "holidays_and_festivals": [
+     "chinese mid-autumn festival",
+     "labour day",
+     "golden weeks",
+     "qingming festival",
+     "public holidays in hong kong",
+     "youth day"
+    ],
+    "clothing_and_accessories": [
+     "luvas (par)",
+     "wedding outfit, jacket and skirt",
+     "dudou",
+     "xuezi",
+     "tibetan chuba",
+     "zhuojin"
+    ],
+    "landmarks": [
+     "xiaolou mosque",
+     "lei feng memorial hall",
+     "macun port",
+     "hangzhou children's library",
+     "former residence of cheng dawei",
+     "fuqing road"
+    ],
+    "counts": {
+     "cuisine": 100,
+     "holidays_and_festivals": 64,
+     "clothing_and_accessories": 86,
+     "landmarks": 100
+    }
+   }
+  },
+  "IN": {
+   "worldHeritage": {
+    "total": 45,
+    "cultural": 37,
+    "natural": 7,
+    "items": [
+     {
+      "id": "242",
+      "name": "Ajanta Caves",
+      "category": "Cultural",
+      "year": 1983,
+      "summary": "The first Buddhist cave monuments at Ajanta date from the 2nd and 1st centuries B.C. During the Gupta period (5th and 6th centuries A.D.), many more richly decorated caves were added to the original group. The paintings…",
+      "url": "https://whc.unesco.org/en/list/242"
+     },
+     {
+      "id": "251",
+      "name": "Agra Fort",
+      "category": "Cultural",
+      "year": 1983,
+      "summary": "Near the gardens of the Taj Mahal stands the important 16th-century Mughal monument known as the Red Fort of Agra. This powerful fortress of red sandstone encompasses, within its 2.5-km-long enclosure walls, the…",
+      "url": "https://whc.unesco.org/en/list/251"
+     },
+     {
+      "id": "243",
+      "name": "Ellora Caves",
+      "category": "Cultural",
+      "year": 1983,
+      "summary": "These 34 monasteries and temples, extending over more than 2 km, were dug side by side in the wall of a high basalt cliff, not far from Aurangabad, in Maharashtra. Ellora, with its uninterrupted sequence of monuments…",
+      "url": "https://whc.unesco.org/en/list/243"
+     },
+     {
+      "id": "252",
+      "name": "Taj Mahal",
+      "category": "Cultural",
+      "year": 1983,
+      "summary": "An immense mausoleum of white marble, built in Agra between 1631 and 1648 by order of the Mughal emperor Shah Jahan in memory of his favourite wife, the Taj Mahal is the jewel of Muslim art in India and one of the…",
+      "url": "https://whc.unesco.org/en/list/252"
+     },
+     {
+      "id": "249",
+      "name": "Group of Monuments at Mahabalipuram",
+      "category": "Cultural",
+      "year": 1984,
+      "summary": "This group of sanctuaries, founded by the Pallava kings, was carved out of rock along the Coromandel coast in the 7th and 8th centuries. It is known especially for its rathas (temples in the form of chariots), mandapas…",
+      "url": "https://whc.unesco.org/en/list/249"
+     },
+     {
+      "id": "246",
+      "name": "Sun Temple, Konârak",
+      "category": "Cultural",
+      "year": 1984,
+      "summary": "On the shores of the Bay of Bengal, bathed in the rays of the rising sun, the temple at Konarak is a monumental representation of the sun god Surya's chariot; its 24 wheels are decorated with symbolic designs and it is…",
+      "url": "https://whc.unesco.org/en/list/246"
+     }
+    ]
+   },
+   "intangibleHeritage": {
+    "total": 16,
+    "items": [
+     {
+      "ref": "2312",
+      "name": "Deepavali",
+      "year": 2025,
+      "list": "RL",
+      "summary": "Deepavali, also known as Diwali, is a light festival celebrated annually by diverse individuals and communities across India, that marks the last harvest of the year and the start of a new year and new season. Based on…",
+      "url": "https://ich.unesco.org/en/RL/02312"
+     },
+     {
+      "ref": "2097",
+      "name": "Nawrouz, Novruz, Nowrouz, Nowrouz, Nawrouz, Nauryz, Nooruz, Nowruz, Navruz, Nevruz, Nowruz, Navruz",
+      "year": 2024,
+      "list": "RL",
+      "summary": "Nauryz is a traditional folk spring festival based on the worship of nature, the sun and the universe. Observed in several countries in Asia and the Middle East, it is associated with a love of nature and all living…",
+      "url": "https://ich.unesco.org/en/RL/02097"
+     },
+     {
+      "ref": "1962",
+      "name": "Garba of Gujarat",
+      "year": 2023,
+      "list": "RL",
+      "summary": "Garba is a ritualistic and devotional dance that is performed on the occasion of the Hindu festival of Navaratri, which is dedicated to the worship of the feminine energy or ‘Shakti’. The dance takes place around a…",
+      "url": "https://ich.unesco.org/en/RL/01962"
+     },
+     {
+      "ref": "703",
+      "name": "Durga Puja in Kolkata",
+      "year": 2021,
+      "list": "RL",
+      "summary": "Durga Puja is an annual festival celebrated in September or October, most notably in Kolkata, in West Bengal of India, but also in other parts of India and amongst the Bengali diaspora. It marks the ten-day worship of…",
+      "url": "https://ich.unesco.org/en/RL/00703"
+     },
+     {
+      "ref": "1258",
+      "name": "Kumbh Mela",
+      "year": 2017,
+      "list": "RL",
+      "summary": "Kumbh Mela (the festival of the sacred Pitcher) is the largest peaceful congregation of pilgrims on earth, during which participants bathe or take a dip in a sacred river. Devotees believe that by bathing in the Ganges…",
+      "url": "https://ich.unesco.org/en/RL/01258"
+     },
+     {
+      "ref": "1163",
+      "name": "Yoga",
+      "year": 2016,
+      "list": "RL",
+      "summary": "The philosophy behind the ancient Indian practice of yoga has influenced various aspects of how society in India functions, whether it be in relation to areas such as health and medicine or education and the arts. Based…",
+      "url": "https://ich.unesco.org/en/RL/01163"
+     }
+    ]
+   },
+   "museumObjects": [],
+   "europeana": [
+    {
+     "title": "Målning, Bildkonst, Painting",
+     "provider": "Museum of Far Eastern Antiquities",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcollections.smvk.se%2Fcarlotta-om%2Fweb%2Fimage%2Fzoom%2F305226%2Frepresentation&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91643/SMVK_OM_objekt_113420",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+     "title": "Målning, Bildkonst, Painting",
+     "provider": "Museum of Far Eastern Antiquities",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcollections.smvk.se%2Fcarlotta-om%2Fweb%2Fimage%2Fzoom%2F305614%2Frepresentation&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91643/SMVK_OM_objekt_113490",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+     "title": "glasmålning, målning, painting",
+     "provider": "Museum of Ethnography",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcollections.smvk.se%2Fcarlotta-em%2Fweb%2Fimage%2Fzoom%2F1203700%2F1883.05.0073.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91619/SMVK_EM_objekt_1203698",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+     "title": "Petrecere cu derviș",
+     "provider": "National Museum of Art of Romania",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fresource.culturalia.ro%2Fimagini-clasate%2Fimagini24%2F59687d9bdef1452cbeb5378650eb3edd.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/2048047/Clasate_5c7a8bc51da74c39b994df6dc322aee8",
+     "rights": "http://creativecommons.org/licenses/by-sa/4.0/"
+    }
+   ],
+   "scale": {
+    "cuisine": [
+     "matar mushroom",
+     "dim shorshe",
+     "paniyaram",
+     "bele machher patla jhol",
+     "kolkata biryani",
+     "jalfrezi"
+    ],
+    "holidays_and_festivals": [
+     "karva chauth",
+     "telangana irrigation day",
+     "anant chaturdashi",
+     "uttar pradesh day",
+     "minjar mela",
+     "national sports day"
+    ],
+    "clothing_and_accessories": [
+     "tado tassang",
+     "clothing in india",
+     "bolup",
+     "lekepo",
+     "shalwar kameez",
+     "aami-aawrulo"
+    ],
+    "landmarks": [
+     "saileswar temple",
+     "tata housing amantra",
+     "temple of sangameshwara and nelaganga",
+     "31b, sovabazar street",
+     "tarpan ghat park",
+     "lauriya-areraj ashoka pillar"
+    ],
+    "counts": {
+     "cuisine": 100,
+     "holidays_and_festivals": 100,
+     "clothing_and_accessories": 95,
+     "landmarks": 100
+    }
+   }
+  },
+  "FR": {
+   "worldHeritage": {
+    "total": 56,
+    "cultural": 47,
+    "natural": 7,
+    "items": [
+     {
+      "id": "80",
+      "name": "Mont-Saint-Michel and its Bay",
+      "category": "Cultural",
+      "year": 1979,
+      "summary": "Perched on a rocky islet in the midst of vast sandbanks exposed to powerful tides between Normandy and Brittany stand the 'Wonder of the West', a Gothic-style Benedictine abbey dedicated to the archangel St Michael, and…",
+      "url": "https://whc.unesco.org/en/list/80"
+     },
+     {
+      "id": "81",
+      "name": "Chartres Cathedral",
+      "category": "Cultural",
+      "year": 1979,
+      "summary": "Partly built starting in 1145, and then reconstructed over a 26-year period after the fire of 1194, Chartres Cathedral marks the high point of French Gothic art. The vast nave, in pure ogival style, the porches adorned…",
+      "url": "https://whc.unesco.org/en/list/81"
+     },
+     {
+      "id": "85",
+      "name": "Prehistoric Sites and Decorated Caves of the Vézère Valley",
+      "category": "Cultural",
+      "year": 1979,
+      "summary": "The Vézère valley contains 147 prehistoric sites dating from the Palaeolithic and 25 decorated caves. It is particularly interesting from an ethnological and anthropological, as well as an aesthetic point of view…",
+      "url": "https://whc.unesco.org/en/list/85"
+     },
+     {
+      "id": "84",
+      "name": "Vézelay, Church and Hill",
+      "category": "Cultural",
+      "year": 1979,
+      "summary": "Shortly after its foundation in the 9th century, the Benedictine abbey of Vézelay acquired the relics of St Mary Magdalene and since then it has been an important place of pilgrimage. St Bernard preached the Second…",
+      "url": "https://whc.unesco.org/en/list/84"
+     },
+     {
+      "id": "83",
+      "name": "Palace and Park of Versailles",
+      "category": "Cultural",
+      "year": 1979,
+      "summary": "The Palace of Versailles was the principal residence of the French kings from the time of Louis XIV to Louis XVI. Embellished by several generations of architects, sculptors, decorators and landscape architects, it…",
+      "url": "https://whc.unesco.org/en/list/83"
+     },
+     {
+      "id": "160",
+      "name": "Palace and Park of Fontainebleau",
+      "category": "Cultural",
+      "year": 1981,
+      "summary": "Used by the kings of France from the 12th century, the medieval royal hunting lodge of Fontainebleau, standing at the heart of a vast forest in the Ile-de-France, was transformed, enlarged and embellished in the 16th…",
+      "url": "https://whc.unesco.org/en/list/160"
+     }
+    ]
+   },
+   "intangibleHeritage": {
+    "total": 30,
+    "items": [
+     {
+      "ref": "2106",
+      "name": "Art of dry stone construction, knowledge and techniques",
+      "year": 2024,
+      "list": "RL",
+      "summary": "The art of dry stone construction refers to the practice of building with stone without using binding material. Practised in various countries in Europe, it requires an innate understanding of geometry and physics, as…",
+      "url": "https://ich.unesco.org/en/RL/02106"
+     },
+     {
+      "ref": "2108",
+      "name": "Funfair culture",
+      "year": 2024,
+      "list": "RL",
+      "summary": "Every year, from February through November, the funfair community travels around following a set itinerary, returning to the same places each year. Hosted by local authorities, they install their attractions in a public…",
+      "url": "https://ich.unesco.org/en/RL/02108"
+     },
+     {
+      "ref": "2105",
+      "name": "Skills of Parisian zinc roofers and ornamentalists",
+      "year": 2024,
+      "list": "RL",
+      "summary": "Parisian zinc roofing encompasses the knowledge and skills required to restore the roofs of Haussmann-style buildings constructed in Paris during the nineteenth century. These roofs are characterized by the shape of the…",
+      "url": "https://ich.unesco.org/en/RL/02105"
+     },
+     {
+      "ref": "1964",
+      "name": "Transhumance, the seasonal droving of livestock",
+      "year": 2023,
+      "list": "RL",
+      "summary": "Transhumance refers to the seasonal movement of people with their livestock between geographical or climatic regions. Each year, in spring and autumn, men and women herders organise the movement of thousands of animals…",
+      "url": "https://ich.unesco.org/en/RL/01964"
+     },
+     {
+      "ref": "1961",
+      "name": "Knowledge, craft and skills of handmade glass production",
+      "year": 2023,
+      "list": "RL",
+      "summary": "Traditional handmade glass production entails shaping and decorating hot and cold glass to produce hollow glass objects, flat glass and crown glass. It is characterised by the high degree of craftsmanship inherent to…",
+      "url": "https://ich.unesco.org/en/RL/01961"
+     },
+     {
+      "ref": "1709",
+      "name": "Tocatì, a shared programme for the safeguarding of traditional games and sports",
+      "year": 2022,
+      "list": "Art18",
+      "summary": "As part of coordinated efforts to safeguard traditional games and sports in Italy, Belgium, Croatia, Cyprus and France, the Associazione Giochi Antichi launched Tocatì (‘it's your turn’), a festival and platform uniting…",
+      "url": "https://ich.unesco.org/en/Art18/01709"
+     }
+    ]
+   },
+   "museumObjects": [
+    {
+     "title": "Maria Theresa Charlotte de France, Louis Charles de France",
+     "unit": "Smithsonian American Art Museum",
+     "thumbnail": "images/objects/fr-si-0.jpg",
+     "url": "https://americanart.si.edu/collections/search/artwork/?id=24904",
+     "license": "CC0"
+    },
+    {
+     "title": "Frances Elizabeth Caroline Willard",
+     "unit": "National Portrait Gallery",
+     "thumbnail": "images/objects/fr-si-1.jpg",
+     "url": "https://npg.si.edu/object/npg_NPG.80.56",
+     "license": "CC0"
+    },
+    {
+     "title": "Frances Folsom Cleveland",
+     "unit": "National Portrait Gallery",
+     "thumbnail": "images/objects/fr-si-2.jpg",
+     "url": "https://npg.si.edu/object/npg_S_NPG.77.58",
+     "license": "CC0"
+    },
+    {
+     "title": "Hommage de l'Amerique a la France (America paying homage to France)",
+     "unit": "Cooper Hewitt, Smithsonian Design Museum",
+     "thumbnail": "images/objects/fr-si-3.jpg",
+     "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/210420",
+     "license": "CC0"
+    }
+   ],
+   "europeana": [
+    {
+     "title": "costume from \"France pittoresque, ou description ... des départements et colonies de la France ... pur A. H\".",
+     "provider": "The British Library",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Ffarm6.staticflickr.com%2F5471%2F11223395944_725b92ba1e_o.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/2059209/5471_11223395944_725b92ba1e_o_jpg",
+     "rights": "http://creativecommons.org/publicdomain/mark/1.0/"
+    },
+    {
+     "title": "costume from \"France pittoresque, ou description ... des départements et colonies de la France ... pur A. H\".",
+     "provider": "The British Library",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Ffarm4.staticflickr.com%2F3777%2F11223462184_64255969a6_o.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/2059209/3777_11223462184_64255969a6_o_jpg",
+     "rights": "http://creativecommons.org/publicdomain/mark/1.0/"
+    },
+    {
+     "title": "Costume dei tempi di Re Carlo VI (France siecle XIV)",
+     "provider": "Turin Gallery for Modern and Contemporary Art",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=http%3A%2F%2F93.62.170.226%2Ffoto%2Fgam%2FGrafica%2Ffl2565.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/285/gam8316",
+     "rights": "http://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+     "title": "Parisian costume",
+     "provider": "Fashion Museum of Antwerp",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=http%3A%2F%2Frepos.europeanafashion.eu%2Fmomu%2Fimages%2FJDDEDM-jaargang-10-18060125_009.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/2048208/europeana_fashion_JDDEDM_jaargang_10_18060125_009_jpg",
+     "rights": "http://creativecommons.org/publicdomain/mark/1.0/"
+    }
+   ],
+   "scale": {
+    "cuisine": [
+     "bleu du vercors-sassenage",
+     "piperade",
+     "morbiflette",
+     "pompe aux grattons",
+     "laguiole cheese",
+     "poule au pot"
+    ],
+    "holidays_and_festivals": [
+     "nationale feestdag van de catalaanse landen",
+     "fêtes de la madeleine",
+     "bal des pompiers",
+     "fêtes de bayonne",
+     "victory in europe day",
+     "st john's eve"
+    ],
+    "clothing_and_accessories": [
+     "2 robes de statues de la vierge et de l'enfant jésus 7 à bourg-en-bresse",
+     "costume de suisse (canne de suisse) à litz",
+     "costume de suisse d'église comprenant deux vestes, trois baudriers, deux hallebardes, une épée et deux bâtons à bar-le-duc",
+     "mitre dite de saint bassus à nice",
+     "bijou de parure (bracelet d'avant-bras) à suippes",
+     "ancienne ganterie vallier"
+    ],
+    "landmarks": [
+     "port de limay",
+     "vlaams huis",
+     "chapelle dieu-de-pitié de conteville",
+     "musée ziem",
+     "église saint-charles-borromée de bastia",
+     "pont de buzet-sur-tarn"
+    ],
+    "counts": {
+     "cuisine": 100,
+     "holidays_and_festivals": 76,
+     "clothing_and_accessories": 100,
+     "landmarks": 100
+    }
+   }
+  },
+  "MX": {
+   "worldHeritage": {
+    "total": 36,
+    "cultural": 28,
+    "natural": 6,
+    "items": [
+     {
+      "id": "416",
+      "name": "Historic Centre of Puebla",
+      "category": "Cultural",
+      "year": 1987,
+      "summary": "Puebla, which was founded ex nihilo in 1531, is situated about 100 km east of Mexico City, at the foot of the Popocatepetl volcano. It has preserved its great religious structures such as the 16th–17th-century cathedral…",
+      "url": "https://whc.unesco.org/en/list/416"
+     },
+     {
+      "id": "412",
+      "name": "Historic Centre of Mexico City and Xochimilco",
+      "category": "Cultural",
+      "year": 1987,
+      "summary": "Built in the 16th century by the Spanish on the ruins of Tenochtitlan, the old Aztec capital, Mexico City is now one of the world's largest and most densely populated cities. It has five Aztec temples, the ruins of…",
+      "url": "https://whc.unesco.org/en/list/412"
+     },
+     {
+      "id": "411",
+      "name": "Pre-Hispanic City and National Park of Palenque",
+      "category": "Cultural",
+      "year": 1987,
+      "summary": "A prime example of a Mayan sanctuary of the classical period, Palenque was at its height between AD 500 and 700, when its influence extended throughout the basin of the Usumacinta River. The elegance and craftsmanship…",
+      "url": "https://whc.unesco.org/en/list/411"
+     },
+     {
+      "id": "415",
+      "name": "Historic Centre of Oaxaca and Archaeological Site of Monte Albán",
+      "category": "Cultural",
+      "year": 1987,
+      "summary": "Inhabited over a period of 1,500 years by a succession of peoples – Olmecs, Zapotecs and Mixtecs – the terraces, dams, canals, pyramids and artificial mounds of Monte Albán were literally carved out of the mountain and…",
+      "url": "https://whc.unesco.org/en/list/415"
+     },
+     {
+      "id": "414",
+      "name": "Pre-Hispanic City of Teotihuacan",
+      "category": "Cultural",
+      "year": 1987,
+      "summary": "The holy city of Teotihuacan ('the place where the gods were created') is situated some 50 km north-east of Mexico City. Built between the 1st and 7th centuries A.D., it is characterized by the vast size of its…",
+      "url": "https://whc.unesco.org/en/list/414"
+     },
+     {
+      "id": "482",
+      "name": "Historic Town of Guanajuato and Adjacent Mines",
+      "category": "Cultural",
+      "year": 1988,
+      "summary": "Founded by the Spanish in the early 16th century, Guanajuato became the world's leading silver-extraction centre in the 18th century. This past can be seen in its 'subterranean streets' and the 'Boca del Inferno', a…",
+      "url": "https://whc.unesco.org/en/list/482"
+     }
+    ]
+   },
+   "intangibleHeritage": {
+    "total": 13,
+    "items": [
+     {
+      "ref": "2237",
+      "name": "Representation of the Passion, Death and Resurrection of Christ in Iztapalapa",
+      "year": 2025,
+      "list": "RL",
+      "summary": "The Representation of the Passion, Death and Resurrection of Christ in Iztapalapa is a community tradition that brings together local residents in an expression of faith, identity and culture. It began when the…",
+      "url": "https://ich.unesco.org/en/RL/02237"
+     },
+     {
+      "ref": "1990",
+      "name": "Bolero: identity, emotion and poetry turned into song",
+      "year": 2023,
+      "list": "RL",
+      "summary": "Bolero is an indispensable part of the Latin American sentimental song, with a strong lyrical character deeply rooted in Cuba and Mexico. A cultural amalgam, it combines the language used in European poetry, with…",
+      "url": "https://ich.unesco.org/en/RL/01990"
+     },
+     {
+      "ref": "1462",
+      "name": "Artisanal talavera of Puebla and Tlaxcala (Mexico) and ceramics of Talavera de la Reina and El Puente del Arzobispo (Spain) making process",
+      "year": 2019,
+      "list": "RL",
+      "summary": "The processes of making the artisanal talavera of Puebla and Tlaxcala (Mexico) and ceramics of Talavera de la Reina and El Puente del Arzobispo (Spain) are identified with two communities in both Mexico and Spain. The…",
+      "url": "https://ich.unesco.org/en/RL/01462"
+     },
+     {
+      "ref": "1400",
+      "name": "La Romería (the pilgrimage): ritual cycle of 'La llevada' (the carrying) of the Virgin of Zapopan",
+      "year": 2018,
+      "list": "RL",
+      "summary": "The annual celebration of La Romería on 12 October, honouring the image of the Virgin of Zapopan, is a tradition that dates back to 1734. The day marks the final phase of the annual ritual cycle popularly known as ‘The…",
+      "url": "https://ich.unesco.org/en/RL/01400"
+     },
+     {
+      "ref": "1108",
+      "name": "Charrería, equestrian tradition in Mexico",
+      "year": 2016,
+      "list": "RL",
+      "summary": "Charrería is a traditional practice of livestock herding communities in Mexico. It was initially used to help herders managing livestock from different estates better coexist. Techniques were then passed on to younger…",
+      "url": "https://ich.unesco.org/en/RL/01108"
+     },
+     {
+      "ref": "666",
+      "name": "Xtaxkgakget Makgkaxtlawana: the Centre for Indigenous Arts and its contribution to safeguarding the intangible cultural heritage of the Totonac people of Veracruz, Mexico",
+      "year": 2012,
+      "list": "Art18",
+      "summary": "The Center for Indigenous Arts was designed as a response to a long-term desire of the Totonac people to create an educational institution to transmit their teachings, art, values and culture, while also providing…",
+      "url": "https://ich.unesco.org/en/Art18/00666"
+     }
+    ]
+   },
+   "museumObjects": [],
+   "europeana": [
+    {
+     "title": "Mexico City, Mexico",
+     "provider": "Postmuseum",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fmm.dimu.org%2Fimage%2F032sC3PgcqNB%3Fdimension%3D1200x1200&type=IMAGE",
+     "url": "https://www.europeana.eu/item/916120/pm_photo_POST004441",
+     "rights": "http://creativecommons.org/publicdomain/mark/1.0/"
+    },
+    {
+     "title": "Mexico",
+     "provider": "Deutsche Fotothek",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=http%3A%2F%2Ffotothek.slub-dresden.de%2Ffotos%2Fdf_dat_0004584.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/188/item_CZQ7SLXCDLCFRZNNSP7QNW6BGMLX54GX",
+     "rights": "http://creativecommons.org/licenses/by-sa/4.0/"
+    },
+    {
+     "title": "mexico",
+     "provider": "Wellcome Collection",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fiiif.wellcomecollection.org%2Fimage%2FL0022116.jpg%2Ffull%2F500%2C%2F0%2Fdefault.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/9200579/t6amn9yh",
+     "rights": "http://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+     "title": "Mexico",
+     "provider": "Cartographic and Geological Institute of Catalonia",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcartotecadigital.icgc.cat%2Fiiif%2F2%2Fvistes%3A1359%2Ffull%2F730%2C%2F0%2Fdefault.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/991/https___catalonica_bnc_cat_catalonicahub_lod_oai_cdm21055_contentdm_oclc_org_vistes____1359_ent0",
+     "rights": "http://creativecommons.org/publicdomain/mark/1.0/"
+    }
+   ],
+   "scale": {
+    "cuisine": [
+     "nicuatole",
+     "arroz negro",
+     "poison beans",
+     "empalme",
+     "meatballs with rice",
+     "4 copas"
+    ],
+    "holidays_and_festivals": [
+     "charro days",
+     "mother's day",
+     "xantolo",
+     "fiestas patrias",
+     "day of the constitution",
+     "revolution day"
+    ],
+    "clothing_and_accessories": [
+     "necklace",
+     "traditional clothing of mexico",
+     "duck-billed pendant",
+     "pendant with skull motif",
+     "pendant of the sun deity",
+     "throne pendant"
+    ],
+    "landmarks": [
+     "torre cube ii",
+     "centro cultural roldán sandoval",
+     "cuarenta casas",
+     "templo mayor",
+     "plazuelas",
+     "la constancia mexicana"
+    ],
+    "counts": {
+     "cuisine": 99,
+     "holidays_and_festivals": 60,
+     "clothing_and_accessories": 100,
+     "landmarks": 100
+    }
+   }
+  },
+  "EG": {
+   "worldHeritage": {
+    "total": 7,
+    "cultural": 6,
+    "natural": 1,
+    "items": [
+     {
+      "id": "87",
+      "name": "Ancient Thebes with its Necropolis",
+      "category": "Cultural",
+      "year": 1979,
+      "summary": "Thebes, the city of the god Amon, was the capital of Egypt during the period of the Middle and New Kingdoms. With the temples and palaces at Karnak and Luxor, and the necropolises of the Valley of the Kings and the…",
+      "url": "https://whc.unesco.org/en/list/87"
+     },
+     {
+      "id": "90",
+      "name": "Abu Mena",
+      "category": "Cultural",
+      "year": 1979,
+      "summary": "The church, baptistry, basilicas, public buildings, streets, monasteries, houses and workshops in this early Christian holy city were built over the tomb of the martyr Menas of Alexandria, who died in A.D. 296.",
+      "url": "https://whc.unesco.org/en/list/90"
+     },
+     {
+      "id": "89",
+      "name": "Historic Cairo",
+      "category": "Cultural",
+      "year": 1979,
+      "summary": "Tucked away amid the modern urban area of Cairo lies one of the world's oldest Islamic cities, with its famous mosques, madrasas, hammams and fountains. Founded in the 10th century, it became the new centre of the…",
+      "url": "https://whc.unesco.org/en/list/89"
+     },
+     {
+      "id": "88",
+      "name": "Nubian Monuments from Abu Simbel to Philae",
+      "category": "Cultural",
+      "year": 1979,
+      "summary": "This outstanding archaeological area contains such magnificent monuments as the Temples of Ramses II at Abu Simbel and the Sanctuary of Isis at Philae, which were saved from the rising waters of the Nile thanks to the…",
+      "url": "https://whc.unesco.org/en/list/88"
+     },
+     {
+      "id": "86",
+      "name": "Memphis and its Necropolis – the Pyramid Fields from Giza to Dahshur",
+      "category": "Cultural",
+      "year": 1979,
+      "summary": "The capital of the Old Kingdom of Egypt has some extraordinary funerary monuments, including rock tombs, ornate mastabas, temples and pyramids. In ancient times, the site was considered one of the Seven Wonders of the…",
+      "url": "https://whc.unesco.org/en/list/86"
+     },
+     {
+      "id": "954",
+      "name": "Saint Catherine Area",
+      "category": "Cultural",
+      "year": 2002,
+      "summary": "The Orthodox Monastery of St Catherine stands at the foot of Mount Horeb where, the Old Testament records, Moses received the Tablets of the Law. The mountain is known and revered by Muslims as Jebel Musa. The entire…",
+      "url": "https://whc.unesco.org/en/list/954"
+     }
+    ]
+   },
+   "intangibleHeritage": {
+    "total": 11,
+    "items": [
+     {
+      "ref": "2278",
+      "name": "Koshary, daily life dish and practices associated with it",
+      "year": 2025,
+      "list": "RL",
+      "summary": "Practices associated with Koshary revolve around a popular dish made from simple, affordable ingredients such as rice, pasta, black lentils and fried onions, with condiments such as vinegar, garlic and hot sauce added…",
+      "url": "https://ich.unesco.org/en/RL/02278"
+     },
+     {
+      "ref": "2119",
+      "name": "Semsemiah: instrument crafting and playing",
+      "year": 2024,
+      "list": "RL",
+      "summary": "Semsemiah is a popular harp-like instrument that is crafted and played among communities in the Suez Canal region. The body is attached to three wooden poles that form a triangle. The instrument is usually crafted by…",
+      "url": "https://ich.unesco.org/en/RL/02119"
+     },
+     {
+      "ref": "2116",
+      "name": "Henna: rituals, aesthetic and social practices",
+      "year": 2024,
+      "list": "RL",
+      "summary": "Henna is a deciduous tree that grows in hot regions. Perceived as sacred by communities in Northern Africa and the Middle East, its leaves are harvested twice a year, left to dry, then ground and processed to create a…",
+      "url": "https://ich.unesco.org/en/RL/02116"
+     },
+     {
+      "ref": "1951",
+      "name": "Arts, skills and practices associated with engraving on metals (gold, silver and copper)",
+      "year": 2023,
+      "list": "RL",
+      "summary": "Engraving on metals such as gold, silver and copper is a centuries-old practice that entails manually cutting words, symbols or patterns into the surfaces of decorative, utilitarian, religious or ceremonial objects. The…",
+      "url": "https://ich.unesco.org/en/RL/01951"
+     },
+     {
+      "ref": "1700",
+      "name": "Festivals related to the Journey of the Holy family in Egypt",
+      "year": 2022,
+      "list": "RL",
+      "summary": "The festivals related to the Journey of the Holy Family in Egypt commemorate the Holy Family’s voyage from Bethlehem to Egypt to escape King Herod’s oppression. Every year, the event is memorialized by two festivals in…",
+      "url": "https://ich.unesco.org/en/RL/01700"
+     },
+     {
+      "ref": "1902",
+      "name": "Date palm, knowledge, skills, traditions and practices",
+      "year": 2022,
+      "list": "RL",
+      "summary": "Typically found in deserts and dry, temperate climates, the date palm is an evergreen plant with roots that deeply penetrate the earth in search of humidity. Date palms grow in oases in desert areas with suitable water…",
+      "url": "https://ich.unesco.org/en/RL/01902"
+     }
+    ]
+   },
+   "museumObjects": [
+    {
+     "title": "Sunset over the Sea, Port Said, Egypt",
+     "unit": "Cooper Hewitt, Smithsonian Design Museum",
+     "thumbnail": "images/objects/eg-si-0.jpg",
+     "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/23759",
+     "license": "CC0"
+    },
+    {
+     "title": "Figure Sketches, Egypt",
+     "unit": "Cooper Hewitt, Smithsonian Design Museum",
+     "thumbnail": "images/objects/eg-si-1.jpg",
+     "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/23760",
+     "license": "CC0"
+    },
+    {
+     "title": "\"Les Francais en Egypte\" [French in Egypt]",
+     "unit": "Cooper Hewitt, Smithsonian Design Museum",
+     "thumbnail": "images/objects/eg-si-2.jpg",
+     "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/125411",
+     "license": "CC0"
+    },
+    {
+     "title": "Horeb, Egypt",
+     "unit": "Smithsonian American Art Museum",
+     "thumbnail": "images/objects/eg-si-3.jpg",
+     "url": "https://americanart.si.edu/collections/search/artwork/?id=37221",
+     "license": "CC0"
+    }
+   ],
+   "europeana": [
+    {
+     "title": "Egyptian amulet showing 'SMA', emblem of union...",
+     "provider": "Wellcome Collection",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fiiif.wellcomecollection.org%2Fimage%2FM0016456.jpg%2Ffull%2F500%2C%2F0%2Fdefault.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/9200579/xyhkf9y8",
+     "rights": "http://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+     "title": "Amulet, Amulett",
+     "provider": "The Museum of Mediterranean and Near Eastern Antiquities",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcollections.smvk.se%2Fcarlotta-mhm%2Fweb%2Fimage%2Fzoom%2F4011646%2Fimage.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91639/SMVK_MM_objekt_3007076",
+     "rights": "http://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+     "title": "Amulet, Amulett",
+     "provider": "The Museum of Mediterranean and Near Eastern Antiquities",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcollections.smvk.se%2Fcarlotta-mhm%2Fweb%2Fimage%2Fzoom%2F3987956%2Fimage.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91639/SMVK_MM_objekt_3006963",
+     "rights": "http://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+     "title": "Amulet, Amulett",
+     "provider": "The Museum of Mediterranean and Near Eastern Antiquities",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fcollections.smvk.se%2Fcarlotta-mhm%2Fweb%2Fimage%2Fzoom%2F3990320%2Fimage.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/91639/SMVK_MM_objekt_3006858",
+     "rights": "http://creativecommons.org/licenses/by/4.0/"
+    }
+   ],
+   "scale": null
+  },
+  "KE": {
+   "worldHeritage": {
+    "total": 8,
+    "cultural": 5,
+    "natural": 3,
+    "items": [
+     {
+      "id": "1055",
+      "name": "Lamu Old Town",
+      "category": "Cultural",
+      "year": 2001,
+      "summary": "Lamu Old Town is the oldest and best-preserved Swahili settlement in East Africa, retaining its traditional functions. Built in coral stone and mangrove timber, the town is characterized by the simplicity of structural…",
+      "url": "https://whc.unesco.org/en/list/1055"
+     },
+     {
+      "id": "1231",
+      "name": "Sacred Mijikenda Kaya Forests",
+      "category": "Cultural",
+      "year": 2008,
+      "summary": "The Mijikenda Kaya Forests consist of 10 separate forest sites spread over some 200 km along the coast containing the remains of numerous fortified villages, known as kayas, of the Mijikenda people. The kayas, created…",
+      "url": "https://whc.unesco.org/en/list/1231"
+     },
+     {
+      "id": "1295",
+      "name": "Fort Jesus, Mombasa",
+      "category": "Cultural",
+      "year": 2011,
+      "summary": "The Fort, built by the Portuguese in 1593-1596 to the designs of Giovanni Battista Cairati to protect the port of Mombasa, is one of the most outstanding and well preserved examples of 16th Portuguese military…",
+      "url": "https://whc.unesco.org/en/list/1295"
+     },
+     {
+      "id": "1450",
+      "name": "Thimlich Ohinga Archaeological Site",
+      "category": "Cultural",
+      "year": 2018,
+      "summary": "Situated north-west of the town of Migori, in the Lake Victoria region, this dry-stone walled settlement was probably built in the 16th century CE. The Ohinga (i.e. settlement) seems to have served as a fort for…",
+      "url": "https://whc.unesco.org/en/list/1450"
+     },
+     {
+      "id": "1720",
+      "name": "The Historic Town and Archaeological Site of Gedi",
+      "category": "Cultural",
+      "year": 2024,
+      "summary": "Surrounded by a remnant coastal forest, away from the coastline, the abandoned city of Gedi was one of the most important Swahili cities on the East African coast from the 10th to 17th centuries. During this period, it…",
+      "url": "https://whc.unesco.org/en/list/1720"
+     },
+     {
+      "id": "801",
+      "name": "Lake Turkana National Parks",
+      "category": "Natural",
+      "year": 1997,
+      "summary": "The most saline of Africa's large lakes, Turkana is an outstanding laboratory for the study of plant and animal communities. The three National Parks serve as a stopover for migrant waterfowl and are major breeding…",
+      "url": "https://whc.unesco.org/en/list/801"
+     }
+    ]
+   },
+   "intangibleHeritage": {
+    "total": 6,
+    "items": [
+     {
+      "ref": "2297",
+      "name": "Mwazindika spiritual dance of the Daida community of Kenya",
+      "year": 2025,
+      "list": "USL",
+      "summary": "The Mwazindika spiritual dance is a traditional practice used to promote individual and communal well-being amongst the Daida community. It combines dance, music, ritual and storytelling, and is performed during…",
+      "url": "https://ich.unesco.org/en/USL/02297"
+     },
+     {
+      "ref": "1409",
+      "name": "Success story of promoting traditional foods and safeguarding traditional foodways in Kenya",
+      "year": 2021,
+      "list": "Art18",
+      "summary": "In Kenya, traditional foodways were under threat due to historical factors and the pressure of modern lifestyles. Local foods were looked down upon and were associated with poverty and backwardness. Understanding that a…",
+      "url": "https://ich.unesco.org/en/Art18/01409"
+     },
+     {
+      "ref": "1489",
+      "name": "Rituals and practices associated with Kit Mikayi shrine",
+      "year": 2019,
+      "list": "USL",
+      "summary": "The Rituals and practices associated with Kit Mikayi shrine concern the Luos of western Kenya. Legend has it that Kit Mikayi Shrine is associated with the good fortunes of the Seme people and other Luo ethnic…",
+      "url": "https://ich.unesco.org/en/USL/01489"
+     },
+     {
+      "ref": "1390",
+      "name": "Enkipaata, Eunoto and Olng'esherr, three male rites of passage of the Maasai community",
+      "year": 2018,
+      "list": "USL",
+      "summary": "Enkipaata, Eunoto and Olng’esherr are three interrelated male rites of passage of the Maasai community: Enkipaata is the induction of boys leading to initiation; Eunoto is the shaving of the morans paving the way to…",
+      "url": "https://ich.unesco.org/en/USL/01390"
+     },
+     {
+      "ref": "981",
+      "name": "Isukuti dance of Isukha and Idakho communities of Western Kenya",
+      "year": 2014,
+      "list": "USL",
+      "summary": "The Isukuti dance is a traditional celebratory performance practised among the Isukha and Idakho communities of Western Kenya. It takes the form of a fast-paced, energetic and passionate dance accompanied by drumming…",
+      "url": "https://ich.unesco.org/en/USL/00981"
+     },
+     {
+      "ref": "313",
+      "name": "Traditions and practices associated with the Kayas in the sacred forests of the Mijikenda",
+      "year": 2009,
+      "list": "USL",
+      "summary": "The Mijikenda include nine Bantu-speaking ethnic groups in the Kaya forests of coastal Kenya. The identity of the Mijikenda is expressed through oral traditions and performing arts related to the sacred forests, which…",
+      "url": "https://ich.unesco.org/en/USL/00313"
+     }
+    ]
+   },
+   "museumObjects": [],
+   "europeana": [
+    {
+     "title": "Mount Kenya",
+     "provider": "Finnish National Gallery",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fmpfinlandrepox.zetcom.app%2Fimagehelper%2Fdownload%3Fid%3D1718886%26size%3Dextra_large%26org%3D39091&type=IMAGE",
+     "url": "https://www.europeana.eu/item/2021012/_C05DC1D2A2CFB0EAB7BE07521FB1FBA2",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+     "title": "Foto\nKENYA",
+     "provider": "National Maritime Museum",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=http%3A%2F%2Fmm.dimu.org%2Fimage%2F022wXWWS1qGU%3Fdimension%3D1200x1200&type=IMAGE",
+     "url": "https://www.europeana.eu/item/916109/smm_sm_photo_Fo142579",
+     "rights": "http://creativecommons.org/publicdomain/mark/1.0/"
+    },
+    {
+     "title": "Mount Kenya",
+     "provider": "Finnish National Gallery",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fmpfinlandrepox.zetcom.app%2Fimagehelper%2Fdownload%3Fid%3D248243%26size%3Dextra_large%26org%3D39091&type=IMAGE",
+     "url": "https://www.europeana.eu/item/2021012/_F1AD05FDD1C43A8724E9CBAF095402C1",
+     "rights": "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+     "title": "ספארי בקניה.",
+     "provider": "National Library of Israel",
+     "thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fmedia.jhn.ngo%2Fproxy%3Furl%3Dhttps%3A%2F%2Fmedia.jhn.ngo%2FNLI%2FIIIFv21%2FFL45966698%2Ffull%2Fmax%2F0%2Fdefault.jpg&type=IMAGE",
+     "url": "https://www.europeana.eu/item/318/marc_nli_004045336",
+     "rights": "http://creativecommons.org/licenses/by/4.0/"
+    }
+   ],
+   "scale": null
+  }
+ }
+}

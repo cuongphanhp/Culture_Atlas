@@ -1,0 +1,92 @@
+<div class="backdrop" [class.split]="countries().length === 2">
+  @for (iso of countries(); track iso) {
+    <div class="bg" [style.background-image]="'url(' + svc.photo(iso).src + ')'"></div>
+  } @empty {
+    <div class="bg" [style.background-image]="'url(' + svc.img('jp-kyoto').src + ')'"></div>
+  }
+  <div class="veil"></div>
+</div>
+
+<div class="guide">
+  <aside class="history glass">
+    <button class="btn new">＋ Trò chuyện mới</button>
+    <p class="eyebrow">Gần đây</p>
+    @for (s of svc.sessions; track s.title; let i = $index) {
+      <button class="sess" [class.on]="i === current()" (click)="pick(i)">{{ s.title }}</button>
+    }
+    <p class="eyebrow mt">Thử hỏi</p>
+    @for (x of quick; track x.q) { <button class="sess q" (click)="ask(x.q)">{{ x.flag }} {{ x.q }}</button> }
+    <div class="limit small">Khách: còn 7/10 lượt hỏi hôm nay</div>
+  </aside>
+
+  <section class="chat glass">
+    <header class="chat-head">
+      <div>
+        <h2>AI Cultural Guide</h2>
+        <div class="talking">
+          <span class="small">Đang nói về</span>
+          @for (iso of countries(); track iso) {
+            <span class="ctry"><img [src]="svc.photo(iso).src" alt="" />{{ svc.country(iso)?.flag }} {{ svc.country(iso)?.nameVi }}</span>
+          } @empty { <span class="ctry">🌏 Văn hoá thế giới</span> }
+        </div>
+      </div>
+      <div class="lvl" role="group" aria-label="Mức độ giải thích">
+        <button [class.on]="level() === 'simple'" (click)="level.set('simple')">Đơn giản</button>
+        <button [class.on]="level() === 'normal'" (click)="level.set('normal')">Tiêu chuẩn</button>
+        <button [class.on]="level() === 'deep'" (click)="level.set('deep')">Chuyên sâu</button>
+      </div>
+    </header>
+
+    <div class="msgs">
+      @for (m of messages(); track $index) {
+        @if (m.role === 'user') {
+          <div class="bubble user">{{ m.text }}</div>
+        } @else {
+          <div class="bubble ai">
+            <div class="ai-top"><span class="ai-ic">✦</span><ca-confidence-badge [level]="m.confidence ?? 'supported'" /></div>
+            @for (p of paragraphs(m.text); track $index) {
+              <p>
+                @for (s of p; track $index) {
+                  @switch (s.kind) {
+                    @case ('bold') { <b>{{ s.value }}</b> }
+                    @case ('cite') { <button class="cite" [class.active]="activeCite() === s.value" (click)="activeCite.set(s.value)">{{ s.value.slice(1) }}</button> }
+                    @default { {{ s.value }} }
+                  }
+                }
+              </p>
+            }
+            @if (m.unsupportedPoints?.length) { <div class="unsup small">⚠ Chưa đủ nguồn để kết luận: {{ m.unsupportedPoints!.join('; ') }}</div> }
+            <div class="ai-actions small"><button>👍</button><button>👎</button><button>⚑ Báo cáo sai</button><button>⧉ Sao chép</button></div>
+            @if (m.followUps?.length) {
+              <div class="follow">@for (f of m.followUps; track f) { <button class="chip" (click)="ask(f)">{{ f }}</button> }</div>
+            }
+          </div>
+        }
+      }
+    </div>
+
+    <form class="composer" (submit)="$event.preventDefault(); ask()">
+      <input [value]="draft()" (input)="draft.set($any($event.target).value)" placeholder="Hỏi về phong tục, lễ hội, ẩm thực… (tiếng Việt hoặc English)" />
+      <button class="btn" type="submit">Gửi ↑</button>
+    </form>
+    <p class="disclaimer small">AI chỉ khẳng định khi có nguồn trong kho tri thức đã duyệt. Văn hoá khác nhau theo vùng, thế hệ và bối cảnh.</p>
+  </section>
+
+  <aside class="sources glass">
+    <p class="eyebrow">Nguồn trích dẫn</p>
+    @for (c of lastAnswer()?.citations ?? []; track c.id) {
+      @if (svc.source(c.sourceId); as s) {
+        <div class="src" [class.on]="activeCite() === c.id" (click)="activeCite.set(c.id)">
+          <div class="src-top"><span class="cite">{{ c.id.slice(1) }}</span><span class="tier">{{ s.reliabilityTier }}</span></div>
+          <b>{{ s.title }}</b>
+          <div class="muted small">{{ s.publisher }}</div>
+          <blockquote>“{{ c.excerpt }}”</blockquote>
+          <div class="muted small">Giấy phép: {{ s.license }} · {{ s.retrievedAt }}</div>
+        </div>
+      }
+    } @empty { <p class="muted small">Chưa có trích dẫn cho câu trả lời này.</p> }
+    @if (countries()[0]; as iso) {
+      <div class="photo-credit small">Ảnh nền: {{ svc.photo(iso).caption }} — © {{ svc.photo(iso).author }} · {{ svc.photo(iso).license }}</div>
+    }
+  </aside>
+</div>

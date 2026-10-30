@@ -1,0 +1,67 @@
+<div class="admin">
+  <aside class="side">
+    <p class="eyebrow">Quản trị nội dung</p>
+    <a class="on">📥 Hàng đợi duyệt</a><a>📚 Bài viết & claim</a><a>🔗 Nguồn & giấy phép</a><a>🖼 Media</a>
+    <a>⚑ Báo cáo sai</a><a>🔄 Đồng bộ dữ liệu</a><a>📊 Benchmark RAG</a>
+  </aside>
+
+  <div class="content">
+    <h1>Hàng đợi duyệt</h1>
+    <div class="kpis">
+      @for (s of stats; track s.label) {
+        <div class="card kpi" [class]="'card kpi ' + s.tone"><span class="small muted">{{ s.label }}</span><b>{{ s.value }}</b></div>
+      }
+    </div>
+
+    <section class="card queue">
+      <div class="tabs">
+        <button [class.on]="tab() === 'all'" (click)="tab.set('all')">Tất cả</button>
+        <button [class.on]="tab() === 'ai_generated'" (click)="tab.set('ai_generated')">AI sinh</button>
+        <button [class.on]="tab() === 'user_report'" (click)="tab.set('user_report')">Báo cáo người dùng</button>
+      </div>
+      <table>
+        <thead><tr><th>Loại</th><th>Nội dung</th><th>Quốc gia</th><th>Nguồn gốc</th><th>Trạng thái</th><th>Cập nhật</th><th></th></tr></thead>
+        <tbody>
+          @for (r of rows(); track r.id) {
+            <tr>
+              <td><span class="type">{{ typeLabel[r.type] }}</span></td>
+              <td class="title">{{ r.title }}</td>
+              <td>{{ svc.country(r.country)?.flag }} {{ r.country }}</td>
+              <td class="small">{{ originLabel[r.origin] }}</td>
+              <td><span class="st" [class]="'st ' + r.status">{{ r.status }}</span></td>
+              <td class="small muted">{{ r.updatedAt }}</td>
+              <td class="acts"><button class="ok">Duyệt</button><button>Sửa</button><button class="no">Từ chối</button></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <div class="cov-head"><h3>Nguồn dữ liệu & đồng bộ</h3><span class="small muted">Snapshot {{ svc.snapshotInfo.generatedAt }} · worker → PostgreSQL</span></div>
+      <table class="src-table">
+        <thead><tr><th>Nguồn</th><th>Giấy phép</th><th>Bản ghi</th><th>Trạng thái</th></tr></thead>
+        <tbody>
+          @for (s of sources(); track s.key) {
+            <tr><td><a [href]="s.url" target="_blank" rel="noopener"><b>{{ s.name }}</b></a></td><td class="small">{{ s.license }}</td><td>{{ s.records ?? '—' }}</td>
+              <td><span class="st" [class]="'st ' + s.state">{{ s.stateLabel }}</span></td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <div class="cov-head"><h3>Độ phủ dữ liệu: quốc gia × danh mục</h3><span class="small muted">Số claim đã duyệt · mục tiêu ≥ 3 / ô</span></div>
+      <div class="heat" [style.grid-template-columns]="'110px repeat(' + svc.categories.length + ', 1fr)'">
+        <span></span>
+        @for (c of svc.categories; track c.code) { <span class="hc" [title]="c.nameVi">{{ c.icon }}</span> }
+        @for (co of svc.countries; track co.iso2) {
+          <span class="hr small">{{ co.flag }} {{ co.nameVi }}</span>
+          @for (c of svc.categories; track c.code; let j = $index) {
+            <span class="cell" [class.low]="cell(co.iso2, j) < 3" [style.--v]="cell(co.iso2, j) / 6">{{ cell(co.iso2, j) }}</span>
+          }
+        }
+      </div>
+    </section>
+  </div>
+</div>

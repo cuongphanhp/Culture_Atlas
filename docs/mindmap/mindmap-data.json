@@ -1,0 +1,26 @@
+{
+  "root": "CultureAtlas AI",
+  "subtitle": "Khám phá văn hoá · So sánh phong tục · Học cùng AI có nguồn",
+  "branches": [
+    { "title": "Cultural Explorer", "icon": "🗺️", "color": "#1F6F6B", "side": "right", "tag": "MVP",
+      "children": ["Bản đồ thế giới tô theo độ phủ", "Hồ sơ quốc gia · 12 danh mục văn hoá", "Di sản UNESCO vật thể & phi vật thể", "Chủ đề xuyên quốc gia · lễ hội theo tháng"] },
+    { "title": "AI Cultural Guide", "icon": "✦", "color": "#C2552D", "side": "right", "tag": "MVP · cốt lõi",
+      "children": ["RAG song ngữ Việt – Anh, streaming", "Trích dẫn từng ý + mức độ chắc chắn", "Từ chối có lý do khi thiếu nguồn", "Ngữ cảnh trang · nền ảnh theo quốc gia"] },
+    { "title": "Culture Comparison", "icon": "⇄", "color": "#7A4FB5", "side": "right", "tag": "MVP",
+      "children": ["2 quốc gia × 1 chủ đề", "Bảng tương đồng / khác biệt có nguồn từng ô", "Ô “chưa đủ nguồn để kết luận”", "Bản đã duyệt được cache"] },
+    { "title": "Culture Quiz", "icon": "❓", "color": "#B7862B", "side": "right", "tag": "MVP",
+      "children": ["Theo quốc gia · chủ đề · độ khó", "Giải thích đáp án kèm nguồn", "Thống kê nội dung chưa vững", "AI sinh nháp → biên tập viên duyệt"] },
+    { "title": "Cultural Scenario", "icon": "🎭", "color": "#3A7BD5", "side": "right", "tag": "Sau MVP",
+      "children": ["Tình huống: ăn tối, lễ hội, gặp đối tác", "3–4 lựa chọn mỗi bước + giải thích", "Khung kịch bản do biên tập viên viết"] },
+    { "title": "Cultural Passport", "icon": "🛂", "color": "#D04E8A", "side": "left", "tag": "Sau MVP",
+      "children": ["Đóng dấu khi hoàn thành bộ bài", "Lưu quốc gia & kết quả quiz", "AI gợi ý lộ trình học tiếp"] },
+    { "title": "Quản trị nội dung", "icon": "🖊️", "color": "#1F2A37", "side": "left", "tag": "MVP",
+      "children": ["Hàng đợi duyệt nội dung AI sinh", "Claim · nguồn · giấy phép · ghi công", "Xử lý báo cáo sai từ người dùng", "Bảng độ phủ quốc gia × danh mục"] },
+    { "title": "Nguồn dữ liệu mở", "icon": "📚", "color": "#2E8B57", "side": "left", "tag": "Ingestion",
+      "children": ["UNESCO World Heritage (1.273) & ICH (849)", "Smithsonian Open Access · Europeana", "REST Countries · Wikidata · Natural Earth", "SCALE Cultural Data (taxonomy)"] },
+    { "title": "Nền tảng AI & dữ liệu", "icon": "⚙️", "color": "#5B6472", "side": "left", "tag": "Kỹ thuật",
+      "children": ["PostgreSQL + pgvector (FTS + vector)", "Hybrid search · RRF · reranking", "Kiểm tra trích dẫn sau sinh", "Benchmark RAG chạy trong CI"] },
+    { "title": "Người dùng & vai trò", "icon": "👥", "color": "#E07B39", "side": "left", "tag": "RBAC",
+      "children": ["Khách · Người học (chuẩn bị đi nước ngoài)", "Biên tập viên: soạn & duyệt", "Quản trị viên: đồng bộ, benchmark, người dùng"] }
+  ]
+}

@@ -1,0 +1,279 @@
+// CultureAtlas AI — mô hình dữ liệu (DBML) · PostgreSQL 16 + pgvector
+// Xem trực quan: dán vào https://dbdiagram.io
+
+Project culture_atlas {
+  database_type: 'PostgreSQL'
+  Note: 'Nội dung văn hoá dạng claim có nguồn, RAG (full-text + vector), quiz, so sánh, quản trị và đồng bộ dữ liệu.'
+}
+
+Enum user_role { learner editor admin }
+Enum content_status { draft in_review published flagged archived }
+Enum category_code { greetings etiquette food_dining gift_giving festivals religion_beliefs clothing arts_music family_life heritage business_culture taboos }
+Enum claim_scope { common_practice historical_tradition regional community_specific }
+Enum confidence_level { verified partially_supported unverified }
+Enum reliability_tier { official museum academic community }
+Enum source_type { api_dataset official_site museum academic editorial encyclopedia }
+Enum heritage_type { tangible intangible }
+Enum difficulty_level { easy medium hard }
+Enum feedback_type { factual_error stereotype missing_source unanswered other }
+Enum feedback_status { open in_progress resolved dismissed }
+Enum feedback_target { entry claim chat_message comparison quiz_question }
+Enum content_origin { editor ai_generated imported }
+Enum run_status { running succeeded failed }
+
+Table users {
+  id bigserial [pk]
+  email varchar(255) [unique, not null]
+  password_hash varchar(255)
+  display_name varchar(120)
+  role user_role [not null, default: 'learner']
+  locale varchar(5) [not null, default: 'vi']
+  preferences jsonb [not null, default: '{}']
+  is_active boolean [not null, default: true]
+  last_login_at timestamptz
+  created_at timestamptz [not null, default: `now()`]
+  updated_at timestamptz [not null, default: `now()`]
+}
+
+Table countries {
+  id serial [pk]
+  iso2 char(2) [unique, not null, note: 'ISO 3166-1 alpha-2']
+  iso3 char(3) [unique, not null]
+  iso_numeric char(3) [unique, not null]
+  name_vi varchar(120) [not null]
+  name_en varchar(120) [not null]
+  region varchar(80) [not null]
+  subregion varchar(80)
+  capital varchar(120)
+  languages jsonb [not null, default: '[]']
+  currencies jsonb [not null, default: '[]']
+  neighbors char(2)[]
+  geometry_ref varchar(60) [note: 'id hình học Natural Earth']
+  is_featured boolean [not null, default: false]
+  raw_data jsonb [note: 'snapshot REST Countries / Wikidata']
+  updated_at timestamptz [not null, default: `now()`]
+}
+
+Table sources {
+  id bigserial [pk]
+  title varchar(500) [not null]
+  publisher varchar(255) [not null]
+  source_url text [not null]
+  source_type source_type [not null]
+  license varchar(120) [not null]
+  reliability_tier reliability_tier [not null]
+  language varchar(5)
+  retrieved_at date [not null]
+  raw_ref text [note: 'khoá bản ghi ở nguồn gốc']
+  created_at timestamptz [not null, default: `now()`]
+  indexes { (source_url) [unique] }
+}
+
+Table culture_entries {
+  id bigserial [pk]
+  country_id int [not null, ref: > countries.id]
+  category category_code [not null]
+  slug varchar(160) [not null]
+  title_vi varchar(255) [not null]
+  title_en varchar(255)
+  summary text
+  content text
+  scope claim_scope
+  region varchar(120)
+  period varchar(60)
+  status content_status [not null, default: 'draft']
+  origin content_origin [not null, default: 'editor']
+  version int [not null, default: 1]
+  created_by bigint [ref: > users.id]
+  reviewed_by bigint [ref: > users.id]
+  reviewed_at timestamptz
+  updated_at timestamptz [not null, default: `now()`]
+  indexes {
+    (country_id, category, status)
+    (country_id, slug) [unique]
+  }
+}
+
+Table entry_revisions {
+  id bigserial [pk]
+  entry_id bigint [not null, ref: > culture_entries.id]
+  version int [not null]
+  snapshot jsonb [not null]
+  changed_by bigint [ref: > users.id]
+  change_note text
+  created_at timestamptz [not null, default: `now()`]
+  indexes { (entry_id, version) [unique] }
+}
+
+Table claims {
+  id bigserial [pk]
+  entry_id bigint [not null, ref: > culture_entries.id]
+  text text [not null]
+  language varchar(5) [not null, default: 'vi']
+  scope claim_scope [not null]
+  region varchar(120) [note: 'bắt buộc khi scope = regional']
+  period varchar(60) [default: 'contemporary']
+  confidence confidence_level [not null, default: 'unverified']
+  status content_status [not null, default: 'draft']
+  position int [not null, default: 0]
+  reviewed_by bigint [ref: > users.id]
+  reviewed_at timestamptz
+  indexes { (entry_id, position) }
+}
+
+Table claim_sources {
+  claim_id bigint [ref: > claims.id]
+  source_id bigint [ref: > sources.id]
+  evidence_excerpt text [not null]
+  locator varchar(120) [note: 'trang / đoạn / timestamp']
+  indexes { (claim_id, source_id) [pk] }
+}
+
+Table entry_chunks {
+  id bigserial [pk]
+  entry_id bigint [not null, ref: > culture_entries.id]
+  claim_ids bigint[]
+  chunk_text text [not null]
+  language varchar(5) [not null]
+  metadata jsonb [not null, note: 'country, category, scope, source_ids']
+  tsv tsvector [note: 'GIN; simple + unaccent']
+  embedding vector(1024) [note: 'HNSW cosine']
+  token_count int
+  created_at timestamptz [not null, default: `now()`]
+}
+
+Table tags {
+  id serial [pk]
+  name varchar(80) [unique, not null]
+  kind varchar(30) [not null, note: 'theme | topic | era']
+}
+
+Table entry_tags {
+  entry_id bigint [ref: > culture_entries.id]
+  tag_id int [ref: > tags.id]
+  indexes { (entry_id, tag_id) [pk] }
+}
+
+Table media_assets {
+  id bigserial [pk]
+  entry_id bigint [ref: > culture_entries.id]
+  source_id bigint [ref: > sources.id]
+  url text [not null]
+  stored_url text [note: 'chỉ khi đã xác minh giấy phép']
+  author varchar(255)
+  license varchar(120) [not null]
+  attribution_text text [not null]
+  verified boolean [not null, default: false]
+  created_at timestamptz [not null, default: `now()`]
+}
+
+Table heritage_items {
+  id bigserial [pk]
+  unesco_id varchar(30) [unique, not null]
+  name varchar(500) [not null]
+  type heritage_type [not null]
+  list_type varchar(120) [not null]
+  inscribed_year smallint
+  criteria varchar(60)
+  lat numeric(9,6)
+  lng numeric(9,6)
+  source_id bigint [ref: > sources.id]
+  raw_data jsonb
+}
+
+Table heritage_item_countries {
+  heritage_item_id bigint [ref: > heritage_items.id]
+  country_id int [ref: > countries.id]
+  indexes { (heritage_item_id, country_id) [pk] }
+}
+
+Table comparisons {
+  id bigserial [pk]
+  country_a_id int [not null, ref: > countries.id]
+  country_b_id int [not null, ref: > countries.id]
+  topic category_code [not null]
+  language varchar(5) [not null, default: 'vi']
+  result jsonb [not null, note: 'similarities, rows, context, caveats, insufficient']
+  status content_status [not null, default: 'draft']
+  origin content_origin [not null, default: 'ai_generated']
+  reviewed_by bigint [ref: > users.id]
+  reviewed_at timestamptz
+  updated_at timestamptz [not null, default: `now()`]
+  indexes { (country_a_id, country_b_id, topic, language) [unique] }
+}
+
+Table quiz_questions {
+  id bigserial [pk]
+  entry_id bigint [not null, ref: > culture_entries.id]
+  question text [not null]
+  options jsonb [not null]
+  answer_index smallint [not null]
+  explanation text [not null]
+  difficulty difficulty_level [not null]
+  language varchar(5) [not null, default: 'vi']
+  status content_status [not null, default: 'draft']
+  origin content_origin [not null, default: 'ai_generated']
+  reviewed_by bigint [ref: > users.id]
+  created_at timestamptz [not null, default: `now()`]
+}
+
+Table user_progress {
+  id bigserial [pk]
+  user_id bigint [not null, ref: > users.id]
+  entry_id bigint [ref: > culture_entries.id]
+  quiz_question_id bigint [ref: > quiz_questions.id]
+  is_correct boolean
+  quiz_score numeric(5,2)
+  completed_at timestamptz [not null, default: `now()`]
+}
+
+Table chat_sessions {
+  id uuid [pk]
+  user_id bigint [ref: > users.id, note: 'null với Khách']
+  anon_key varchar(64) [note: 'băm thiết bị cho rate limit']
+  context jsonb [note: 'country, category, page']
+  created_at timestamptz [not null, default: `now()`]
+}
+
+Table chat_logs {
+  id bigserial [pk]
+  session_id uuid [not null, ref: > chat_sessions.id]
+  question text [not null]
+  answer text
+  language varchar(5)
+  route varchar(20) [note: 'structured | rag | compare | refused']
+  cited_chunk_ids bigint[]
+  confidence varchar(20)
+  model varchar(80)
+  latency_ms int
+  prompt_tokens int
+  completion_tokens int
+  rating smallint [note: '-1 | 1']
+  created_at timestamptz [not null, default: `now()`]
+}
+
+Table feedback {
+  id bigserial [pk]
+  target_type feedback_target [not null]
+  target_id bigint [not null]
+  user_id bigint [ref: > users.id]
+  type feedback_type [not null]
+  comment text
+  status feedback_status [not null, default: 'open']
+  handled_by bigint [ref: > users.id]
+  created_at timestamptz [not null, default: `now()`]
+  resolved_at timestamptz
+  indexes { (target_type, target_id) }
+}
+
+Table ingestion_runs {
+  id bigserial [pk]
+  source_name varchar(80) [not null]
+  status run_status [not null, default: 'running']
+  started_at timestamptz [not null, default: `now()`]
+  finished_at timestamptz
+  records_in int [default: 0]
+  records_changed int [default: 0]
+  errors jsonb [default: '[]']
+  triggered_by bigint [ref: > users.id]
+}

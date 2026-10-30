@@ -1,0 +1,124 @@
+<section class="banner">
+  <ca-photo class="banner-bg" [photo]="svc.photo(country().iso2)" />
+  <div class="banner-shade"></div>
+  <div class="banner-body">
+    <nav class="crumbs small"><a routerLink="/">Khám phá</a> / {{ country().region }}</nav>
+    <h1><span class="flag">{{ country().flag }}</span> {{ country().nameVi }}</h1>
+    <p class="sub">{{ svc.photo(country().iso2).caption }}</p>
+    <div class="facts">
+      <span>🏛 {{ country().capital }}</span><span>🗣 {{ country().languages.join(', ') }}</span><span>💴 {{ country().currency }}</span>
+    </div>
+    <div class="banner-actions">
+      <a class="btn" routerLink="/guide">✦ Hỏi AI về {{ country().nameVi }}</a>
+      <a class="btn glass" routerLink="/compare">⇄ So sánh với Việt Nam</a>
+    </div>
+  </div>
+  <div class="stats">
+    <div><b>{{ data().worldHeritage.total }}</b><span>Di sản thế giới</span></div>
+    <div><b>{{ data().intangibleHeritage.total }}</b><span>Di sản phi vật thể</span></div>
+    <div><b>{{ country().coverage }}%</b><span>Độ phủ nội dung</span></div>
+  </div>
+</section>
+
+<div class="cats">
+  <button class="cat" [class.on]="!category()" (click)="category.set(null)"><span>✨</span>Tất cả</button>
+  @for (c of svc.categories; track c.code) {
+    <button class="cat" [class.on]="category() === c.code" (click)="category.set(c.code)"><span>{{ c.icon }}</span>{{ c.nameVi }}</button>
+  }
+</div>
+
+@if (tips().length) {
+  <section class="tips">
+    <h2>Lần đầu đến {{ country().nameVi }}? Hãy biết 5 điều này</h2>
+    <div class="tip-grid">
+      @for (t of tips(); track t.text; let i = $index) {
+        <div class="tip"><span class="tip-ic">{{ tipIcons[i] }}</span><p>{{ t.text }}</p><ca-cite [ids]="[t.sourceId]" /></div>
+      }
+    </div>
+  </section>
+}
+
+@if (gallery().length) {
+  <section class="gallery">
+    @for (g of gallery(); track g.src; let i = $index) {
+      <figure [class.big]="i === 0"><ca-photo [photo]="g" /><figcaption>{{ g.caption }}</figcaption></figure>
+    }
+  </section>
+}
+
+<div class="layout">
+  <div class="col">
+    @for (e of entries(); track e.id) {
+      <article class="card entry">
+        <div class="entry-head"><span class="eyebrow">{{ svc.category(e.category)?.icon }} {{ svc.category(e.category)?.nameVi }}</span><span class="muted small">Cập nhật {{ e.updatedAt }}</span></div>
+        <h2>{{ e.title }}</h2>
+        <p class="summary">{{ e.summary }}</p>
+        <ul class="claims">
+          @for (c of e.claims; track c.id) {
+            <li><p>{{ c.text }} <ca-cite [ids]="c.sourceIds" /></p><div class="meta"><ca-scope-badge [scope]="c.scope" /><ca-confidence-badge [level]="c.confidence" /></div></li>
+          }
+        </ul>
+        <div class="entry-foot small"><a routerLink="/guide">✦ Hỏi AI: “Vì sao lại như vậy?”</a><button class="report">⚑ Báo cáo sai</button></div>
+      </article>
+    } @empty {
+      <div class="card empty">Chưa có bài viết đã duyệt cho danh mục này. <a routerLink="/guide">Hỏi AI</a> — AI sẽ nói rõ nếu kho dữ liệu chưa đủ nguồn.</div>
+    }
+
+    @if (data().museumObjects.length || data().europeana.length) {
+      <section class="card">
+        <div class="row-head"><h3>Hiện vật & tư liệu số</h3><span class="muted small">Smithsonian Open Access (CC0) · Europeana</span></div>
+        <div class="objects">
+          @for (o of data().museumObjects; track o.url) {
+            <a class="obj" [href]="o.url" target="_blank" rel="noopener"><img [src]="o.thumbnail" [alt]="o.title" /><b>{{ o.title }}</b><span>{{ o.unit }} · {{ o.license }}</span></a>
+          }
+          @for (o of data().europeana; track o.url) {
+            <a class="obj" [href]="o.url" target="_blank" rel="noopener"><img [src]="o.thumbnail" [alt]="o.title" /><b>{{ o.title }}</b><span>{{ o.provider }} · Europeana</span></a>
+          }
+        </div>
+      </section>
+    }
+  </div>
+
+  <aside class="col side">
+    <section class="card">
+      <div class="tabs">
+        <button [class.on]="heritageTab() === 'whc'" (click)="heritageTab.set('whc')">🏯 Di sản thế giới · {{ data().worldHeritage.total }}</button>
+        <button [class.on]="heritageTab() === 'ich'" (click)="heritageTab.set('ich')">🎭 Phi vật thể · {{ data().intangibleHeritage.total }}</button>
+      </div>
+      <ul class="heritage">
+        @if (heritageTab() === 'whc') {
+          @for (h of data().worldHeritage.items; track h.id) {
+            <li><a [href]="h.url" target="_blank" rel="noopener"><b>{{ h.name }}</b></a><div class="muted small">{{ h.category }} · {{ h.year }}</div></li>
+          }
+        } @else {
+          @for (h of data().intangibleHeritage.items; track h.ref) {
+            <li><a [href]="h.url" target="_blank" rel="noopener"><b>{{ h.name }}</b></a><div class="muted small">{{ h.list }} · {{ h.year }}</div></li>
+          }
+        }
+      </ul>
+      <p class="attr">Nguồn: UNESCO DataHub (whc001 / ich001) · CC BY-SA 4.0</p>
+    </section>
+
+    @if (scaleRows().length) {
+      <section class="card">
+        <div class="row-head"><h3>Gợi ý chủ đề từ SCALE</h3></div>
+        @for (r of scaleRows(); track r.label) {
+          <div class="scale"><b>{{ r.label }} <span class="muted small">· {{ r.n }} mục</span></b>
+            <div class="tags">@for (x of r.items.slice(0, 5); track x) { <span class="tag">{{ x }}</span> }</div></div>
+        }
+        <p class="attr">SCALE Cultural Data (Google Research) — chỉ dùng tham khảo taxonomy, chưa công bố giấy phép.</p>
+      </section>
+    }
+
+    @if (sourceIds().length) {
+      <section class="card">
+        <p class="eyebrow">Nguồn trên trang này</p>
+        <ul class="sources small">
+          @for (id of sourceIds(); track id) {
+            @if (svc.source(id); as s) { <li><span class="cite">{{ s.id }}</span> <b>{{ s.publisher }}</b> — {{ s.title }}<div class="muted">{{ s.license }} · {{ s.retrievedAt }}</div></li> }
+          }
+        </ul>
+      </section>
+    }
+  </aside>
+</div>

@@ -1,0 +1,53 @@
+<div class="quiz">
+  <div class="main">
+    <div class="top">
+      <span class="chip">🇯🇵 Nhật Bản</span><span class="chip">🎁 Tặng quà</span><span class="chip">Dễ</span>
+      <span class="progress-label small muted">Câu {{ index() + 1 }} / 10</span>
+    </div>
+    <div class="progress"><i [style.width.%]="(index() + 1) * 10"></i></div>
+
+    <section class="card qcard">
+      <div class="qimg"><img [src]="svc.img(q().category === 'gift_giving' ? 'jp-tea' : 'jp-kaiseki').src" alt="" /><span class="qnum">Câu {{ index() + 1 }}</span></div>
+      <h2>{{ q().question }}</h2>
+      <div class="opts">
+        @for (o of q().options; track o; let i = $index) {
+          <button class="opt" [disabled]="picked() !== null"
+                  [class.right]="picked() !== null && i === q().answerIndex"
+                  [class.wrong]="picked() === i && i !== q().answerIndex"
+                  (click)="picked.set(i)">
+            <span class="letter">{{ letters[i] }}</span>{{ o }}
+          </button>
+        }
+      </div>
+
+      @if (picked() !== null) {
+        <div class="explain" [class.bad]="!correct()">
+          <b>{{ correct() ? '✓ Chính xác!' : '✗ Chưa đúng' }}</b>
+          <p>{{ q().explanation }} <ca-cite [ids]="q().sourceIds" /></p>
+          <a routerLink="/countries/JP" class="small">Đọc bài gốc: Tặng quà ở Nhật Bản →</a>
+        </div>
+        <div class="foot"><button class="btn" (click)="next()">Câu tiếp theo →</button></div>
+      }
+    </section>
+  </div>
+
+  <aside class="card stats">
+    <div class="stamp"><img [src]="svc.photo('JP').src" alt="" /><span>🇯🇵 Nhật Bản<br /><small>Hộ chiếu văn hoá · 3/5 bài</small></span></div>
+    <p class="eyebrow">Tiến độ của bạn</p>
+    <div class="score"><b>7</b><span>/ 9 đúng</span></div>
+    <p class="eyebrow">Cần ôn lại</p>
+    <ul class="small">
+      <li>🇰🇷 Phép lịch sự bàn ăn <span class="muted">· 2 câu sai</span></li>
+      <li>🇮🇳 Lễ hội Diwali <span class="muted">· 1 câu sai</span></li>
+    </ul>
+    <p class="eyebrow">Bộ câu hỏi khác</p>
+    <div class="sets">
+      <span class="chip">🇻🇳 Tết cổ truyền</span><span class="chip">🇫🇷 Chào hỏi</span><span class="chip">🌏 Đoán quốc gia qua hiện vật</span>
+    </div>
+    <div class="next-sets">
+      @for (iso of ['VN', 'IN', 'MX']; track iso) {
+        <div class="ns"><img [src]="svc.photo(iso).src" alt="" /><b>{{ svc.country(iso)?.flag }} {{ svc.country(iso)?.nameVi }}</b></div>
+      }
+    </div>
+  </aside>
+</div>

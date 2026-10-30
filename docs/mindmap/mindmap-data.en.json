@@ -1,0 +1,27 @@
+{
+  "root": "CultureAtlas AI",
+  "subtitle": "Explore cultures · Compare customs · Learn with a source-grounded AI",
+  "legend": "<span><b>MVP</b>: Explorer · AI Guide · Comparison · Quiz · Content Admin</span><span><b>Post-MVP</b>: Scenario · Passport</span>",
+  "branches": [
+    { "title": "Cultural Explorer", "icon": "🗺️", "color": "#1F6F6B", "side": "right", "tag": "MVP",
+      "children": ["Interactive world map shaded by coverage", "Country profile · 12 culture categories", "UNESCO tangible & intangible heritage", "Cross-country themes · festivals by month"] },
+    { "title": "AI Cultural Guide", "icon": "✦", "color": "#C2552D", "side": "right", "tag": "MVP · core",
+      "children": ["Bilingual RAG (Vietnamese – English), streaming", "Per-claim citations + confidence level", "Reasoned refusal when sources are missing", "Page context · country-themed background"] },
+    { "title": "Culture Comparison", "icon": "⇄", "color": "#7A4FB5", "side": "right", "tag": "MVP",
+      "children": ["2 countries × 1 topic", "Similarities / differences, sourced per cell", "“Not enough evidence” cells", "Editor-approved results cached"] },
+    { "title": "Culture Quiz", "icon": "❓", "color": "#B7862B", "side": "right", "tag": "MVP",
+      "children": ["By country · topic · difficulty", "Answer explanations with sources", "Tracks weak topics", "AI drafts → editor approves"] },
+    { "title": "Cultural Scenario", "icon": "🎭", "color": "#3A7BD5", "side": "right", "tag": "Post-MVP",
+      "children": ["Situations: dinner, festival, business meeting", "3–4 choices per step + explanation", "Story frames written by editors"] },
+    { "title": "Cultural Passport", "icon": "🛂", "color": "#D04E8A", "side": "left", "tag": "Post-MVP",
+      "children": ["Stamps for completed lesson sets", "Saved countries & quiz results", "AI-recommended learning path"] },
+    { "title": "Content Administration", "icon": "🖊️", "color": "#1F2A37", "side": "left", "tag": "MVP",
+      "children": ["Review queue for AI-generated content", "Claims · sources · licenses · attribution", "User error reports", "Country × category coverage board"] },
+    { "title": "Open Data Sources", "icon": "📚", "color": "#2E8B57", "side": "left", "tag": "Ingestion",
+      "children": ["UNESCO World Heritage (1,273) & ICH (849)", "Smithsonian Open Access · Europeana", "REST Countries · Wikidata · Natural Earth", "SCALE Cultural Data (taxonomy)"] },
+    { "title": "AI & Data Platform", "icon": "⚙️", "color": "#5B6472", "side": "left", "tag": "Engineering",
+      "children": ["PostgreSQL + pgvector (FTS + vector)", "Hybrid search · RRF · reranking", "Post-generation citation check", "RAG benchmark in CI"] },
+    { "title": "Users & Roles", "icon": "👥", "color": "#E07B39", "side": "left", "tag": "RBAC",
+      "children": ["Guest · Learner (travelling abroad)", "Editor: write & review", "Admin: sync, benchmark, users"] }
+  ]
+}

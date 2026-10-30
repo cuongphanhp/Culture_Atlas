@@ -1,0 +1,24 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment: { POSTGRES_DB: culture_atlas, POSTGRES_USER: atlas, POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-atlas} }
+    volumes: [ "pgdata:/var/lib/postgresql/data", "./src/database/culture_atlas.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro" ]
+    ports: [ "5432:5432" ]
+  api:
+    build: ./src/backend
+    env_file: .env
+    depends_on: [ db ]
+    ports: [ "8000:8000" ]
+  worker:
+    build: ./src/backend
+    command: python -m worker.scheduler
+    env_file: .env
+    depends_on: [ db ]
+  web:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm ci && npx ng serve --host 0.0.0.0"
+    volumes: [ "./src/frontend:/app" ]
+    ports: [ "4200:4200" ]
+volumes:
+  pgdata:

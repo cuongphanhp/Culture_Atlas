@@ -1,0 +1,58 @@
+<section class="duel">
+  <div class="side-a"><img [src]="svc.photo(a()).src" alt="" /><div class="lbl"><span>{{ ca().flag }}</span>{{ ca().nameVi }}<small>{{ svc.photo(a()).caption }}</small></div></div>
+  <div class="side-b"><img [src]="svc.photo(b()).src" alt="" /><div class="lbl"><span>{{ cb().flag }}</span>{{ cb().nameVi }}<small>{{ svc.photo(b()).caption }}</small></div></div>
+  <div class="vs">VS</div>
+  <div class="duel-title"><p class="eyebrow light">Culture Comparison</p><h1>{{ svc.category(topic())?.icon }} {{ svc.category(topic())?.nameVi }}</h1></div>
+</section>
+
+<div class="picker card">
+  <label>Quốc gia A
+    <select (change)="a.set($any($event.target).value)">
+      @for (c of svc.countries; track c.iso2) { <option [value]="c.iso2" [selected]="c.iso2 === a()">{{ c.flag }} {{ c.nameVi }}</option> }
+    </select>
+  </label>
+  <button class="swap" (click)="swap()" title="Đổi chỗ">⇄</button>
+  <label>Quốc gia B
+    <select (change)="b.set($any($event.target).value)">
+      @for (c of svc.countries; track c.iso2) { <option [value]="c.iso2" [selected]="c.iso2 === b()">{{ c.flag }} {{ c.nameVi }}</option> }
+    </select>
+  </label>
+  <label>Chủ đề
+    <select (change)="topic.set($any($event.target).value)">
+      @for (c of svc.categories; track c.code) { <option [value]="c.code" [selected]="c.code === topic()">{{ c.icon }} {{ c.nameVi }}</option> }
+    </select>
+  </label>
+  <button class="btn">So sánh</button>
+</div>
+
+<div class="status small"><span class="badge conf-verified"><span class="dot"></span>Đã được biên tập viên duyệt</span> <span class="muted">· {{ result.reviewedBy }} · bản lưu cache</span></div>
+
+<section class="card">
+  <h3>✓ Điểm tương đồng</h3>
+  <ul class="sim">
+    @for (s of result.similarities; track s.text) { <li>{{ s.text }} <ca-cite [ids]="s.sourceIds" /></li> }
+  </ul>
+</section>
+
+<section class="card table-card">
+  <table>
+    <thead>
+      <tr><th class="aspect">Khía cạnh</th><th>{{ ca().flag }} {{ ca().nameVi }}</th><th>{{ cb().flag }} {{ cb().nameVi }}</th></tr>
+    </thead>
+    <tbody>
+      @for (r of result.rows; track r.aspect) {
+        <tr>
+          <td class="aspect">{{ r.aspect }}</td>
+          <td>@if (r.a) { {{ r.a.text }} <ca-cite [ids]="r.a.sourceIds" /> } @else { <span class="na">Chưa đủ nguồn để kết luận</span> }</td>
+          <td>@if (r.b) { {{ r.b.text }} <ca-cite [ids]="r.b.sourceIds" /> } @else { <span class="na">Chưa đủ nguồn để kết luận</span> }</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>
+
+<div class="grid3">
+  <section class="card"><h3>🧭 Bối cảnh hình thành</h3><p>{{ result.context }}</p></section>
+  <section class="card"><h3>⚠ Ngoại lệ & lưu ý</h3><ul>@for (c of result.caveats; track c) { <li>{{ c }}</li> }</ul></section>
+  <section class="card insuf"><h3>? Chưa đủ bằng chứng</h3><ul>@for (c of result.insufficient; track c) { <li>{{ c }}</li> }</ul></section>
+</div>

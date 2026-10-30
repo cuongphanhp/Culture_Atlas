@@ -1,0 +1,113 @@
+<section class="hero">
+  <ca-photo class="hero-bg" [photo]="svc.photo(hero().iso2)" />
+  <div class="hero-shade"></div>
+  <div class="hero-content">
+    <p class="eyebrow light">Cultural Explorer · 10 quốc gia · 12 chủ đề</p>
+    <h1>Hiểu <span class="hl">vì sao</span><br />thế giới sống như vậy.</h1>
+    <div class="search">
+      <span>🔍</span>
+      <input [value]="query()" (input)="query.set($any($event.target).value)" placeholder="Tìm quốc gia, phong tục… ví dụ “tặng quà Nhật Bản”" />
+      <a class="btn" routerLink="/guide">✦ Hỏi AI</a>
+    </div>
+    <div class="hero-pick">
+      @for (iso of heroIsos; track iso; let i = $index) {
+        <button class="thumb" [class.on]="i === heroIndex()" (click)="heroIndex.set(i)" [title]="svc.country(iso)?.nameVi">
+          <img [src]="svc.photo(iso).src" alt="" /><span>{{ svc.country(iso)?.flag }}</span>
+        </button>
+      }
+      <a class="hero-caption" [routerLink]="['/countries', hero().iso2]">{{ hero().flag }} {{ svc.photo(hero().iso2).caption }} — khám phá {{ hero().nameVi }} →</a>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  @for (f of features; track f.title) {
+    <a class="feature" [routerLink]="f.link">
+      <ca-photo [photo]="svc.img(f.img)" [credit]="false" />
+      <div class="f-shade"></div>
+      <div class="f-body"><span class="f-icon">{{ f.icon }}</span><h3>{{ f.title }}</h3><p>{{ f.text }}</p></div>
+    </a>
+  }
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <h2>Điểm đến văn hoá</h2>
+    <div class="regions">
+      @for (r of regions; track r) { <button class="chip" [class.on]="r === region()" (click)="region.set(r)">{{ r }}</button> }
+    </div>
+  </div>
+  <div class="dest">
+    @for (c of filtered(); track c.iso2) {
+      <a class="dest-card" [routerLink]="['/countries', c.iso2]">
+        <ca-photo [photo]="svc.photo(c.iso2)" [credit]="false" />
+        <div class="d-shade"></div>
+        <div class="d-top"><span class="flag">{{ c.flag }}</span><span class="cov">{{ c.coverage }}%</span></div>
+        <div class="d-body">
+          <h3>{{ c.nameVi }}</h3>
+          <div class="d-stats">
+            <span>🏯 {{ svc.data(c.iso2).worldHeritage.total }} di sản</span>
+            <span>🎭 {{ svc.data(c.iso2).intangibleHeritage.total }} phi vật thể</span>
+          </div>
+        </div>
+      </a>
+    }
+  </div>
+</section>
+
+<section class="map-wrap">
+  <div class="card map">
+    <ca-world-map [countries]="filtered()" [selected]="selected()?.iso2 ?? null" (pick)="selected.set($event)" />
+    <div class="legend small"><span>Độ phủ nội dung</span><i class="grad"></i><span class="muted">thấp → cao</span></div>
+  </div>
+  @if (selected(); as c) {
+    <aside class="peek card">
+      <ca-photo class="peek-img" [photo]="svc.photo(c.iso2)" />
+      <div class="peek-body">
+        <h2>{{ c.flag }} {{ c.nameVi }}</h2>
+        <p class="muted small">{{ c.region }} · Thủ đô {{ c.capital }}</p>
+        <div class="kpis">
+          <div><b>{{ svc.data(c.iso2).worldHeritage.total }}</b><span>Di sản thế giới</span></div>
+          <div><b>{{ svc.data(c.iso2).intangibleHeritage.total }}</b><span>Phi vật thể</span></div>
+          <div><b>{{ c.coverage }}%</b><span>Độ phủ</span></div>
+        </div>
+        <button class="btn full" (click)="open(c)">Xem hồ sơ văn hoá</button>
+      </div>
+    </aside>
+  }
+</section>
+
+<section class="sec two">
+  <div>
+    <h2>Khám phá theo chủ đề</h2>
+    <div class="themes">
+      @for (t of svc.themes; track t.title) {
+        <div class="theme">
+          <ca-photo [photo]="svc.img(t.img)" [credit]="false" /><div class="d-shade"></div>
+          <div class="t-body"><b>{{ t.title }}</b><span>{{ t.countries }} quốc gia</span></div>
+        </div>
+      }
+    </div>
+  </div>
+  <div>
+    <h2>Tháng này thế giới có lễ hội gì?</h2>
+    <div class="fest">
+      @for (f of svc.festivals; track f.name) {
+        <div class="fest-row card">
+          <ca-photo class="fest-img" [photo]="svc.img(f.img)" [credit]="false" />
+          <div><b>{{ f.flag }} {{ f.name }}</b><div class="muted small">{{ f.date }}</div></div>
+          <a class="small" [routerLink]="'/guide'">Hỏi AI →</a>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="sources card">
+  <div><p class="eyebrow">Dữ liệu từ nguồn mở có giấy phép</p><h3>Mọi phát biểu đều truy được về nguồn gốc</h3></div>
+  <div class="src-grid">
+    @for (s of sources(); track s.key) {
+      <a class="src" [href]="s.url" target="_blank" rel="noopener"><b>{{ s.label }}</b><span>{{ s.value }}</span></a>
+    }
+  </div>
+</section>
