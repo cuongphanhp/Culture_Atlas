@@ -251,6 +251,66 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '429': { $ref: '#/components/responses/TooManyRequests' }
 
+  /ai/transcribe:
+    post:
+      tags: [AI]
+      operationId: transcribeSpeech
+      summary: Nhận dạng giọng nói tiếng Việt (AI local — Gipformer)
+      description: Âm thanh chỉ được xử lý bởi dịch vụ AI local và không được lưu (AC21.3).
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { type: object, required: [file], properties: { file: { type: string, format: binary, description: 'webm/ogg/wav/mp3/m4a, ≤ 60 giây, ≤ 10 MB' } } }
+      responses:
+        '200':
+          description: Văn bản nhận dạng
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text: { type: string, example: Ở nhật bản tặng quà cần lưu ý gì }
+                  segments: { type: array, items: { type: object, properties: { start: { type: number }, end: { type: number }, text: { type: string } } } }
+                  durationS: { type: number }
+                  model: { type: string, example: gipformer1.5-68M-rnnt }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '503': { $ref: '#/components/responses/Unavailable' }
+  /ai/speech:
+    post:
+      tags: [AI]
+      operationId: synthesizeSpeech
+      summary: Đọc văn bản thành giọng nói (AI local — VieNeu-TTS, 48 kHz)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [text], properties: { text: { type: string, minLength: 1, maxLength: 1500 }, voice: { type: string, example: Hải Đăng } } }
+      responses:
+        '200':
+          description: File WAV. Header X-Voice (mã hoá URL), X-Audio-Seconds
+          content: { audio/wav: { schema: { type: string, format: binary } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '503': { $ref: '#/components/responses/Unavailable' }
+  /ai/voices:
+    get:
+      tags: [AI]
+      operationId: listVoices
+      summary: Danh sách giọng đọc (Bắc / Nam)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  default: { type: string }
+                  voices: { type: array, items: { type: object, properties: { id: { type: string }, label: { type: string } } } }
+        '503': { $ref: '#/components/responses/Unavailable' }
+
   # ───────────────────────── Auth ─────────────────────────
   /auth/login:
     post:
@@ -521,7 +581,8 @@ components:
     Conflict: { description: Xung đột trạng thái, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
     Unprocessable: { description: Vi phạm quy tắc nghiệp vụ (ví dụ claim thiếu nguồn), content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
     TooManyRequests: { description: Vượt giới hạn lượt, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
-    Unavailable: { description: Nhà cung cấp LLM không phản hồi, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    PayloadTooLarge: { description: File hoặc văn bản quá lớn, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    Unavailable: { description: Nhà cung cấp LLM hoặc dịch vụ AI local không phản hồi, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
   schemas:
     Problem:
       type: object

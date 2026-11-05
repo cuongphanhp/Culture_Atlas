@@ -41,3 +41,15 @@ describe('AI Cultural Guide UI (US06–US10)', () => {
     expect($(f, '[data-testid="context-chip"]')!.textContent).toContain('Nhật Bản');
   });
 });
+
+describe('AI Guide — giọng nói (US21)', () => {
+  it.skip('[AC21.6] PENDING: nút micro ghi âm, văn bản nhận dạng hiện vào ô nhập để sửa trước khi gửi', async () => {
+    const f = await render(AiGuidePage);
+    expect($(f, '[data-testid="mic"]')).toBeTruthy();
+  });
+
+  it.skip('[AC21.6] PENDING: nút loa trên mỗi câu trả lời để nghe lại', async () => {
+    const f = await render(AiGuidePage);
+    expect($$(f, '[data-testid="speak"]').length).toBeGreaterThan(0);
+  });
+});

@@ -23,6 +23,16 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: python -m pytest -q
 
+  ai-local:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: src/ai-local } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sudo apt-get install -y ffmpeg
+      - run: pip install --extra-index-url https://download.pytorch.org/whl/cpu -e ".[dev]"
+      - run: python -m pytest -q    # engine giả; test model thật (-m models) chạy thủ công
 
   frontend:
     runs-on: ubuntu-latest

@@ -85,3 +85,19 @@ Mỗi tiêu chí có mã `ACxx.y`, ánh xạ tới user story trong [08-invest-r
 **US19** — AC19.1 Ô có < 3 claim đã duyệt được tô cảnh báo. AC19.2 Bấm ô mở danh sách bài viết của quốc gia × danh mục.
 
 **US20** — AC20.1 Mỗi lần chạy tạo `ingestion_runs` với số bản ghi vào/thay đổi/lỗi. AC20.2 Chạy lại không tạo bản ghi trùng (idempotent theo khoá nguồn). AC20.3 `raw_data` gốc được lưu.
+
+## Hỏi đáp bằng giọng nói
+
+**US21 — Hỏi bằng giọng nói và nghe câu trả lời** (AI local: Gipformer STT, VieNeu-TTS — xem [11-vietnamese-chat-stack.md](11-vietnamese-chat-stack.md))
+- AC21.1 *Given* bản ghi âm tiếng Việt (webm/ogg/wav/mp3/m4a, ≤ 60 giây), *when* gửi lên, *then* nhận lại văn bản nhận dạng. Đoạn 15 giây xử lý < 2 s trên CPU. Âm thanh chỉ được xử lý bởi dịch vụ AI local, không gửi ra dịch vụ bên ngoài.
+- AC21.2 File không phải âm thanh hoặc rỗng → HTTP 400. File > 10 MB hoặc dài > 60 giây → HTTP 413. Mọi lỗi kèm thông báo tiếng Việt.
+- AC21.3 Không lưu âm thanh của người dùng: âm thanh chỉ nằm trong bộ nhớ hoặc file tạm và bị xoá ngay sau khi nhận dạng. DB chỉ lưu văn bản.
+- AC21.4 Đọc câu trả lời thành giọng nói:
+  - Bỏ nhãn trích dẫn `[c#]` và ký hiệu markdown trước khi đọc.
+  - Số và ngày tháng được đọc thành chữ.
+  - Chọn được giọng Bắc hoặc Nam từ danh sách; chọn giọng không tồn tại → HTTP 400.
+  - Văn bản > 1.500 ký tự → HTTP 413.
+- AC21.5 Dịch vụ AI local không chạy → HTTP 503. Hỏi đáp bằng văn bản vẫn hoạt động bình thường.
+- AC21.6 Trong AI Guide:
+  - Nút micro ghi âm; văn bản nhận dạng hiện vào ô nhập để người dùng sửa trước khi gửi.
+  - Nút loa trên mỗi câu trả lời để nghe lại.

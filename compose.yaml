@@ -7,8 +7,15 @@ services:
   api:
     build: ./src/backend
     env_file: .env
-    depends_on: [ db ]
+    environment: { AI_LOCAL_URL: "http://ai-local:8100" }
+    depends_on: [ db, ai-local ]
     ports: [ "8000:8000" ]
+  ai-local:
+    build: ./src/ai-local
+    environment: { AI_LOCAL_THREADS: "8" }
+    volumes: [ "ai-models:/models" ]
+    # Lần đầu: docker compose run --rm ai-local python -m ai_local.download
+    healthcheck: { test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8100/health')" ], interval: 10s, retries: 30 }
   worker:
     build: ./src/backend
     command: python -m worker.scheduler
@@ -22,3 +29,4 @@ services:
     ports: [ "4200:4200" ]
 volumes:
   pgdata:
+  ai-models:

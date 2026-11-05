@@ -1,0 +1,28 @@
+[project]
+name = "culture-atlas-ai-local"
+version = "0.1.0"
+description = "Dịch vụ AI chạy local (CPU): nhận dạng giọng nói, đọc văn bản, embedding, rerank tiếng Việt"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "fastapi>=0.115", "uvicorn[standard]>=0.30", "python-multipart>=0.0.9", "pydantic-settings>=2.4",
+  "numpy>=1.26", "soundfile>=0.12", "huggingface_hub>=0.26",
+  "sherpa-onnx>=1.12", "sherpa-onnx-core>=1.12; python_version>='3.8'",
+  "onnxruntime>=1.20", "tokenizers>=0.20",
+  "vieneu>=3.8",
+]
+
+[project.optional-dependencies]
+# Reranker cross-encoder chỉ có trọng số safetensors → cần torch (bản CPU)
+rerank = ["torch>=2.4", "transformers>=4.45"]
+dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.6"]
+
+[tool.setuptools.packages.find]
+include = ["ai_local*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "models: dùng model thật (cần tải trước bằng `python -m ai_local.download`)",
+  "ac(*ids): mã tiêu chí chấp nhận (docs/06-acceptance-criteria.md)",
+]
+addopts = "-m 'not models' -rfE"

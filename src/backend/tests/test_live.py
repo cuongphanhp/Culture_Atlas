@@ -1,5 +1,6 @@
 """Kiểm tra dịch vụ thật — KHÔNG chạy mặc định (tốn tiền / cần dịch vụ chạy). Chạy: pytest -m live
 - GPT-4o: cần OPENAI_API_KEY trong .env
+- AI local: cần `uvicorn ai_local.main:app --port 8100` đang chạy
 """
 import asyncio
 import os
@@ -54,3 +55,17 @@ def test_luna_structured_json():
     out = asyncio.run(llm.complete_json([{"role": "user", "content": "3 câu hỏi gợi ý tiếp về tặng quà ở Nhật."}],
                                         name="follow_ups", schema=schema))
     assert 1 <= len(out["questions"]) <= 5
+
+
+@ac("AC21.1")
+def test_local_ai_round_trip():
+    import httpx
+    url = _settings().ai_local_url
+    try:
+        httpx.get(f"{url}/health", timeout=2)
+    except httpx.HTTPError:
+        pytest.skip(f"Dịch vụ AI local chưa chạy ở {url}")
+    tts = httpx.post(f"{url}/v1/tts", json={"text": "Xin chào, tôi muốn hỏi về văn hoá Nhật Bản."}, timeout=120)
+    assert tts.status_code == 200
+    stt = httpx.post(f"{url}/v1/stt", files={"file": ("a.wav", tts.content, "audio/wav")}, timeout=120).json()
+    assert {"xin", "chào", "nhật", "bản"} <= set(stt["text"].lower().replace(",", "").split()), stt["text"]

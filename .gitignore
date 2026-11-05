@@ -9,3 +9,4 @@ src/backend/data/
 .pytest_cache/
 .ruff_cache/
 *.egg-info/
+src/ai-local/models/
