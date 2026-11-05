@@ -305,6 +305,23 @@ CREATE TABLE ingestion_runs (
   triggered_by    BIGINT REFERENCES users(id)
 );
 
+-- Tài liệu tham khảo do worker thu thập (Wikipedia, trang du lịch chính thức…) — đầu vào cho biên tập viên, không xuất bản trực tiếp
+CREATE TABLE source_documents (
+  id             BIGSERIAL PRIMARY KEY,
+  country_id     INT REFERENCES countries(id),
+  source_id      BIGINT NOT NULL REFERENCES sources(id),
+  title          VARCHAR(500) NOT NULL,
+  section        VARCHAR(255) NOT NULL,
+  body           TEXT NOT NULL,
+  url            TEXT NOT NULL,
+  language       VARCHAR(5) NOT NULL DEFAULT 'en',
+  category_guess category_code,
+  excerpt_only   BOOLEAN NOT NULL DEFAULT FALSE,    -- nguồn có bản quyền: chỉ trích đoạn ngắn
+  retrieved_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (url, section)
+);
+CREATE INDEX ix_source_documents_country ON source_documents (country_id, category_guess);
+
 -- ===== View: độ phủ quốc gia × danh mục (SCR25) =====
 CREATE VIEW v_coverage AS
 SELECT c.iso2, cat.code AS category,

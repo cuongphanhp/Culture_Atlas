@@ -266,6 +266,22 @@ Table feedback {
   indexes { (target_type, target_id) }
 }
 
+Table source_documents {
+  id bigserial [pk]
+  country_id int [ref: > countries.id]
+  source_id bigint [not null, ref: > sources.id]
+  title varchar(500) [not null]
+  section varchar(255) [not null]
+  body text [not null]
+  url text [not null]
+  language varchar(5) [not null, default: 'en']
+  category_guess category_code
+  excerpt_only boolean [not null, default: false, note: 'nguồn có bản quyền: chỉ trích đoạn']
+  retrieved_at timestamptz [not null, default: `now()`]
+  indexes { (url, section) [unique] }
+  Note: 'Tài liệu tham khảo do worker thu thập — đầu vào cho biên tập viên'
+}
+
 Table ingestion_runs {
   id bigserial [pk]
   source_name varchar(80) [not null]

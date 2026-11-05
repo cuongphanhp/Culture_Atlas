@@ -462,9 +462,9 @@ Culture/
 │   │   │   └── features/             # Explorer, country, AI guide, compare, quiz, admin
 │   │   ├── public/images/            # Wikimedia Commons photos + credits, Smithsonian objects
 │   │   └── package.json
-│   ├── backend/                      # FastAPI + ingestion worker skeleton
+│   ├── backend/                      # FastAPI skeleton + ingestion worker
 │   │   ├── app/                      # API, core, schemas, domain, repositories, services, ai
-│   │   ├── worker/                   # Source ingestion and RAG pipeline
+│   │   ├── worker/                   # Crawlers (API, BeautifulSoup, Selenium), aggregation, PostgreSQL loader
 │   │   ├── eval/                     # RAG benchmark
 │   │   └── tests/
 │   └── database/
@@ -480,7 +480,7 @@ Culture/
 └── README.md
 ```
 
-The frontend is a working prototype backed by sample content and real source snapshots; it is not yet connected to the API. The backend contains the target module layout with a runnable health endpoint and test. See [Project Progress](#project-progress) for the current checklist.
+The frontend is a working prototype backed by sample content and real source snapshots; it is not yet connected to the API. The backend contains the target module layout with a runnable health endpoint; the ingestion worker is implemented and tested. See [Project Progress](#project-progress) for the current checklist.
 
 ### 5.2 Target Angular feature structure
 
@@ -527,8 +527,12 @@ src/backend/
 │   ├── services/        # Content, comparison, quiz, review use cases
 │   └── ai/              # Router, agent, tools, retrieval, reranker, LLM adapter, citation verifier, prompts
 ├── worker/
-│   ├── ingest/          # UNESCO, REST Countries, Smithsonian, Europeana, Wikidata
-│   └── pipeline/        # Normalize, chunk, embed
+│   ├── core/            # Polite HTTP client (robots.txt, rate limit, retry), Selenium browser, storage, records
+│   ├── sources/         # UNESCO DataHub, Wikidata, REST Countries, Smithsonian, Europeana, Commons,
+│   │                    # Wikipedia (BeautifulSoup), SCALE, official tourism sites (Selenium)
+│   ├── pipeline/        # Classify, aggregate, load into PostgreSQL (chunk, embed next)
+│   ├── cli.py           # sources · run · run-all · aggregate · load
+│   └── scheduler.py     # Scheduled sync per source
 ├── eval/                # RAG benchmark questions and runner (CI)
 └── tests/
 ```
@@ -540,7 +544,7 @@ api → services → repositories → database
 api → ai.agent → ai.tools → retrieval → repositories
 ai.agent → llm_adapter (interface only)
 domain → neither api nor repositories
-worker → domain + repositories, never api
+worker → its own core + pipeline, writes to PostgreSQL; never imports api
 ```
 
 ## 6. Detailed Class and Sequence Design
@@ -833,6 +837,7 @@ sequenceDiagram
 - Mind map: [PNG](docs/mindmap.png) and [XMind](docs/mindmap.xmind).
 - Database: [Data model](docs/05-data-model.md), [ER diagram](docs/DATABASE.md), [DBML](src/database/culture_atlas.dbml), [PostgreSQL schema](src/database/culture_atlas.sql).
 - API contract: [OpenAPI 3.0.4 specification](docs/api/openapi.yaml).
+- Data ingestion: [Workers, sources, and collection rules](docs/09-data-ingestion.md).
 
 ## Project Progress
 
@@ -855,7 +860,8 @@ sequenceDiagram
 - [x] Design the FastAPI backend and worker folder structure
 - [x] Design class diagrams and sequence diagrams
 - [ ] Connect the Angular frontend to the API
-- [ ] Implement ingestion for UNESCO, REST Countries, Smithsonian, and Europeana
+- [x] Implement ingestion workers: UNESCO DataHub, Wikidata, REST Countries, Smithsonian, Europeana, Wikimedia Commons, Wikipedia (BeautifulSoup), SCALE, official tourism sites (Selenium)
+- [x] Aggregate sources and load into PostgreSQL with provenance and licenses
 - [ ] Implement the RAG pipeline (chunking, embeddings, hybrid search, reranking, citation verification)
 - [ ] Write source-backed etiquette content for 10 countries × 12 categories
 - [ ] Build the 100–150 question RAG benchmark and run it in CI
