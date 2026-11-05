@@ -14,3 +14,13 @@ dev = ["pytest>=8", "ruff>=0.6"]
 
 [tool.setuptools.packages.find]
 include = ["app*", "worker*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "ac(*ids): mã tiêu chí chấp nhận (docs/06-acceptance-criteria.md) mà test kiểm chứng",
+  "route(method, path): endpoint test cần — chưa có trong app thì test PENDING (skip)",
+  "db: cần PostgreSQL test (tự bỏ qua nếu không kết nối được, trừ khi ACCEPTANCE_STRICT=1)",
+  "live: gọi dịch vụ thật (OpenAI…); chỉ chạy khi gọi -m live",
+]
+addopts = "-m 'not live' -rfE"

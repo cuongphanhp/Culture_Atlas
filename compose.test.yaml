@@ -1,0 +1,13 @@
+# PostgreSQL riêng cho bộ test (dữ liệu trong RAM, xoá khi dừng container).
+# Khởi động: docker compose -f compose.test.yaml up -d --wait
+services:
+  db-test:
+    image: pgvector/pgvector:pg16
+    environment: { POSTGRES_USER: atlas, POSTGRES_PASSWORD: atlas, POSTGRES_DB: postgres }
+    ports: [ "55432:5432" ]
+    tmpfs: [ /var/lib/postgresql/data ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U atlas -d postgres" ]
+      interval: 2s
+      timeout: 3s
+      retries: 30
