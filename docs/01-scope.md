@@ -1,6 +1,6 @@
 # 01 — Phân tích đề bài Top-down (Research)
 
-> Bước 1 · Nguồn đầu vào: [CultureAtlas-AI.md](../CultureAtlas-AI.md)
+> Bước 1 · Nguồn đầu vào: tài liệu đề bài gốc `CultureAtlas-AI.md` (đã được tách vào thư mục docs/; bản gốc xem bằng `git show bf7c8be:CultureAtlas-AI.md`)
 > Phương pháp: đi từ **tầm nhìn → mục tiêu → năng lực → tính năng → chức năng → dữ liệu/kỹ thuật**, mỗi tầng chỉ trả lời câu hỏi của tầng trên.
 
 ## 1. Tóm tắt đề bài
@@ -116,7 +116,7 @@ F4 Scenario, F6 Passport, tài khoản người học đầy đủ, ứng dụng
 
 ## 7. Rủi ro chính (tóm tắt)
 
-AI bịa thông tin · khuôn mẫu văn hoá · bản quyền hình ảnh · mất cân bằng dữ liệu giữa quốc gia · chi phí LLM · thiếu biên tập viên. Chi tiết và cách xử lý: [CultureAtlas-AI.md §13](../CultureAtlas-AI.md#13-rủi-ro-và-cách-xử-lý).
+AI bịa thông tin · khuôn mẫu văn hoá · bản quyền hình ảnh · mất cân bằng dữ liệu giữa quốc gia · chi phí LLM · thiếu biên tập viên. Chi tiết và cách xử lý: mục 13 của tài liệu đề bài gốc (`git show bf7c8be:CultureAtlas-AI.md`).
 
 ## 8. Câu hỏi mở cần chốt ở Giai đoạn 0
 
