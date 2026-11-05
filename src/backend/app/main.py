@@ -1,9 +1,11 @@
-"""Điểm vào FastAPI: gắn router Content / AI / Auth / Admin, CORS, xử lý lỗi RFC 7807."""
+"""Điểm vào FastAPI: gắn router Content / AI / Auth / Admin, xử lý lỗi RFC 7807."""
 from fastapi import FastAPI
 
 from app.api import admin, ai, auth, content
+from app.core import errors
 
 app = FastAPI(title="CultureAtlas AI API", version="0.1.0", docs_url="/api/docs", openapi_url="/api/openapi.json")
+errors.install(app)
 app.include_router(content.router, prefix="/api")
 app.include_router(ai.router, prefix="/api/ai", tags=["AI"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
