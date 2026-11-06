@@ -1,0 +1,112 @@
+{
+  "_doc": "Ngân hàng câu hỏi gợi ý của AI Guide (AC10.3, AC10.4). Mỗi quốc gia → danh mục (category_code của DB) → câu hỏi nêu nét văn hoá RIÊNG của nước đó, không phải câu mẫu chỉ thay tên nước. Chỉ thêm câu mà kho dữ liệu có nguồn để trả lời (Wikipedia 'Culture of …', UNESCO, trang du lịch chính thức). app/ai/suggestions.py đọc file này.",
+  "countries": {
+    "VN": {
+      "festivals": ["Tết Nguyên Đán ở Việt Nam có những phong tục gì?", "Tết Trung Thu của Việt Nam có nguồn gốc thế nào?", "Lễ hội Đền Hùng có ý nghĩa gì với người Việt?"],
+      "food_dining": ["Người Việt có những phép lịch sự nào trong bữa ăn?", "Dùng đũa ở Việt Nam cần tránh điều gì?"],
+      "gift_giving": ["Lì xì ngày Tết ở Việt Nam mang ý nghĩa gì?", "Nên mua quà lưu niệm truyền thống nào ở Việt Nam?"],
+      "clothing": ["Áo dài Việt Nam có lịch sử thế nào?", "Trang phục truyền thống của người H'Mông và Dao có gì đặc biệt?"],
+      "religion_beliefs": ["Thờ cúng tổ tiên ở Việt Nam được thực hành ra sao?", "Đi chùa ở Việt Nam cần lưu ý những gì?"],
+      "arts_music": ["Ca trù và quan họ Bắc Ninh khác nhau thế nào?", "Tranh Đông Hồ được làm như thế nào?", "Nhã nhạc cung đình Huế có gì đặc sắc?"],
+      "heritage": ["Phố cổ Hội An được UNESCO công nhận vì sao?", "Không gian văn hoá cồng chiêng Tây Nguyên là gì?"],
+      "etiquette": ["Có nên chụp ảnh người dân ở Việt Nam khi chưa xin phép?", "Chuyện giữ thể diện trong giao tiếp của người Việt là thế nào?"],
+      "taboos": ["Ở Việt Nam dùng tay thế nào thì bị coi là bất lịch sự?"],
+      "family_life": ["Đám tang truyền thống của người Việt diễn ra thế nào?", "Quan hệ họ hàng trong gia đình Việt được coi trọng ra sao?"]
+    },
+    "JP": {
+      "greetings": ["Cúi chào ở Nhật Bản có những kiểu nào?", "Người Nhật dùng kính ngữ -san, -sama thế nào?"],
+      "etiquette": ["Kính ngữ keigo trong tiếng Nhật dùng khi nào?", "Trả tiền ở cửa hàng Nhật Bản có quy tắc gì?"],
+      "gift_giving": ["Omiyage ở Nhật Bản là gì?", "Những món quà nào bị coi là bất lịch sự ở Nhật Bản?", "Quà theo mùa ochūgen và oseibo ở Nhật là gì?"],
+      "food_dining": ["Dùng đũa ở Nhật Bản cần tránh những điều gì?", "Washoku được UNESCO công nhận vì sao?"],
+      "clothing": ["Kimono truyền thống được mặc vào dịp nào?", "Tắm onsen ở Nhật Bản cần biết những quy tắc gì?"],
+      "religion_beliefs": ["Thần đạo và Phật giáo cùng tồn tại ở Nhật Bản thế nào?", "Thăm đền Thần đạo ở Nhật cần làm gì?"],
+      "arts_music": ["Kabuki và kịch Nō khác nhau thế nào?", "Múa rối Bunraku của Nhật Bản có gì đặc biệt?"],
+      "heritage": ["Núi Phú Sĩ được UNESCO công nhận vì sao?", "Các di tích cố đô Kyoto gồm những gì?"],
+      "business_culture": ["Trao danh thiếp meishi ở Nhật Bản thế nào cho đúng?"],
+      "family_life": ["Tang lễ ở Nhật Bản có những nghi thức gì?"],
+      "festivals": ["Người Nhật gửi thiệp chúc mừng năm mới nengajō thế nào?"]
+    },
+    "KR": {
+      "greetings": ["Người Hàn Quốc cúi chào và bắt tay thế nào?", "Thứ bậc tuổi tác ảnh hưởng tới cách chào ở Hàn Quốc ra sao?"],
+      "food_dining": ["Uống rượu với người lớn tuổi ở Hàn Quốc cần lưu ý gì?", "Kimjang – mùa muối kimchi ở Hàn Quốc là gì?"],
+      "festivals": ["Tết Seollal của Hàn Quốc có những phong tục gì?", "Lễ Chuseok ở Hàn Quốc diễn ra thế nào?", "Doljanchi – tiệc thôi nôi của trẻ Hàn Quốc là gì?"],
+      "gift_giving": ["Tặng quà ở Hàn Quốc nên tránh những gì?"],
+      "etiquette": ["Phép lịch sự hằng ngày ở Hàn Quốc có gì cần biết?"],
+      "arts_music": ["Pansori của Hàn Quốc là loại hình gì?", "Arirang có ý nghĩa thế nào với người Hàn?"],
+      "heritage": ["Cung Changdeokgung được UNESCO công nhận vì sao?", "Văn hoá nữ thợ lặn Haenyeo ở Jeju là gì?"],
+      "clothing": ["Hanbok được mặc vào những dịp nào?"],
+      "family_life": ["Tang lễ truyền thống ở Hàn Quốc diễn ra thế nào?"]
+    },
+    "CN": {
+      "food_dining": ["Văn hoá trà của Trung Quốc có gì đặc sắc?", "Ẩm thực Trung Quốc chia thành những trường phái nào?"],
+      "festivals": ["Tết Đoan Ngọ của Trung Quốc có những phong tục gì?", "Lồng đèn có ý nghĩa gì trong lễ hội Trung Quốc?"],
+      "religion_beliefs": ["Nho giáo ảnh hưởng tới đời sống người Trung Quốc thế nào?", "Tín ngưỡng thờ Mẫu Tổ (Mazu) là gì?"],
+      "clothing": ["Sườn xám (qipao) ra đời thế nào?", "Trang phục Trung Quốc thay đổi qua các triều đại ra sao?"],
+      "arts_music": ["Thư pháp Trung Quốc có vị trí thế nào trong nghệ thuật?", "Côn khúc – loại hình kịch cổ Trung Quốc là gì?", "Nghệ thuật cắt giấy của Trung Quốc có gì đặc biệt?"],
+      "heritage": ["Vạn Lý Trường Thành được UNESCO công nhận vì sao?", "Tử Cấm Thành ở Bắc Kinh có giá trị gì?"]
+    },
+    "TH": {
+      "greetings": ["Chào kiểu wai ở Thái Lan thực hiện thế nào?", "Ở Thái Lan nên bắt tay hay chào wai?"],
+      "etiquette": ["Vì sao người Thái rất tôn trọng quốc ca và hoàng gia?", "Chúc mừng người Thái có phép lịch sự gì?"],
+      "festivals": ["Tết Songkran của Thái Lan diễn ra thế nào?", "Thái Lan có những ngày lễ lớn nào?"],
+      "food_dining": ["Tom yum kung được UNESCO công nhận vì sao?", "Ẩm thực Thái Lan có những đặc trưng gì?"],
+      "religion_beliefs": ["Phật giáo ảnh hưởng tới đời sống người Thái thế nào?"],
+      "arts_music": ["Múa Khon của Thái Lan có gì đặc biệt?", "Massage truyền thống Nuad Thai có nguồn gốc thế nào?"],
+      "heritage": ["Cố đô Ayutthaya được UNESCO công nhận vì sao?", "Sukhothai có vai trò gì trong lịch sử Thái Lan?"],
+      "family_life": ["Đám cưới truyền thống ở Thái Lan diễn ra thế nào?", "Tang lễ ở Thái Lan có những nghi thức gì?"]
+    },
+    "IN": {
+      "greetings": ["Chào namaste ở Ấn Độ thực hiện thế nào?"],
+      "festivals": ["Lễ hội ánh sáng Diwali ở Ấn Độ có ý nghĩa gì?", "Lễ hội Kumbh Mela của Ấn Độ là gì?", "Durga Puja ở Kolkata diễn ra thế nào?"],
+      "food_dining": ["Bữa ăn truyền thống của người Ấn Độ gồm những gì?", "Ăn bằng tay ở Ấn Độ cần biết những gì?"],
+      "religion_beliefs": ["Ấn Độ giáo ảnh hưởng tới đời sống hằng ngày thế nào?", "Vì sao bò được coi là linh thiêng ở Ấn Độ?"],
+      "clothing": ["Sari được mặc thế nào và vào dịp nào?"],
+      "arts_music": ["Yoga được UNESCO công nhận là di sản vì sao?", "Ấn Độ có những điệu múa cổ điển nào?"],
+      "family_life": ["Hôn nhân sắp đặt ở Ấn Độ hiện nay ra sao?", "Đám cưới Ấn Độ có những nghi lễ gì?"],
+      "heritage": ["Đền Taj Mahal được xây dựng để làm gì?", "Hang động Ajanta và Ellora có giá trị gì?"]
+    },
+    "FR": {
+      "food_dining": ["Bữa ăn kiểu Pháp được UNESCO công nhận vì sao?", "Rượu vang có vị trí thế nào trong văn hoá Pháp?"],
+      "etiquette": ["Chào la bise ở Pháp thực hiện thế nào?", "Phong tục các vùng miền nước Pháp khác nhau ra sao?"],
+      "festivals": ["Nước Pháp có những ngày lễ lớn nào?", "Lễ hội Carnival Granville của Pháp có gì đặc biệt?"],
+      "religion_beliefs": ["Nguyên tắc thế tục (laïcité) ở Pháp là gì?", "Công giáo ảnh hưởng tới văn hoá Pháp thế nào?"],
+      "arts_music": ["Bảo tàng có vai trò gì trong đời sống văn hoá Pháp?", "Điện ảnh Pháp có vị trí thế nào trên thế giới?"],
+      "family_life": ["Cấu trúc gia đình Pháp hiện nay thế nào?"],
+      "heritage": ["Cung điện Versailles được UNESCO công nhận vì sao?", "Mont-Saint-Michel có gì đặc biệt?"]
+    },
+    "MX": {
+      "festivals": ["Día de Muertos ở Mexico diễn ra thế nào?", "Mexico có những ngày lễ quốc gia nào?"],
+      "food_dining": ["Ẩm thực truyền thống Mexico được UNESCO công nhận vì sao?", "Ngô có vai trò gì trong ẩm thực Mexico?"],
+      "arts_music": ["Mariachi có nguồn gốc từ đâu?", "Nghi lễ Voladores – người bay của Mexico là gì?"],
+      "religion_beliefs": ["Tôn giáo ảnh hưởng tới lễ hội Mexico thế nào?"],
+      "clothing": ["Trang phục truyền thống Mexico có những gì đặc trưng?"],
+      "heritage": ["Thành phố cổ Teotihuacan có gì đặc biệt?", "Chichen Itza của người Maya được công nhận vì sao?"]
+    },
+    "EG": {
+      "clothing": ["Khi đến Ai Cập nên lưu ý gì về trang phục?"],
+      "food_dining": ["Koshary – món ăn đường phố của Ai Cập có gì đặc biệt?", "Ẩm thực Ai Cập có những món đặc trưng nào?"],
+      "religion_beliefs": ["Hồi giáo ảnh hưởng tới đời sống hằng ngày ở Ai Cập thế nào?"],
+      "arts_music": ["Nghệ thuật Ai Cập cổ đại có những đặc trưng gì?", "Tahteeb – võ gậy của Ai Cập là gì?"],
+      "festivals": ["Lễ hội hành trình của Thánh Gia ở Ai Cập là gì?"],
+      "family_life": ["Henna được dùng trong những nghi lễ nào ở Ai Cập?"],
+      "heritage": ["Kim tự tháp Giza thuộc khu di sản nào?", "Khu Cairo lịch sử có gì đáng xem?"]
+    },
+    "KE": {
+      "family_life": ["Nghi lễ trưởng thành của người Maasai diễn ra thế nào?"],
+      "clothing": ["Trang phục và trang sức hạt cườm của người Maasai có ý nghĩa gì?", "Kenya có quốc phục không?"],
+      "food_dining": ["Ẩm thực Kenya có những món đặc trưng nào?"],
+      "arts_music": ["Điệu múa Isukuti của Kenya là gì?", "Âm nhạc truyền thống Kenya có gì đặc sắc?"],
+      "religion_beliefs": ["Rừng thiêng Kaya của người Mijikenda có ý nghĩa gì?"],
+      "festivals": ["Người Kenya đón Giáng sinh thế nào?"],
+      "heritage": ["Phố cổ Lamu được UNESCO công nhận vì sao?", "Pháo đài Jesus ở Mombasa có lịch sử thế nào?"]
+    }
+  },
+  "general": [
+    "Tặng quà ở Nhật Bản cần lưu ý gì?",
+    "Tết ở Việt Nam có những phong tục gì?",
+    "Día de Muertos ở Mexico diễn ra thế nào?",
+    "Chào kiểu wai ở Thái Lan thực hiện thế nào?",
+    "Lễ hội ánh sáng Diwali ở Ấn Độ có ý nghĩa gì?",
+    "Hanbok được mặc vào những dịp nào?"
+  ]
+}

@@ -234,6 +234,35 @@ paths:
       responses:
         '204': { description: Đã lưu }
         '409': { $ref: '#/components/responses/Conflict' }
+  /ai/suggestions:
+    get:
+      tags: [AI]
+      operationId: suggestQuestions
+      summary: Câu hỏi gợi ý theo quốc gia và chủ đề người dùng quan tâm
+      description: |
+        Dùng cho lời chào và cột "Thử hỏi" của AI Guide (AC10.3, AC10.4). Không gọi LLM, không trừ lượt hỏi.
+        Câu hỏi nêu nét văn hoá riêng của quốc gia (không phải câu mẫu chỉ thay tên nước); chủ đề có dữ liệu trong kho đứng trước.
+        Mối quan tâm suy ra từ `category` (mục đang xem) và các câu đã hỏi trong `sessionId` — chỉ đọc khi phiên thuộc đúng `X-Client-Id`.
+        Không có `country` → lấy nước được nhắc gần nhất trong phiên; vẫn không có → gợi ý chung theo chủ đề quan tâm.
+      parameters:
+        - { name: country, in: query, schema: { type: string, pattern: '^[A-Za-z]{2}$' } }
+        - { name: sessionId, in: query, schema: { type: string, maxLength: 64 } }
+        - { name: category, in: query, schema: { $ref: '#/components/schemas/CategoryCode' } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 6, default: 4 } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Suggestions' }
+              example:
+                country: JP
+                interests: [gift_giving]
+                questions:
+                  - { text: Omiyage ở Nhật Bản là gì?, category: gift_giving, country: JP }
+                  - { text: Những món quà nào bị coi là bất lịch sự ở Nhật Bản?, category: gift_giving, country: JP }
+                  - { text: Kính ngữ keigo trong tiếng Nhật dùng khi nào?, category: etiquette, country: JP }
+        '400': { $ref: '#/components/responses/BadRequest' }
   /ai/compare:
     post:
       tags: [AI]
@@ -789,6 +818,8 @@ components:
         id: { type: string, example: c1 }
         sourceId: { type: integer }
         chunkId: { type: integer }
+        kind: { type: string, enum: [claim, reference, heritage], description: 'claim = đã biên tập; reference = tài liệu tham khảo chưa biên tập; heritage = dữ liệu UNESCO' }
+        verified: { type: boolean, description: true khi kind = claim (đã qua biên tập viên) }
         title: { type: string }
         publisher: { type: string }
         url: { type: string, format: uri }
@@ -802,8 +833,10 @@ components:
         sessionId: { type: string, format: uuid }
         answer: { type: string, description: 'Markdown; ý có nguồn gắn [c#]' }
         citations: { type: array, items: { $ref: '#/components/schemas/Citation' } }
-        confidence: { type: string, enum: [supported, inferred, insufficient] }
-        route: { type: string, enum: [structured, rag, compare, refused] }
+        confidence: { type: string, enum: [supported, inferred, insufficient, none], description: 'none = chào hỏi, không có phát biểu cần nguồn' }
+        route: { type: string, enum: [smalltalk, structured, rag, compare, refused] }
+        countries: { type: array, items: { type: string }, description: Quốc gia mà lượt hỏi đang nói tới (ISO alpha-2) }
+        model: { type: string, description: 'Model đã trả lời: gpt-6-luna | gpt-4o | structured | refused' }
         followUpQuestions: { type: array, maxItems: 3, items: { type: string } }
         unsupportedPoints: { type: array, items: { type: string } }
       example:
@@ -814,6 +847,21 @@ components:
         route: rag
         followUpQuestions: ["Ở Nhật, nên tránh những món quà nào?"]
         unsupportedPoints: []
+    Suggestions:
+      type: object
+      required: [country, interests, questions]
+      properties:
+        country: { type: string, nullable: true, description: Quốc gia các câu gợi ý hướng tới (ISO2) }
+        interests: { type: array, items: { $ref: '#/components/schemas/CategoryCode' }, description: Chủ đề quan tâm, giảm dần }
+        questions:
+          type: array
+          items:
+            type: object
+            required: [text]
+            properties:
+              text: { type: string }
+              category: { allOf: [{ $ref: '#/components/schemas/CategoryCode' }], nullable: true }
+              country: { type: string, nullable: true }
     CompareRequest:
       type: object
       required: [countryA, countryB, topic]

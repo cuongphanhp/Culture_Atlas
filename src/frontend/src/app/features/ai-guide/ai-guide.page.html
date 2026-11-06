@@ -9,14 +9,18 @@
 
 <div class="guide">
   <aside class="history glass">
-    <button class="btn new">＋ Trò chuyện mới</button>
-    <p class="eyebrow">Gần đây</p>
-    @for (s of svc.sessions; track s.title; let i = $index) {
-      <button class="sess" [class.on]="i === current()" (click)="pick(i)">{{ s.title }}</button>
+    <button class="btn new" (click)="newChat()">＋ Trò chuyện mới</button>
+    <p class="eyebrow">{{ focusCountry() ? 'Thử hỏi về ' + svc.country(focusCountry()!)?.nameVi : 'Thử hỏi' }}</p>
+    @for (x of starters(); track x.text) {
+      <button class="sess q" data-testid="starter" (click)="ask(x.text)" [disabled]="busy()">{{ flag(x) }} {{ x.text }}</button>
     }
-    <p class="eyebrow mt">Thử hỏi</p>
-    @for (x of quick; track x.q) { <button class="sess q" (click)="ask(x.q)">{{ x.flag }} {{ x.q }}</button> }
-    <div class="limit small">Khách: còn 7/10 lượt hỏi hôm nay</div>
+    <p class="eyebrow mt">Hội thoại mẫu</p>
+    @for (s of svc.sessions; track s.title; let i = $index) {
+      <button class="sess" [class.on]="i === active()" (click)="pick(i)">{{ s.title }}</button>
+    }
+    <div class="limit small" data-testid="limit">
+      @if (remaining() !== null) { Khách: còn {{ remaining() }} lượt hỏi hôm nay } @else { Khách: 10 lượt hỏi AI mỗi ngày }
+    </div>
   </aside>
 
   <section class="chat glass">
@@ -28,6 +32,11 @@
           @for (iso of countries(); track iso) {
             <span class="ctry"><img [src]="svc.photo(iso).src" alt="" />{{ svc.country(iso)?.flag }} {{ svc.country(iso)?.nameVi }}</span>
           } @empty { <span class="ctry">🌏 Văn hoá thế giới</span> }
+          @if (contextCountry(); as iso) {
+            <span class="ctry ctx" data-testid="context-chip" title="Câu hỏi sẽ ưu tiên quốc gia này">
+              📍 {{ svc.country(iso)?.nameVi }} <button type="button" (click)="clearContext()" aria-label="Bỏ ngữ cảnh quốc gia">×</button>
+            </span>
+          }
         </div>
       </div>
       <div class="lvl" role="group" aria-label="Mức độ giải thích">
@@ -37,13 +46,21 @@
       </div>
     </header>
 
-    <div class="msgs">
-      @for (m of messages(); track $index) {
+    @if (isDemo()) {
+      <div class="demo small">Đây là hội thoại mẫu. <button type="button" (click)="newChat()">Bắt đầu trò chuyện thật →</button></div>
+    }
+
+    <div class="msgs" #msgs aria-live="polite">
+      @for (m of messages(); track $index; let i = $index) {
         @if (m.role === 'user') {
           <div class="bubble user">{{ m.text }}</div>
         } @else {
-          <div class="bubble ai">
-            <div class="ai-top"><span class="ai-ic">✦</span><ca-confidence-badge [level]="m.confidence ?? 'supported'" /></div>
+          <div class="bubble ai" [class.err]="m.error">
+            <div class="ai-top">
+              <span class="ai-ic">✦</span>
+              @if (m.streaming && !m.text) { <span class="thinking small">Đang tìm nguồn và soạn câu trả lời…</span> }
+              @else if (m.confidence && m.confidence !== 'none' && !m.streaming) { <ca-confidence-badge [level]="m.confidence" /> }
+            </div>
             @for (p of paragraphs(m.text); track $index) {
               <p>
                 @for (s of p; track $index) {
@@ -53,29 +70,53 @@
                     @default { {{ s.value }} }
                   }
                 }
+                @if (m.streaming && $last) { <span class="caret"></span> }
               </p>
             }
             @if (m.unsupportedPoints?.length) { <div class="unsup small">⚠ Chưa đủ nguồn để kết luận: {{ m.unsupportedPoints!.join('; ') }}</div> }
-            <div class="ai-actions small"><button>👍</button><button>👎</button><button>⚑ Báo cáo sai</button><button>⧉ Sao chép</button></div>
-            @if (m.followUps?.length) {
-              <div class="follow">@for (f of m.followUps; track f) { <button class="chip" (click)="ask(f)">{{ f }}</button> }</div>
+            @if (!m.streaming && !m.error && m.text) {
+              <div class="ai-actions small">
+                @if (m.messageId) {
+                  <button data-testid="rate-up" [disabled]="!!m.rated" [class.on]="m.rated === 1" (click)="rate(m, 1)" title="Câu trả lời hữu ích">👍</button>
+                  <button data-testid="rate-down" [disabled]="!!m.rated" [class.on]="m.rated === -1" (click)="rate(m, -1)" title="Chưa tốt">👎</button>
+                }
+                <button data-testid="speak" (click)="speak(m, i)">{{ speaking() === i ? '■ Dừng đọc' : '🔊 Nghe' }}</button>
+                <button (click)="copy(m)">⧉ Sao chép</button>
+              </div>
+            }
+            @if (m.followUps?.length && !m.streaming) {
+              <div class="follow">@for (f of m.followUps; track f) { <button class="chip" [disabled]="busy()" (click)="ask(f)">{{ f }}</button> }</div>
             }
           </div>
         }
       }
     </div>
 
+    @if (notice()) { <p class="notice small" role="status">{{ notice() }} <button type="button" (click)="notice.set(null)">×</button></p> }
     <form class="composer" (submit)="$event.preventDefault(); ask()">
-      <input [value]="draft()" (input)="draft.set($any($event.target).value)" placeholder="Hỏi về phong tục, lễ hội, ẩm thực… (tiếng Việt hoặc English)" />
-      <button class="btn" type="submit">Gửi ↑</button>
+      <button type="button" class="mic" data-testid="mic" [class.rec]="recording()" (click)="toggleMic()"
+              [attr.aria-label]="recording() ? 'Dừng ghi âm' : 'Hỏi bằng giọng nói'" [title]="recording() ? 'Dừng ghi âm' : 'Hỏi bằng giọng nói'">
+        {{ recording() ? '■' : '🎙' }}
+      </button>
+      <input [value]="draft()" (input)="draft.set($any($event.target).value)" [disabled]="busy()" maxlength="1000"
+             placeholder="Hỏi về phong tục, lễ hội, ẩm thực… (tiếng Việt hoặc English)" />
+      <button class="btn" type="submit" [disabled]="busy() || !draft().trim()">{{ busy() ? '…' : 'Gửi ↑' }}</button>
     </form>
-    <p class="disclaimer small">AI chỉ khẳng định khi có nguồn trong kho tri thức đã duyệt. Văn hoá khác nhau theo vùng, thế hệ và bối cảnh.</p>
+    <p class="disclaimer small">AI chỉ khẳng định khi có nguồn. Văn hoá khác nhau theo vùng, thế hệ và bối cảnh — hãy bấm vào số trích dẫn để kiểm tra.</p>
   </section>
 
   <aside class="sources glass">
     <p class="eyebrow">Nguồn trích dẫn</p>
     @for (c of lastAnswer()?.citations ?? []; track c.id) {
-      @if (svc.source(c.sourceId); as s) {
+      @if (c.title) {
+        <div class="src" [class.on]="activeCite() === c.id" (click)="activeCite.set(c.id)">
+          <div class="src-top"><span class="cite">{{ c.id.slice(1) }}</span><span class="tier" [class.unverified]="c.verified === false">{{ citationKind(c) }}</span></div>
+          <b>{{ c.title }}</b>
+          <div class="muted small">{{ c.publisher }}</div>
+          <blockquote>“{{ c.excerpt }}”</blockquote>
+          <div class="muted small">Giấy phép: {{ c.license }} @if (c.url) { · <a [href]="c.url" target="_blank" rel="noopener">Mở nguồn ↗</a> }</div>
+        </div>
+      } @else if (svc.source(c.sourceId); as s) {
         <div class="src" [class.on]="activeCite() === c.id" (click)="activeCite.set(c.id)">
           <div class="src-top"><span class="cite">{{ c.id.slice(1) }}</span><span class="tier">{{ s.reliabilityTier }}</span></div>
           <b>{{ s.title }}</b>

@@ -9,7 +9,7 @@
       <span>🏛 {{ country().capital }}</span><span>🗣 {{ country().languages.join(', ') }}</span><span>💴 {{ country().currency }}</span>
     </div>
     <div class="banner-actions">
-      <a class="btn" routerLink="/guide">✦ Hỏi AI về {{ country().nameVi }}</a>
+      <a class="btn" routerLink="/guide" [queryParams]="{ country: country().iso2, category: category() }">✦ Hỏi AI về {{ country().nameVi }}</a>
       <a class="btn glass" routerLink="/compare">⇄ So sánh với Việt Nam</a>
     </div>
   </div>
@@ -58,10 +58,10 @@
             <li><p>{{ c.text }} <ca-cite [ids]="c.sourceIds" /></p><div class="meta"><ca-scope-badge [scope]="c.scope" /><ca-confidence-badge [level]="c.confidence" /></div></li>
           }
         </ul>
-        <div class="entry-foot small"><a routerLink="/guide">✦ Hỏi AI: “Vì sao lại như vậy?”</a><button class="report">⚑ Báo cáo sai</button></div>
+        <div class="entry-foot small"><a routerLink="/guide" [queryParams]="{ country: country().iso2, category: e.category }">✦ Hỏi AI: “Vì sao lại như vậy?”</a><button class="report">⚑ Báo cáo sai</button></div>
       </article>
     } @empty {
-      <div class="card empty">Chưa có bài viết đã duyệt cho danh mục này. <a routerLink="/guide">Hỏi AI</a> — AI sẽ nói rõ nếu kho dữ liệu chưa đủ nguồn.</div>
+      <div class="card empty">Chưa có bài viết đã duyệt cho danh mục này. <a routerLink="/guide" [queryParams]="{ country: country().iso2, category: category() }">Hỏi AI</a> — AI sẽ nói rõ nếu kho dữ liệu chưa đủ nguồn.</div>
     }
 
     @if (data().museumObjects.length || data().europeana.length) {
