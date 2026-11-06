@@ -38,3 +38,41 @@ describe('Explorer (US01, US05)', () => {
     expect($$(f, '.dest-card h3').map((e) => e.textContent)).toContain('Nhật Bản');
   });
 });
+
+describe('Explorer — ảnh nền theo quốc gia (AC01.4)', () => {
+  it('[AC01.4] bấm ảnh nhỏ của từng quốc gia ở hero → ảnh nền đổi theo quốc gia đó', async () => {
+    const f = await render(ExplorerPage);
+    const svc = f.componentInstance.svc;
+    const thumbs = $$(f, '.hero-pick .thumb');
+    expect(thumbs.length).toBe(f.componentInstance.heroIsos.length);
+    f.componentInstance.heroIsos.forEach((iso, i) => {
+      thumbs[i].click();
+      f.detectChanges();
+      expect($(f, '.hero-bg img')!.getAttribute('src')).toBe(svc.photo(iso).src);
+      expect(thumbs[i].classList).toContain('on');
+      expect($(f, '.hero-caption')!.textContent).toContain(svc.country(iso)!.nameVi);
+    });
+  });
+
+  it('[AC01.4] bấm quốc gia trên bản đồ → ảnh nền hero và ảnh panel xem nhanh đổi theo quốc gia đó', async () => {
+    const f = await render(ExplorerPage);
+    const svc = f.componentInstance.svc;
+    for (const iso of ['KR', 'EG', 'VN']) {
+      const country = svc.country(iso)!;
+      const path = $$(f, 'ca-world-map path.on').find((p) => p.querySelector('title')!.textContent!.startsWith(country.nameVi))!;
+      path.dispatchEvent(new MouseEvent('click'));
+      f.detectChanges();
+      expect($(f, '.hero-bg img')!.getAttribute('src')).toBe(svc.photo(iso).src);
+      expect($(f, '.peek .peek-img img')!.getAttribute('src')).toBe(svc.photo(iso).src);
+      expect($(f, '.peek h2')!.textContent).toContain(country.nameVi);
+    }
+  });
+
+  it('[AC01.4] mỗi quốc gia có ảnh nền riêng (không dùng chung một ảnh)', async () => {
+    const f = await render(ExplorerPage);
+    const svc = f.componentInstance.svc;
+    const srcs = svc.countries.map((c) => svc.photo(c.iso2)?.src);
+    expect(srcs.every(Boolean)).toBe(true);
+    expect(new Set(srcs).size).toBe(srcs.length);
+  });
+});

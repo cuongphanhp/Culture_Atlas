@@ -1,3 +1,4 @@
+/** Trang khám phá: bản đồ thế giới, tìm kiếm / lọc khu vực, thẻ quốc gia. */
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Country } from '../../core/models/culture.models';
@@ -5,6 +6,7 @@ import { CultureService } from '../../core/services/culture.service';
 import { PhotoComponent } from '../../shared/components/photo';
 import { WorldMap } from '../../shared/components/world-map';
 
+/** Trang chủ (/). */
 @Component({
   selector: 'ca-explorer-page',
   imports: [WorldMap, RouterLink, PhotoComponent],
@@ -19,8 +21,15 @@ export class ExplorerPage {
   selected = signal<Country | null>(this.svc.country('JP') ?? null);
   regions = ['Tất cả', ...new Set(this.svc.countries.map((c) => c.region))];
   heroIsos = ['JP', 'VN', 'IN', 'FR', 'MX'];
-  heroIndex = signal(0);
-  hero = computed(() => this.svc.country(this.heroIsos[this.heroIndex()])!);
+  /** Quốc gia làm ảnh nền hero — đổi khi bấm ảnh nhỏ ở hero hoặc bấm quốc gia trên bản đồ (AC01.4). */
+  heroIso = signal('JP');
+  hero = computed(() => this.svc.country(this.heroIso()) ?? this.svc.country('JP')!);
+
+  /** Chọn quốc gia trên bản đồ: mở panel xem nhanh và đổi ảnh nền theo quốc gia đó. */
+  pickCountry(c: Country) {
+    this.selected.set(c);
+    if (this.svc.photo(c.iso2)) this.heroIso.set(c.iso2);
+  }
 
   features = [
     { title: 'AI Cultural Guide', text: 'Hỏi “vì sao” — câu trả lời luôn có nguồn.', img: 'jp-kyoto', link: '/guide', icon: '✦' },
@@ -48,5 +57,6 @@ export class ExplorerPage {
       (!q || c.nameVi.toLowerCase().includes(q) || c.nameEn.toLowerCase().includes(q)));
   });
 
+  /** Mở hồ sơ quốc gia. */
   open(c: Country) { this.router.navigate(['/countries', c.iso2]); }
 }

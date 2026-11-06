@@ -10,8 +10,8 @@
       <a class="btn" routerLink="/guide">✦ Hỏi AI</a>
     </div>
     <div class="hero-pick">
-      @for (iso of heroIsos; track iso; let i = $index) {
-        <button class="thumb" [class.on]="i === heroIndex()" (click)="heroIndex.set(i)" [title]="svc.country(iso)?.nameVi">
+      @for (iso of heroIsos; track iso) {
+        <button class="thumb" [class.on]="iso === heroIso()" (click)="heroIso.set(iso)" [title]="svc.country(iso)?.nameVi">
           <img [src]="svc.photo(iso).src" alt="" /><span>{{ svc.country(iso)?.flag }}</span>
         </button>
       }
@@ -57,7 +57,7 @@
 
 <section class="map-wrap">
   <div class="card map">
-    <ca-world-map [countries]="filtered()" [selected]="selected()?.iso2 ?? null" (pick)="selected.set($event)" />
+    <ca-world-map [countries]="filtered()" [selected]="selected()?.iso2 ?? null" (pick)="pickCountry($event)" />
     <div class="legend small"><span>Độ phủ nội dung</span><i class="grad"></i><span class="muted">thấp → cao</span></div>
   </div>
   @if (selected(); as c) {

@@ -1,3 +1,4 @@
+/** Component ảnh có ghi công tác giả + giấy phép. */
 import { Component, input } from '@angular/core';
 import { Photo } from '../../core/mock/media';
 

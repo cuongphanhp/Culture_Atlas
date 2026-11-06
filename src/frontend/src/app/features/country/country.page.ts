@@ -1,3 +1,4 @@
+/** Hồ sơ quốc gia: ảnh, mẹo lần đầu, bài viết theo danh mục, di sản UNESCO, chủ đề SCALE. */
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CategoryCode } from '../../core/models/culture.models';
@@ -5,6 +6,7 @@ import { CultureService } from '../../core/services/culture.service';
 import { CiteChips, ConfidenceBadge, ScopeBadge } from '../../shared/components/badges';
 import { PhotoComponent } from '../../shared/components/photo';
 
+/** Trang /countries/:iso. */
 @Component({
   selector: 'ca-country-page',
   imports: [RouterLink, ScopeBadge, ConfidenceBadge, CiteChips, PhotoComponent],

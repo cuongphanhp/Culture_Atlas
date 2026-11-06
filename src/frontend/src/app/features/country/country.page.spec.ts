@@ -45,3 +45,15 @@ describe('Country profile (US02, US03)', () => {
     expect(text(f)).not.toContain('Chưa kiểm chứng');
   });
 });
+
+describe('Country profile — ảnh nền theo quốc gia (AC01.4)', () => {
+  for (const iso of ['JP', 'VN', 'FR', 'KE']) {
+    it('[AC01.4] hồ sơ ' + iso + ' dùng ảnh nền của chính quốc gia đó', async () => {
+      const f = await render(CountryPage, { iso });
+      const svc = f.componentInstance.svc;
+      const img = (f.nativeElement as HTMLElement).querySelector('.banner-bg img')!;
+      expect(img.getAttribute('src')).toBe(svc.photo(iso).src);
+      expect(text(f)).toContain(svc.country(iso)!.nameVi);
+    });
+  }
+});

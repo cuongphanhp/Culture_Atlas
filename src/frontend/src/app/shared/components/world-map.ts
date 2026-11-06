@@ -1,3 +1,4 @@
+/** Bản đồ thế giới SVG, tô sáng 10 quốc gia có dữ liệu, phát sự kiện khi chọn nước. */
 import { Component, computed, input, output } from '@angular/core';
 import { geoNaturalEarth1, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
