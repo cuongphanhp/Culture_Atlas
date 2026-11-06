@@ -1,7 +1,6 @@
--- CultureAtlas AI — PostgreSQL 16 + pgvector schema (MVP)
+-- CultureAtlas AI — PostgreSQL 16 schema (MVP). Văn bản + metadata; embedding ở Qdrant, file ở object storage (MinIO).
 -- Nguồn sự thật mô hình: culture_atlas.dbml
 
-CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS unaccent;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
@@ -147,21 +146,32 @@ CREATE TRIGGER claim_requires_source BEFORE UPDATE OF status ON claims
   FOR EACH ROW EXECUTE FUNCTION trg_claim_requires_source();
 
 -- ===== RAG =====
+-- Đoạn văn cho RAG. kind: claim (bài đã duyệt) | reference (tài liệu tham khảo do worker thu thập) | heritage (di sản UNESCO).
+-- Mọi đoạn đều gắn với nguồn để trích dẫn (BR01 "có nguồn hoặc không khẳng định").
+-- Embedding KHÔNG lưu ở đây: nằm ở Qdrant (collection culture_chunks, point id = entry_chunks.id).
 CREATE TABLE entry_chunks (
-  id          BIGSERIAL PRIMARY KEY,
-  entry_id    BIGINT NOT NULL REFERENCES culture_entries(id) ON DELETE CASCADE,
-  claim_ids   BIGINT[],
+  id                 BIGSERIAL PRIMARY KEY,
+  kind               VARCHAR(12) NOT NULL DEFAULT 'claim' CHECK (kind IN ('claim', 'reference', 'heritage')),
+  entry_id           BIGINT REFERENCES culture_entries(id) ON DELETE CASCADE,
+  source_id          BIGINT REFERENCES sources(id),
+  source_document_id BIGINT,          -- FK thêm ở cuối file (bảng định nghĩa sau)
+  heritage_item_id   BIGINT,          -- FK thêm ở cuối file
+  chunk_index        SMALLINT NOT NULL DEFAULT 0,
+  claim_ids          BIGINT[],
   chunk_text  TEXT NOT NULL,
   language    VARCHAR(5) NOT NULL,
   metadata    JSONB NOT NULL,
   tsv         TSVECTOR GENERATED ALWAYS AS (to_tsvector('ca_simple', chunk_text)) STORED,
-  embedding   VECTOR(1024),
   token_count INT,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT ck_chunk_owner CHECK (
+    (kind = 'claim' AND entry_id IS NOT NULL) OR
+    (kind = 'reference' AND source_document_id IS NOT NULL) OR
+    (kind = 'heritage' AND heritage_item_id IS NOT NULL))
 );
+CREATE INDEX ix_chunks_kind      ON entry_chunks (kind);
 CREATE INDEX ix_chunks_tsv       ON entry_chunks USING GIN (tsv);
 CREATE INDEX ix_chunks_metadata  ON entry_chunks USING GIN (metadata jsonb_path_ops);
-CREATE INDEX ix_chunks_embedding ON entry_chunks USING hnsw (embedding vector_cosine_ops);
 
 -- ===== Phân loại & media =====
 CREATE TABLE tags (
@@ -175,19 +185,32 @@ CREATE TABLE entry_tags (
   PRIMARY KEY (entry_id, tag_id)
 );
 
+-- Media (ảnh, video, âm thanh, tài liệu): FILE nằm ở object storage (MinIO/S3); bảng này chỉ giữ METADATA + URL.
+-- url = trang nguồn gốc (Commons, bảo tàng…); stored_url = URL object storage cấp (/media/<object_key>).
 CREATE TABLE media_assets (
   id               BIGSERIAL PRIMARY KEY,
   entry_id         BIGINT REFERENCES culture_entries(id) ON DELETE SET NULL,
   source_id        BIGINT REFERENCES sources(id),
-  url              TEXT NOT NULL,
+  country_id       INT REFERENCES countries(id),
+  kind             VARCHAR(10) NOT NULL DEFAULT 'image' CHECK (kind IN ('image', 'video', 'audio', 'document', 'data')),
+  title            VARCHAR(500),
+  url              TEXT NOT NULL UNIQUE,
   stored_url       TEXT,
+  bucket           VARCHAR(63),
+  object_key       VARCHAR(1024),
+  content_type     VARCHAR(120),
+  size_bytes       BIGINT CHECK (size_bytes IS NULL OR size_bytes >= 0),
+  sha256           CHAR(64),
   author           VARCHAR(255),
   license          VARCHAR(120) NOT NULL,
   attribution_text TEXT NOT NULL,
   verified         BOOLEAN NOT NULL DEFAULT FALSE,
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT ck_media_stored_only_if_verified CHECK (stored_url IS NULL OR verified)     -- BR09
+  CONSTRAINT ck_media_stored_only_if_verified CHECK ((stored_url IS NULL AND object_key IS NULL) OR verified),  -- BR09
+  CONSTRAINT ck_media_object_complete CHECK (object_key IS NULL OR (bucket IS NOT NULL AND stored_url IS NOT NULL)),
+  CONSTRAINT ux_media_object UNIQUE (bucket, object_key)
 );
+CREATE INDEX ix_media_country ON media_assets (country_id, kind);
 
 -- ===== Di sản UNESCO =====
 CREATE TABLE heritage_items (
@@ -321,6 +344,11 @@ CREATE TABLE source_documents (
   UNIQUE (url, section)
 );
 CREATE INDEX ix_source_documents_country ON source_documents (country_id, category_guess);
+
+-- Khoá ngoại của entry_chunks tới các bảng định nghĩa sau
+ALTER TABLE entry_chunks
+  ADD CONSTRAINT fk_chunks_source_document FOREIGN KEY (source_document_id) REFERENCES source_documents(id) ON DELETE CASCADE,
+  ADD CONSTRAINT fk_chunks_heritage FOREIGN KEY (heritage_item_id) REFERENCES heritage_items(id) ON DELETE CASCADE;
 
 -- ===== View: độ phủ quốc gia × danh mục (SCR25) =====
 CREATE VIEW v_coverage AS

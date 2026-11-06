@@ -9,6 +9,7 @@ from worker.pipeline.loader import load
 
 pytestmark = pytest.mark.db
 
+JPEG = b"\xff\xd8\xff\xe0" + b"\x00" * 64 + b"\xff\xd9"
 PROV_WHC = {"source_name": "unesco_whc", "source_url": "https://data.unesco.org/explore/dataset/whc001/", "license": "CC BY-SA 4.0"}
 PROV_EU = {"source_name": "europeana", "source_url": "https://www.europeana.eu", "license": "CC0"}
 PROV_WIKI = {"source_name": "wikipedia", "source_url": "https://en.wikipedia.org/wiki/Etiquette_in_Japan", "license": "CC BY-SA 4.0"}
@@ -19,6 +20,9 @@ def data_dir(tmp_path: Path) -> Path:
     agg = tmp_path / "aggregated"
     agg.mkdir()
     (tmp_path / "runs").mkdir()
+    (tmp_path / "media").mkdir()
+    (tmp_path / "media" / "1.jpg").write_bytes(JPEG)          # file worker đã tải (giấy phép CC0)
+    (tmp_path / "media" / "2.jpg").write_bytes(JPEG + b"x")   # file KHÔNG được phép lưu (chưa xác minh giấy phép)
     (agg / "countries.json").write_text(json.dumps([{"iso2": "JP", "iso3": "JPN", "name_en": "Japan", "capital": "Tokyo",
                                                      "languages": ["Japanese"], "currencies": ["yen"], "neighbors": ["KR"]}]))
     (agg / "heritage.json").write_text(json.dumps([
@@ -68,11 +72,13 @@ def test_raw_data_is_kept(db, pg_dsn, data_dir):
 
 
 @ac("AC18.2")
-def test_only_verified_media_is_stored_locally(db, pg_dsn, data_dir):
-    load(data_dir, pg_dsn)
-    rows = dict(db.execute("SELECT url, stored_url FROM media_assets WHERE url LIKE 'https://www.europeana.eu/item/%'").fetchall())
-    assert rows["https://www.europeana.eu/item/1"] == "media/1.jpg"
-    assert rows["https://www.europeana.eu/item/2"] is None
+def test_only_verified_media_goes_to_object_storage(db, pg_dsn, data_dir, object_store):
+    load(data_dir, pg_dsn, object_store)
+    rows = {r[0]: r[1:] for r in db.execute("""SELECT url, stored_url, bucket, object_key FROM media_assets
+                                                WHERE url LIKE 'https://www.europeana.eu/item/%'""").fetchall()}
+    stored_url, bucket, key = rows["https://www.europeana.eu/item/1"]
+    assert bucket == "test-media" and stored_url == f"/media/{key}" and object_store.exists(bucket, key)
+    assert rows["https://www.europeana.eu/item/2"] == (None, None, None), "chưa xác minh giấy phép → chỉ lưu liên kết (BR09)"
 
 
 @ac("AC04.2")
@@ -81,3 +87,25 @@ def test_loaded_heritage_keeps_unesco_license(db, pg_dsn, data_dir):
     lic = db.execute("""SELECT s.license FROM heritage_items h JOIN sources s ON s.id = h.source_id
                         WHERE h.unesco_id = 'WHC-660'""").fetchone()[0]
     assert lic == "CC BY-SA 4.0"
+
+
+@ac("AC20.4")
+def test_index_builds_sourced_chunks_for_all_kinds_idempotently(db, fake_embedder):
+    from worker.pipeline.indexer import index
+    embed = lambda texts: [fake_embedder.embed_one(t) for t in texts]
+    first = index(db, embed)
+    assert first["claim"] == 6 and first["reference"] >= 1 and first["heritage"] == 3
+    second = index(db, embed)
+    assert second == first
+    assert db.execute("SELECT count(*) FROM entry_chunks").fetchone()[0] == sum(first.values())
+    assert db.execute("SELECT count(*) FROM entry_chunks WHERE source_id IS NULL").fetchone()[0] == 0, "mọi đoạn phải có nguồn"
+    assert db.execute("SELECT count(*) FROM entry_chunks WHERE kind = 'claim' AND entry_id IN (3, 5)").fetchone()[0] == 0
+
+
+@ac("AC20.4")
+def test_long_documents_are_split_on_sentences():
+    from worker.pipeline.indexer import split_text
+    text = " ".join(f"Câu số {i} nói về phong tục tặng quà ở Nhật Bản." for i in range(80))
+    parts = split_text(text, 300)
+    assert len(parts) > 1 and all(len(p) <= 300 for p in parts)
+    assert all(p.endswith(".") for p in parts)

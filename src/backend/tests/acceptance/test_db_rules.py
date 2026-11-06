@@ -87,7 +87,7 @@ def test_fulltext_matches_vietnamese_without_diacritics(db):
 
 @ac("AC19.1")
 def test_coverage_view_counts_only_published_claims(db):
-    rows = dict(((iso, cat), n) for iso, cat, n in db.execute("SELECT iso2, category::text, published_claims FROM v_coverage"))
+    rows = {(iso, cat): n for iso, cat, n in db.execute("SELECT iso2, category::text, published_claims FROM v_coverage")}
     assert len(rows) == 10 * 12
     assert rows[("JP", "gift_giving")] == 3          # claim 4 (draft) không tính
     assert rows[("JP", "greetings")] == 0            # bài đang chờ duyệt không tính

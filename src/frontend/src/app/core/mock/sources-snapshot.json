@@ -148,14 +148,14 @@
     {
      "title": "Robert F. Kennedy",
      "unit": "National Portrait Gallery",
-     "thumbnail": "images/objects/vn-si-0.jpg",
+     "thumbnail": "/media/objects/vn-si-0.jpg",
      "url": "https://npg.si.edu/object/npg_NPG.69.54",
      "license": "CC0"
     },
     {
      "title": "House Beautiful: Giacometti, from the series House Beautiful: Bringing the War Home",
      "unit": "Smithsonian American Art Museum",
-     "thumbnail": "images/objects/vn-si-1.jpg",
+     "thumbnail": "/media/objects/vn-si-1.jpg",
      "url": "https://americanart.si.edu/collections/search/artwork/?id=117049",
      "license": "CC0"
     }
@@ -305,14 +305,14 @@
     {
      "title": "Textile",
      "unit": "Cooper Hewitt, Smithsonian Design Museum",
-     "thumbnail": "images/objects/th-si-0.jpg",
+     "thumbnail": "/media/objects/th-si-0.jpg",
      "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/151764",
      "license": "CC0"
     },
     {
      "title": "Sarong",
      "unit": "Cooper Hewitt, Smithsonian Design Museum",
-     "thumbnail": "images/objects/th-si-1.jpg",
+     "thumbnail": "/media/objects/th-si-1.jpg",
      "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/156225",
      "license": "CC0"
     }
@@ -501,28 +501,28 @@
     {
      "title": "Interior, Japan",
      "unit": "Cooper Hewitt, Smithsonian Design Museum",
-     "thumbnail": "images/objects/jp-si-0.jpg",
+     "thumbnail": "/media/objects/jp-si-0.jpg",
      "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/13141",
      "license": "CC0"
     },
     {
      "title": "Fishing boats, Japan",
      "unit": "Cooper Hewitt, Smithsonian Design Museum",
-     "thumbnail": "images/objects/jp-si-1.jpg",
+     "thumbnail": "/media/objects/jp-si-1.jpg",
      "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/13131",
      "license": "CC0"
     },
     {
      "title": "View of Japan",
      "unit": "Cooper Hewitt, Smithsonian Design Museum",
-     "thumbnail": "images/objects/jp-si-2.jpg",
+     "thumbnail": "/media/objects/jp-si-2.jpg",
      "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/13096",
      "license": "CC0"
     },
     {
      "title": "One of Sixteen Scenes of the Death and Burial of a Man",
      "unit": "Cooper Hewitt, Smithsonian Design Museum",
-     "thumbnail": "images/objects/jp-si-3.jpg",
+     "thumbnail": "/media/objects/jp-si-3.jpg",
      "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/15894",
      "license": "CC0"
     }
@@ -892,28 +892,28 @@
     {
      "title": "Tall China Cabinet with Eagle Motif",
      "unit": "Cooper Hewitt, Smithsonian Design Museum",
-     "thumbnail": "images/objects/cn-si-0.jpg",
+     "thumbnail": "/media/objects/cn-si-0.jpg",
      "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/216088",
      "license": "CC0"
     },
     {
      "title": "Design for China Cabinet of Mahogany and Inlay, Sept. 13, 1906",
      "unit": "Cooper Hewitt, Smithsonian Design Museum",
-     "thumbnail": "images/objects/cn-si-1.jpg",
+     "thumbnail": "/media/objects/cn-si-1.jpg",
      "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/216121",
      "license": "CC0"
     },
     {
      "title": "Design for China Cabinet in Mahogany on Pear-Shaped Feet",
      "unit": "Cooper Hewitt, Smithsonian Design Museum",
-     "thumbnail": "images/objects/cn-si-2.jpg",
+     "thumbnail": "/media/objects/cn-si-2.jpg",
      "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/216090",
      "license": "CC0"
     },
     {
      "title": "Map of China",
      "unit": "Cooper Hewitt, Smithsonian Design Museum",
-     "thumbnail": "images/objects/cn-si-3.jpg",
+     "thumbnail": "/media/objects/cn-si-3.jpg",
      "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/123332",
      "license": "CC0"
     }
@@ -1283,28 +1283,28 @@
     {
      "title": "Maria Theresa Charlotte de France, Louis Charles de France",
      "unit": "Smithsonian American Art Museum",
-     "thumbnail": "images/objects/fr-si-0.jpg",
+     "thumbnail": "/media/objects/fr-si-0.jpg",
      "url": "https://americanart.si.edu/collections/search/artwork/?id=24904",
      "license": "CC0"
     },
     {
      "title": "Frances Elizabeth Caroline Willard",
      "unit": "National Portrait Gallery",
-     "thumbnail": "images/objects/fr-si-1.jpg",
+     "thumbnail": "/media/objects/fr-si-1.jpg",
      "url": "https://npg.si.edu/object/npg_NPG.80.56",
      "license": "CC0"
     },
     {
      "title": "Frances Folsom Cleveland",
      "unit": "National Portrait Gallery",
-     "thumbnail": "images/objects/fr-si-2.jpg",
+     "thumbnail": "/media/objects/fr-si-2.jpg",
      "url": "https://npg.si.edu/object/npg_S_NPG.77.58",
      "license": "CC0"
     },
     {
      "title": "Hommage de l'Amerique a la France (America paying homage to France)",
      "unit": "Cooper Hewitt, Smithsonian Design Museum",
-     "thumbnail": "images/objects/fr-si-3.jpg",
+     "thumbnail": "/media/objects/fr-si-3.jpg",
      "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/210420",
      "license": "CC0"
     }
@@ -1674,28 +1674,28 @@
     {
      "title": "Sunset over the Sea, Port Said, Egypt",
      "unit": "Cooper Hewitt, Smithsonian Design Museum",
-     "thumbnail": "images/objects/eg-si-0.jpg",
+     "thumbnail": "/media/objects/eg-si-0.jpg",
      "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/23759",
      "license": "CC0"
     },
     {
      "title": "Figure Sketches, Egypt",
      "unit": "Cooper Hewitt, Smithsonian Design Museum",
-     "thumbnail": "images/objects/eg-si-1.jpg",
+     "thumbnail": "/media/objects/eg-si-1.jpg",
      "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/23760",
      "license": "CC0"
     },
     {
      "title": "\"Les Francais en Egypte\" [French in Egypt]",
      "unit": "Cooper Hewitt, Smithsonian Design Museum",
-     "thumbnail": "images/objects/eg-si-2.jpg",
+     "thumbnail": "/media/objects/eg-si-2.jpg",
      "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/125411",
      "license": "CC0"
     },
     {
      "title": "Horeb, Egypt",
      "unit": "Smithsonian American Art Museum",
-     "thumbnail": "images/objects/eg-si-3.jpg",
+     "thumbnail": "/media/objects/eg-si-3.jpg",
      "url": "https://americanart.si.edu/collections/search/artwork/?id=37221",
      "license": "CC0"
     }

@@ -1,13 +1,30 @@
-# PostgreSQL riêng cho bộ test (dữ liệu trong RAM, xoá khi dừng container).
-# Khởi động: docker compose -f compose.test.yaml up -d --wait
+# Hạ tầng riêng cho bộ test (dữ liệu trong RAM, xoá khi dừng container) — không đụng tới bản đang chạy.
+# Khởi động: docker compose -f compose.test.yaml up -d --wait   (scripts/test.sh tự làm việc này)
+#   PostgreSQL 55432 · MinIO (S3) 59000 · Qdrant 56333
+name: culture-test
 services:
   db-test:
     image: pgvector/pgvector:pg16
     environment: { POSTGRES_USER: atlas, POSTGRES_PASSWORD: atlas, POSTGRES_DB: postgres }
-    ports: [ "55432:5432" ]
+    ports: [ "127.0.0.1:55432:5432" ]
     tmpfs: [ /var/lib/postgresql/data ]
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U atlas -d postgres" ]
       interval: 2s
       timeout: 3s
       retries: 30
+
+  s3-test:
+    image: culture-atlas/object-storage:test
+    build: ./src/object-storage
+    user: "10001:10001"
+    environment: { MINIO_ROOT_USER: testaccess, MINIO_ROOT_PASSWORD: testsecret-0123456789 }
+    ports: [ "127.0.0.1:59000:9000" ]
+    tmpfs: [ "/data:uid=10001,gid=10001" ]
+
+  qdrant-test:
+    image: mirror.gcr.io/qdrant/qdrant:v1.20.0-unprivileged@sha256:8c215051dc7bc15221b5f89c100a84a4b04d0dd8497fb73e6fa86fc948d1a41d
+    environment: { QDRANT__SERVICE__API_KEY: test-qdrant-key, QDRANT__TELEMETRY_DISABLED: "true" }
+    ports: [ "127.0.0.1:56333:6333" ]
+    tmpfs: [ "/qdrant/storage:uid=1000,gid=1000", "/qdrant/snapshots:uid=1000,gid=1000" ]
+    healthcheck: { test: [ "CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/6333" ], interval: 2s, timeout: 3s, retries: 30 }

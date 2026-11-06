@@ -1,9 +1,9 @@
-// CultureAtlas AI — mô hình dữ liệu (DBML) · PostgreSQL 16 + pgvector
+// CultureAtlas AI — mô hình dữ liệu (DBML) · PostgreSQL 16 (embedding ở Qdrant, file ở MinIO)
 // Xem trực quan: dán vào https://dbdiagram.io
 
 Project culture_atlas {
   database_type: 'PostgreSQL'
-  Note: 'Nội dung văn hoá dạng claim có nguồn, RAG (full-text + vector), quiz, so sánh, quản trị và đồng bộ dữ liệu.'
+  Note: 'Nội dung văn hoá dạng claim có nguồn, RAG (full-text ở PostgreSQL + vector ở Qdrant), quiz, so sánh, quản trị và đồng bộ dữ liệu.'
 }
 
 Enum user_role { learner editor admin }
@@ -131,13 +131,17 @@ Table claim_sources {
 
 Table entry_chunks {
   id bigserial [pk]
-  entry_id bigint [not null, ref: > culture_entries.id]
+  kind varchar(12) [not null, default: 'claim', note: 'claim | reference | heritage']
+  entry_id bigint [ref: > culture_entries.id, note: 'bắt buộc khi kind = claim']
+  source_id bigint [ref: > sources.id]
+  source_document_id bigint [ref: > source_documents.id, note: 'bắt buộc khi kind = reference']
+  heritage_item_id bigint [ref: > heritage_items.id, note: 'bắt buộc khi kind = heritage']
+  chunk_index smallint [not null, default: 0]
   claim_ids bigint[]
   chunk_text text [not null]
   language varchar(5) [not null]
   metadata jsonb [not null, note: 'country, category, scope, source_ids']
   tsv tsvector [note: 'GIN; simple + unaccent']
-  embedding vector(1024) [note: 'HNSW cosine']
   token_count int
   created_at timestamptz [not null, default: `now()`]
 }
@@ -158,13 +162,23 @@ Table media_assets {
   id bigserial [pk]
   entry_id bigint [ref: > culture_entries.id]
   source_id bigint [ref: > sources.id]
-  url text [not null]
-  stored_url text [note: 'chỉ khi đã xác minh giấy phép']
+  country_id int [ref: > countries.id]
+  kind varchar(10) [not null, default: 'image', note: 'image | video | audio | document | data']
+  title varchar(500)
+  url text [not null, unique, note: 'trang nguồn gốc']
+  stored_url text [note: 'URL object storage cấp (/media/<key>) — chỉ khi đã xác minh giấy phép (BR09)']
+  bucket varchar(63) [note: 'bucket MinIO/S3 chứa file']
+  object_key varchar(1024)
+  content_type varchar(120)
+  size_bytes bigint
+  sha256 char(64)
   author varchar(255)
   license varchar(120) [not null]
   attribution_text text [not null]
   verified boolean [not null, default: false]
   created_at timestamptz [not null, default: `now()`]
+  indexes { (bucket, object_key) [unique] }
+  Note: 'File ở object storage; bảng chỉ giữ metadata + URL'
 }
 
 Table heritage_items {

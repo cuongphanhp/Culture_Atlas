@@ -1,15 +1,19 @@
-// Ảnh văn hoá từ Wikimedia Commons (giấy phép mở) — ghi công đầy đủ trong credits.json.
-import credits from '../../../../public/images/culture/credits.json';
+// Ảnh văn hoá từ Wikimedia Commons (giấy phép mở) — ghi công trong photo-credits.json (bản sao của src/media-seed/culture/credits.json).
+// File ảnh nằm ở object storage (MinIO): nạp bằng `worker.cli seed-media`, phục vụ qua /media/* (nginx → MinIO).
+import credits from './photo-credits.json';
 import snapshot from './sources-snapshot.json';
 
+/** Ảnh kèm ghi công (BR08); `src` trỏ tới /media/* trên object storage. */
 export interface Photo { src: string; author: string; license: string; sourceUrl: string; caption?: string }
 
 const C = credits as Record<string, { file: string; author: string; license: string; sourceUrl: string }>;
+/** Ảnh theo khoá trong photo-credits.json. */
 export function photo(key: string, caption?: string): Photo {
   const c = C[key];
-  return { src: `images/culture/${key}.jpg`, author: c?.author ?? '', license: c?.license ?? '', sourceUrl: c?.sourceUrl ?? '', caption };
+  return { src: `/media/photos/${c?.file ?? key + '.jpg'}`, author: c?.author ?? '', license: c?.license ?? '', sourceUrl: c?.sourceUrl ?? '', caption };
 }
 
+/** Ảnh nền / ảnh đại diện của từng quốc gia. */
 export const COUNTRY_PHOTO: Record<string, Photo> = {
   VN: photo('vn', 'Đèn lồng phố cổ Hội An'),
   TH: photo('th', 'Chùa Wat Arun, Bangkok'),
@@ -23,14 +27,17 @@ export const COUNTRY_PHOTO: Record<string, Photo> = {
   KE: photo('ke', 'Điệu nhảy Adumu của người Maasai'),
 };
 
+/** Bộ ảnh của trang quốc gia. */
 export const GALLERY: Record<string, Photo[]> = {
   JP: [photo('jp-fuji', 'Chùa Chureito và núi Phú Sĩ'), photo('jp-tea', 'Trà đạo'), photo('jp-kaiseki', 'Ẩm thực kaiseki'),
        photo('jp-seijin', 'Lễ trưởng thành Seijin-shiki'), photo('jp-himeji', 'Thành Himeji'), photo('jp-753', 'Lễ Shichi-Go-San')],
   VN: [photo('vn-halong', 'Vịnh Hạ Long'), photo('vn-tet', 'Đèn lồng Hội An')],
 };
 
+/** Snapshot số liệu thật từ các nguồn mở (sinh bởi worker). */
 export const SNAPSHOT = snapshot as unknown as Snapshot;
 
+/** Cấu trúc sources-snapshot.json. */
 export interface Snapshot {
   generatedAt: string;
   sources: Record<string, { name: string; license: string; url: string; records?: number }>;

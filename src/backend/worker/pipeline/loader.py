@@ -2,10 +2,18 @@
 from __future__ import annotations
 
 import json
+import logging
+from collections.abc import Callable
 from datetime import date
 from pathlib import Path
 
 import psycopg
+
+from worker.core.objectstore import ObjectStore, StoredObject
+
+FetchFn = Callable[[str], tuple[bytes, str]]   # url → (nội dung, content-type)
+
+log = logging.getLogger(__name__)
 
 SOURCE_META = {
     "unesco_whc": ("UNESCO World Heritage List (DataHub whc001)", "UNESCO", "https://data.unesco.org/explore/dataset/whc001/", "api_dataset", "CC BY-SA 4.0", "official"),
@@ -20,10 +28,12 @@ SOURCE_META = {
 
 
 def _load(p: Path) -> list[dict]:
+    """Đọc file JSON tổng hợp (không có → [])."""
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else []
 
 
-def _source_id(cur, key: str) -> int:
+def _source_id(cur: psycopg.Cursor, key: str) -> int:
+    """Upsert một dòng sources theo SOURCE_META → id."""
     title, pub, url, stype, lic, tier = SOURCE_META[key]
     cur.execute("""INSERT INTO sources (title, publisher, source_url, source_type, license, reliability_tier, retrieved_at)
                    VALUES (%s,%s,%s,%s,%s,%s,%s)
@@ -32,9 +42,42 @@ def _source_id(cur, key: str) -> int:
     return cur.fetchone()[0]
 
 
-def load(data_dir: Path, dsn: str) -> dict[str, int]:
+def _store_media(store: ObjectStore, data_dir: Path, m: dict, src: str, fetch: FetchFn | None) -> StoredObject | None:
+    """Đưa file media đã xác minh giấy phép lên object storage: dùng file worker đã tải, không có thì tải bản thu nhỏ."""
+    meta = {"license": m.get("license"), "author": m.get("author"), "source-url": m.get("url")}
+    lp = m.get("local_path")
+    try:
+        if lp and (data_dir / lp).is_file():
+            return store.put_file(data_dir / lp, public=True, prefix=f"media/{src}", metadata=meta)
+        if fetch and m.get("image_url"):
+            data, ctype = fetch(m["image_url"])
+            if data and ctype.startswith(("image/", "video/", "audio/")):
+                import hashlib
+                ext = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif"}.get(ctype, "")
+                sha = hashlib.sha256(data).hexdigest()
+                return store.put_bytes(data, f"media/{src}/{sha[:2]}/{sha}{ext}", public=True, content_type=ctype, metadata=meta)
+    except Exception as e:  # noqa: BLE001 — một file lỗi không làm hỏng cả lần nạp
+        log.warning("không lưu được media %s: %s", m.get("url"), e)
+    return None
+
+
+def http_fetch(user_agent: str, timeout: float = 30.0) -> FetchFn:
+    """Tải bản thu nhỏ của media (Commons cấp sẵn thumburl ≤ 1280px)."""
+    import httpx
+
+    def fetch(url: str) -> tuple[bytes, str]:
+        """GET url → (bytes, content-type)."""
+        r = httpx.get(url, headers={"User-Agent": user_agent}, timeout=timeout, follow_redirects=True)
+        r.raise_for_status()
+        return r.content, r.headers.get("content-type", "").split(";")[0].strip()
+    return fetch
+
+
+def load(data_dir: Path, dsn: str, store: ObjectStore | None = None, fetch: FetchFn | None = None) -> dict[str, int]:
+    """Nạp dữ liệu tổng hợp vào PostgreSQL. Có `store` (ObjectStore) → file media đã xác minh giấy phép lên object storage,
+    DB chỉ giữ metadata + URL. `fetch(url) -> (bytes, content_type)` để tải media còn ở dạng liên kết."""
     agg = data_dir / "aggregated"
-    counts = {"countries": 0, "heritage": 0, "media": 0, "documents": 0, "runs": 0}
+    counts = {"countries": 0, "heritage": 0, "media": 0, "media_stored": 0, "documents": 0, "runs": 0}
     with psycopg.connect(dsn) as conn, conn.cursor() as cur:
         for c in _load(agg / "countries.json"):
             cur.execute("""UPDATE countries SET name_en = %s, capital = COALESCE(%s, capital), languages = %s, currencies = %s,
@@ -62,11 +105,28 @@ def load(data_dir: Path, dsn: str) -> dict[str, int]:
 
         for m in _load(agg / "media.json"):
             src = m["provenance"]["source_name"]
-            cur.execute("""INSERT INTO media_assets (source_id, url, stored_url, author, license, attribution_text, verified)
-                           SELECT %s,%s,%s,%s,%s,%s,%s WHERE NOT EXISTS (SELECT 1 FROM media_assets WHERE url = %s)""",
-                        (src_ids[src], m["url"] or m["image_url"], m.get("local_path") if m.get("verified") else None,
-                         (m.get("author") or "")[:255], m["license"][:120], m["attribution_text"], m.get("verified", False), m["url"]))
-            counts["media"] += cur.rowcount
+            url = m["url"] or m["image_url"]
+            obj = _store_media(store, data_dir, m, src, fetch) if store and m.get("verified") else None   # BR09
+            cur.execute("""
+                INSERT INTO media_assets (source_id, country_id, kind, title, url, stored_url, bucket, object_key, content_type,
+                                          size_bytes, sha256, author, license, attribution_text, verified)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                ON CONFLICT (url) DO UPDATE SET
+                  stored_url = COALESCE(EXCLUDED.stored_url, media_assets.stored_url),
+                  bucket = COALESCE(EXCLUDED.bucket, media_assets.bucket),
+                  object_key = COALESCE(EXCLUDED.object_key, media_assets.object_key),
+                  content_type = COALESCE(EXCLUDED.content_type, media_assets.content_type),
+                  size_bytes = COALESCE(EXCLUDED.size_bytes, media_assets.size_bytes),
+                  sha256 = COALESCE(EXCLUDED.sha256, media_assets.sha256),
+                  country_id = COALESCE(EXCLUDED.country_id, media_assets.country_id),
+                  title = COALESCE(EXCLUDED.title, media_assets.title)
+                RETURNING (xmax = 0)""",
+                        (src_ids[src], country_id.get(m.get("country")), obj.kind if obj else "image", (m.get("title") or "")[:500] or None,
+                         url, obj.url if obj else None, obj.bucket if obj else None, obj.key if obj else None,
+                         obj.content_type if obj else None, obj.size if obj else None, obj.sha256 if obj else None,
+                         (m.get("author") or "")[:255], m["license"][:120], m["attribution_text"], bool(m.get("verified"))))
+            counts["media"] += int(cur.fetchone()[0])
+            counts["media_stored"] += int(obj is not None)
 
         for d in _load(agg / "documents.json"):
             src = d["provenance"]["source_name"]
