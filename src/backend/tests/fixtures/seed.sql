@@ -89,6 +89,15 @@ INSERT INTO comparisons (id, country_a_id, country_b_id, topic, language, result
 INSERT INTO feedback (id, target_type, target_id, type, comment, status) VALUES
   (1, 'claim', 3, 'factual_error', 'Cần thêm nguồn về hoa cúc.', 'open');
 
+-- Tài liệu tham khảo do worker thu thập (chưa biên tập) — AC07.4
+INSERT INTO sources (id, title, publisher, source_url, source_type, license, reliability_tier, language, retrieved_at) VALUES
+  (6, 'Wikipedia', 'Wikimedia Foundation', 'https://en.wikipedia.org', 'encyclopedia', 'CC BY-SA 4.0', 'community', 'en', '2026-10-30');
+INSERT INTO source_documents (id, country_id, source_id, title, section, body, url, language, category_guess) VALUES
+  (1, 3, 6, 'Etiquette in Japan', 'Visiting a home',
+   'When visiting a Japanese home, guests usually bring a small gift called temiyage, often sweets from their hometown. '
+   'Shoes are removed at the entrance, the genkan, and guests wear slippers indoors.',
+   'https://en.wikipedia.org/wiki/Etiquette_in_Japan', 'en', 'etiquette');
+
 -- Đồng bộ bộ đếm id sau khi chèn id cố định
 SELECT setval('users_id_seq',           (SELECT MAX(id) FROM users));
 SELECT setval('countries_id_seq',       (SELECT MAX(id) FROM countries));
@@ -99,3 +108,4 @@ SELECT setval('heritage_items_id_seq',  (SELECT MAX(id) FROM heritage_items));
 SELECT setval('quiz_questions_id_seq',  (SELECT MAX(id) FROM quiz_questions));
 SELECT setval('comparisons_id_seq',     (SELECT MAX(id) FROM comparisons));
 SELECT setval('feedback_id_seq',        (SELECT MAX(id) FROM feedback));
+SELECT setval('source_documents_id_seq', (SELECT MAX(id) FROM source_documents));

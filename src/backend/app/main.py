@@ -14,4 +14,5 @@ app.include_router(admin.router, prefix="/api/admin")
 
 @app.get("/api/health", tags=["Ops"])
 def health() -> dict[str, str]:
+    """Healthcheck của Docker / load balancer."""
     return {"status": "ok"}

@@ -26,16 +26,26 @@ SEED_SQL = BACKEND / "tests/fixtures/seed.sql"
 TEST_DSN = os.environ.get("TEST_DATABASE_URL", "postgresql://atlas:atlas@localhost:55432/culture_atlas_test")
 ADMIN_DSN = TEST_DSN.rsplit("/", 1)[0] + "/postgres"
 STRICT = os.environ.get("ACCEPTANCE_STRICT") == "1"
+TEST_JWT_SECRET = "test-secret-for-acceptance-suite-0123456789"   # ≥ 32 byte (RFC 7518 §3.2)
 
 # Cấu hình app cho test — đặt TRƯỚC khi import app, ghi đè .env của máy dev
 os.environ.update({
     "DATABASE_URL": TEST_DSN.replace("postgresql://", "postgresql+asyncpg://", 1),
     "WORKER_DATABASE_URL": TEST_DSN,
-    "JWT_SECRET": "test-secret",
+    "JWT_SECRET": TEST_JWT_SECRET,
     "GUEST_DAILY_LIMIT": "10",
     "LLM_PROVIDER": "fake",
     "OPENAI_API_KEY": "",
     "APP_ENV": "test",
+    # Qdrant + object storage riêng của bộ test (compose.test.yaml)
+    "QDRANT_URL": os.environ.get("TEST_QDRANT_URL", "http://127.0.0.1:56333"),
+    "QDRANT_API_KEY": "test-qdrant-key",
+    "QDRANT_COLLECTION": "culture_chunks_test",
+    "S3_ENDPOINT": os.environ.get("TEST_S3_ENDPOINT", "127.0.0.1:59000"),
+    "S3_ACCESS_KEY": "testaccess",
+    "S3_SECRET_KEY": "testsecret-0123456789",
+    "S3_BUCKET_MEDIA": "test-media",
+    "S3_BUCKET_RAW": "test-raw",
 })
 
 # Dependency của app được thay bằng bản giả: "module:hàm" → tên fixture
@@ -45,7 +55,20 @@ DEPENDENCY_OVERRIDES = {
     "app.ai.local_ai:get_local_ai": "fake_local_ai",
 }
 
+
+@pytest.fixture
+def object_store():
+    """ObjectStore trỏ tới MinIO của bộ test (bucket test-media / test-raw)."""
+    from worker.core.objectstore import ObjectStore
+    store = ObjectStore.from_env()
+    try:
+        store.ensure_buckets()
+    except Exception as e:  # noqa: BLE001
+        _unavailable(f"Object storage test chưa chạy ({type(e).__name__}). Chạy: docker compose -f compose.test.yaml up -d --wait")
+    return store
+
 ac = pytest.mark.ac
+JSON_HEADERS = {"Accept": "application/json"}
 
 
 def route(method: str, path: str):
@@ -112,6 +135,11 @@ def pg_dsn() -> str:
         admin = psycopg.connect(ADMIN_DSN, autocommit=True, connect_timeout=3)
     except Exception as e:  # noqa: BLE001
         _unavailable(f"PostgreSQL test chưa chạy ({type(e).__name__}). Chạy: docker compose -f compose.test.yaml up -d --wait")
+    import httpx
+    try:
+        httpx.get(os.environ["QDRANT_URL"] + "/healthz", timeout=3)
+    except httpx.HTTPError as e:
+        _unavailable(f"Qdrant test chưa chạy ({type(e).__name__}). Chạy: docker compose -f compose.test.yaml up -d --wait")
     with admin:
         admin.execute(f'DROP DATABASE IF EXISTS "{name}" WITH (FORCE)')
         admin.execute(f'CREATE DATABASE "{name}"')
@@ -124,17 +152,12 @@ def _reset(conn, embedder) -> None:
     tables = [r[0] for r in conn.execute("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")]
     conn.execute(f"TRUNCATE {', '.join(tables)} RESTART IDENTITY CASCADE")
     conn.execute(SEED_SQL.read_text(encoding="utf-8"))
-    # Chunk RAG cho mọi claim đã xuất bản (một claim = một chunk), embedding bằng FakeEmbedder
-    rows = conn.execute("""
-        SELECT cl.id, cl.text, e.id, e.category, c.iso2 FROM claims cl
-        JOIN culture_entries e ON e.id = cl.entry_id JOIN countries c ON c.id = e.country_id
-        WHERE cl.status = 'published' AND e.status = 'published' ORDER BY cl.id""").fetchall()
-    for claim_id, text, entry_id, category, iso in rows:
-        vec = "[" + ",".join(f"{v:.6f}" for v in embedder.embed_one(text)) + "]"
-        conn.execute(
-            """INSERT INTO entry_chunks (entry_id, claim_ids, chunk_text, language, metadata, embedding)
-               VALUES (%s, %s, %s, 'vi', %s, %s::vector)""",
-            (entry_id, [claim_id], text, f'{{"country": "{iso}", "category": "{category}", "entry_id": {entry_id}}}', vec))
+    # Chỉ mục RAG dựng bằng chính indexer của worker (claim + tài liệu tham khảo + di sản), embedding bằng FakeEmbedder
+    from worker.core.vectors import VectorIndex
+    from worker.pipeline.indexer import index
+    vectors = VectorIndex()
+    vectors.drop()                       # collection Qdrant sạch cho mỗi test
+    index(conn, lambda texts: [embedder.embed_one(t) for t in texts], vectors=vectors)
 
 
 @pytest.fixture
@@ -167,6 +190,11 @@ def db(pg_dsn, fake_embedder):
 
 # ───────────────────────── HTTP client ─────────────────────────
 
+def _const(value: object) -> object:
+    """Dependency trả về `value`. Không dùng tham số mặc định: FastAPI sẽ coi là query param và deepcopy."""
+    return lambda: value
+
+
 @pytest.fixture
 def client(request, db):
     """TestClient của app với LLM/embedding giả. Mỗi test là một khách riêng (header X-Client-Id)."""
@@ -180,7 +208,7 @@ def client(request, db):
         except (ImportError, AttributeError):
             continue  # chưa có trong app — test cần nó sẽ PENDING theo @route
         fake = request.getfixturevalue(fixture_name)
-        app.dependency_overrides[dep] = (lambda f: lambda: f)(fake)   # không dùng tham số mặc định: FastAPI sẽ coi là query param và deepcopy
+        app.dependency_overrides[dep] = _const(fake)
     with TestClient(app, headers={"X-Client-Id": uuid.uuid4().hex}) as c:
         yield c
     app.dependency_overrides.clear()

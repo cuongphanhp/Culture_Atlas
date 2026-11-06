@@ -10,14 +10,17 @@ PROBLEM_BASE = "https://cultureatlas.example/problems/"
 
 
 class ProblemError(Exception):
+    """Ném ở bất kỳ đâu trong request → trả application/problem+json với mã `status`."""
+
     def __init__(self, status: int, title: str, detail: str | None = None, slug: str | None = None) -> None:
         super().__init__(title)
         self.status, self.title, self.detail, self.slug = status, title, detail, slug
 
 
 def problem(status: int, title: str, detail: str | None = None, slug: str | None = None,
-            errors: dict | None = None) -> JSONResponse:
-    body: dict = {"type": PROBLEM_BASE + (slug or str(status)), "title": title, "status": status}
+            errors: dict[str, list[str]] | None = None) -> JSONResponse:
+    """Tạo response RFC 7807; `slug` → trường `type` (mặc định theo mã lỗi)."""
+    body: dict[str, object] = {"type": PROBLEM_BASE + (slug or str(status)), "title": title, "status": status}
     if detail:
         body["detail"] = detail
     if errors:
@@ -26,17 +29,19 @@ def problem(status: int, title: str, detail: str | None = None, slug: str | None
 
 
 def install(app: FastAPI) -> None:
+    """Gắn exception handler: ProblemError, lỗi validate (→ 400 kèm `errors` theo trường), HTTPException."""
+
     @app.exception_handler(ProblemError)
-    async def _problem(_: Request, e: ProblemError):
+    async def _problem(_: Request, e: ProblemError) -> JSONResponse:
         return problem(e.status, e.title, e.detail, e.slug)
 
     @app.exception_handler(RequestValidationError)
-    async def _invalid(_: Request, e: RequestValidationError):
+    async def _invalid(_: Request, e: RequestValidationError) -> JSONResponse:
         errors: dict[str, list[str]] = {}
         for err in e.errors():
             errors.setdefault(".".join(str(p) for p in err["loc"]), []).append(err["msg"])
         return problem(400, "Yêu cầu không hợp lệ", slug="validation", errors=errors)
 
     @app.exception_handler(HTTPException)
-    async def _http(_: Request, e: HTTPException):
+    async def _http(_: Request, e: HTTPException) -> JSONResponse:
         return problem(e.status_code, str(e.detail))

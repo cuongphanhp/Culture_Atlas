@@ -20,6 +20,8 @@ class LLMUnavailable(RuntimeError):
 
 
 class LLMAdapter(Protocol):
+    """Giao diện LLM mà agent dùng (OpenAIAdapter ở production, FakeLLM trong test)."""
+
     model: str
 
     def stream(self, messages: list[dict[str, str]], *, temperature: float | None = None) -> AsyncIterator[str]:
@@ -57,14 +59,17 @@ class OpenAIAdapter:
         self.last_model = model
 
     def _params(self, model: str, temperature: float | None) -> dict[str, Any]:
+        """Tham số sinh theo loại model: model suy luận nhận `reasoning_effort`, GPT-4o nhận `temperature`."""
         if _is_reasoning(model):
             return {"reasoning_effort": self.reasoning_effort}
         return {"temperature": self.temperature if temperature is None else temperature}
 
     def _models(self) -> list[str]:
+        """Thứ tự thử: model chính rồi model dự phòng (nếu khác)."""
         return [self.model] + ([self.fallback] if self.fallback and self.fallback != self.model else [])
 
     async def _stream(self, messages: list[dict[str, str]], temperature: float | None) -> AsyncIterator[str]:
+        """Stream từ model chính; lỗi tạm thời trước khi có chữ đầu tiên → chuyển sang model dự phòng."""
         import openai
         models = self._models()
         for i, model in enumerate(models):
@@ -84,9 +89,11 @@ class OpenAIAdapter:
                     raise LLMUnavailable(f"{model}: {e}") from e
 
     def stream(self, messages: list[dict[str, str]], *, temperature: float | None = None) -> AsyncIterator[str]:
+        """Sinh câu trả lời dạng stream; lỗi → LLMUnavailable."""
         return self._stream(messages, temperature)
 
     async def complete_json(self, messages: list[dict[str, str]], *, name: str, schema: dict[str, Any]) -> dict[str, Any]:
+        """Structured output (json_schema strict) — dùng cho gợi ý câu hỏi, viết lại truy vấn…; lỗi → LLMUnavailable."""
         import openai
         models = self._models()
         for i, model in enumerate(models):
@@ -102,11 +109,26 @@ class OpenAIAdapter:
         raise LLMUnavailable("Không có model nào khả dụng")
 
 
+class _MissingKeyLLM:
+    """Thiếu OPENAI_API_KEY: chỉ báo lỗi khi thật sự cần LLM — câu hỏi dữ kiện (trả từ DB) vẫn chạy được."""
+
+    model = "unconfigured"
+
+    def stream(self, messages: list[dict[str, str]], *, temperature: float | None = None) -> AsyncIterator[str]:
+        """Luôn báo LLMUnavailable."""
+        raise LLMUnavailable("Chưa cấu hình OPENAI_API_KEY")
+
+    async def complete_json(self, messages: list[dict[str, str]], *, name: str, schema: dict[str, Any]) -> dict[str, Any]:
+        """Luôn báo LLMUnavailable."""
+        raise LLMUnavailable("Chưa cấu hình OPENAI_API_KEY")
+
+
 @lru_cache
-def _openai() -> OpenAIAdapter:
+def _openai() -> LLMAdapter:
+    """Adapter dùng chung cho cả tiến trình (tạo một lần từ cấu hình)."""
     s = get_settings()
     if not s.openai_api_key:
-        raise LLMUnavailable("Chưa cấu hình OPENAI_API_KEY")
+        return _MissingKeyLLM()
     return OpenAIAdapter(s.openai_api_key, s.llm_model, s.llm_fallback_model, reasoning_effort=s.llm_reasoning_effort,
                          temperature=s.llm_temperature, timeout=s.llm_timeout_s)
 

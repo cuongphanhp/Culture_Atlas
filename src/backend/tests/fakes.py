@@ -5,6 +5,7 @@ Khi agent / comparison / quiz đổi cách gọi LLM, cập nhật FakeLLM ở �
 from __future__ import annotations
 
 import hashlib
+import itertools
 import math
 import re
 import unicodedata
@@ -29,6 +30,8 @@ class FakeLLM:
         self.answer = DEFAULT_ANSWER
         self.json: dict[str, dict[str, Any]] = {
             "follow_ups": {"questions": ["Ở Nhật nên tránh những món quà nào?", "Gói quà ở Nhật có gì đặc biệt?"]},
+            # Viết lại câu hỏi thành truy vấn tìm kiếm — mặc định rỗng: agent dùng câu hỏi gốc
+            "search_queries": {"queries": []},
             # Ô có "evidence": [] (không có bằng chứng) → API phải trả null ("Chưa đủ nguồn để kết luận")
             "comparison": {
                 "similarities": [{"text": "Ẩm thực gắn với gia đình và lễ hội.", "evidence": ["c1"]}],
@@ -80,7 +83,7 @@ class FakeEmbedder:
     def embed_one(self, text: str) -> list[float]:
         toks = _norm(text)
         vec = [0.0] * self.dim
-        for t in toks + [f"{a}_{b}" for a, b in zip(toks, toks[1:], strict=False)]:
+        for t in toks + [f"{a}_{b}" for a, b in itertools.pairwise(toks)]:
             vec[int(hashlib.md5(t.encode()).hexdigest(), 16) % self.dim] += 1.0
         n = math.sqrt(sum(v * v for v in vec)) or 1.0
         return [v / n for v in vec]
@@ -116,10 +119,20 @@ class FakeLocalAI:
             from app.ai.local_ai import LocalAIError
             raise LocalAIError(400, "Giọng đọc không tồn tại", voice)
         self.calls.append(("synthesize", text))
-        from urllib.parse import quote  # dịch vụ thật mã hoá URL tên giọng (header chỉ nhận latin-1)
+        # dịch vụ thật mã hoá URL tên giọng (header chỉ nhận latin-1)
+        from urllib.parse import quote
         return b"RIFF\x00\x00\x00\x00WAVEfmt ", {"x-voice": quote(voice or "Hải Đăng"), "x-audio-seconds": "1.00"}
 
     async def voices(self) -> dict[str, Any]:
         self._check()
         return {"default": "Hải Đăng", "voices": [{"id": "Hải Đăng", "label": "Hải Đăng — giọng Bắc"},
                                                   {"id": "Thái Sơn", "label": "Thái Sơn — giọng Nam"}]}
+
+    async def rerank(self, query: str, documents: list[str], top_k: int | None = None) -> list[dict[str, float]]:
+        """Điểm = tỉ lệ từ khoá của câu hỏi (bỏ từ hư) xuất hiện trong đoạn — đủ để kiểm tra lọc theo ngưỡng."""
+        self._check()
+        from app.ai.retrieval import STOPWORDS
+        q = {w for w in _norm(query) if w not in STOPWORDS and len(w) > 1}
+        scores = [len(q & set(_norm(d))) / len(q) if q else 0.0 for d in documents]
+        order = sorted(range(len(documents)), key=lambda i: -scores[i])[: top_k or len(documents)]
+        return [{"index": i, "score": scores[i]} for i in order]

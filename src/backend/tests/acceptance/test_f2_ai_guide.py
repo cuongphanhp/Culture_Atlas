@@ -156,3 +156,111 @@ def test_rating_once_only(client, db):
 def test_rating_value_validated(client):
     mid = ask(client, RAG_Q)["messageId"]
     assert_problem(client.post(f"/api/ai/chat/messages/{mid}/rating", json={"rating": 0}), 400)
+
+
+# ── Hội thoại tự nhiên, nhiều lượt, mức giải thích (AC06.4–AC06.7) ──
+@ac("AC06.4")
+@pytest.mark.parametrize("message", ["Xin chào", "Bạn là ai?", "cảm ơn bạn nhé"])
+def test_smalltalk_answered_naturally_without_citations(client, fake_llm, message):
+    a = ask(client, message)
+    assert a["route"] == "smalltalk" and a["confidence"] == "none"
+    assert a["citations"] == [] and "[c" not in a["answer"] and a["answer"]
+    assert fake_llm.calls and "BẰNG CHỨNG" not in fake_llm.calls[-1]["messages"][-1]["content"]
+    assert 2 <= len(a["followUpQuestions"]) <= 3
+
+
+@ac("AC06.5")
+def test_follow_up_question_uses_previous_turn(client, db, fake_llm):
+    first = ask(client, RAG_Q)
+    second = ask(client, "Còn hoa thì sao?", sessionId=first["sessionId"])
+    assert second["sessionId"] == first["sessionId"]
+    assert second["countries"] == ["JP"], "câu nối tiếp phải hiểu là vẫn đang nói về Nhật Bản"
+    owners = chunk_country(db)
+    assert second["citations"] and all(owners[c["chunkId"]] == "JP" for c in second["citations"])
+    history = [m["content"] for m in fake_llm.calls[-2]["messages"]]   # lượt stream của câu thứ hai
+    assert RAG_Q in history, "LLM phải nhận lượt hỏi trước làm ngữ cảnh"
+
+
+@ac("AC06.5")
+def test_other_clients_session_history_is_not_read(client, fake_llm):
+    first = ask(client, RAG_Q)
+    r = client.post("/api/ai/chat", json={"message": "Còn hoa thì sao?", "sessionId": first["sessionId"]},
+                    headers={**JSON, "X-Client-Id": "khach-khac-0001"})
+    assert r.status_code == 200 and r.json()["sessionId"] != first["sessionId"]
+    assert all(RAG_Q not in m["content"] for m in fake_llm.calls[-2]["messages"])
+
+
+@ac("AC06.6")
+def test_deep_level_requests_deeper_analysis(client, fake_llm):
+    ask(client, RAG_Q, level="simple")
+    simple = fake_llm.calls[-2]["messages"][-1]["content"]
+    ask(client, RAG_Q, level="deep")
+    deep = fake_llm.calls[-2]["messages"][-1]["content"]
+    assert "ngắn gọn" in simple and "CHUYÊN SÂU" in deep
+    assert deep.count("[c") >= simple.count("[c")
+
+
+@ac("AC06.7")
+def test_chat_works_with_keyword_search_when_local_ai_down(client, fake_local_ai):
+    fake_local_ai.down = True          # embedding + rerank đều lỗi
+    a = ask(client, "Vì sao người Nhật cúi chào?")
+    assert a["route"] == "rag" and a["citations"]
+
+
+# ── Loại bằng chứng (AC07.4) ──
+@ac("AC07.4")
+def test_reference_document_cited_with_kind_and_capped_confidence(client):
+    a = ask(client, "temiyage?", context={"country": "JP"})
+    assert a["citations"], a
+    c = a["citations"][0]
+    assert c["kind"] == "reference" and c["verified"] is False
+    assert c["license"] == "CC BY-SA 4.0" and c["url"].startswith("https://en.wikipedia.org/")
+    assert a["confidence"] == "inferred", "chỉ dựa trên tài liệu chưa biên tập thì không được 'supported'"
+
+
+@ac("AC07.4")
+def test_verified_claims_give_supported_confidence(client, fake_llm):
+    fake_llm.answer = "Ở Nhật Bản, quà thường được trao bằng hai tay [c1]."
+    a = ask(client, "Người Nhật trao quà bằng mấy tay?", context={"country": "JP"})
+    assert a["citations"][0]["kind"] == "claim" and a["citations"][0]["verified"] is True
+    assert a["confidence"] == "supported"
+
+
+# ── Ngữ cảnh trang + nhận diện quốc gia (AC09.2) ──
+@ac("AC09.2")
+def test_structured_question_uses_page_context(client, fake_llm):
+    a = ask(client, "Thủ đô là gì?", context={"country": "JP"})
+    assert a["route"] == "structured" and "Tokyo" in a["answer"] and fake_llm.calls == []
+
+
+@ac("AC09.2")
+@pytest.mark.parametrize("message", ["Phương pháp học ngoại ngữ hiệu quả?", "Sinh nhật nên tổ chức thế nào?"])
+def test_common_words_not_mistaken_for_countries(client, message):
+    a = ask(client, message)
+    assert a["countries"] == []
+
+
+# ── Viết lại truy vấn, nhiều quốc gia, ngoài phạm vi (AC06.5, AC09.3, AC08.4) ──
+@ac("AC06.5", "AC09.3")
+def test_follow_up_is_rewritten_into_standalone_search_query(client, fake_llm):
+    first = ask(client, RAG_Q)
+    fake_llm.json["search_queries"] = {"queries": ["flower gift etiquette Japan"]}
+    ask(client, "Còn hoa thì sao?", sessionId=first["sessionId"])
+    rewrite_call = next(c for c in reversed(fake_llm.calls) if c.get("name") == "search_queries")
+    prompt = rewrite_call["messages"][-1]["content"]
+    assert RAG_Q in prompt and "Còn hoa thì sao?" in prompt, "bước viết lại phải thấy lượt trước để hiểu câu nối tiếp"
+
+
+@ac("AC09.3")
+def test_multi_country_question_gets_evidence_from_each_country(client, db):
+    a = ask(client, "So sánh tặng quà ở Việt Nam và Nhật Bản")
+    assert a["countries"] == ["VN", "JP"]
+    owners = chunk_country(db)
+    assert {owners[c["chunkId"]] for c in a["citations"]} == {"VN", "JP"}, "mỗi nước phải có ít nhất một bằng chứng"
+
+
+@ac("AC08.4")
+def test_out_of_scope_question_is_politely_refused(client):
+    a = ask(client, "Giá bitcoin hôm nay bao nhiêu?")
+    assert a["route"] == "refused" and a["confidence"] == "insufficient" and a["citations"] == []
+    assert "chưa có đủ nguồn" in a["answer"].lower() and "10 quốc gia" in a["answer"]

@@ -39,7 +39,7 @@ flowchart LR
 | **Nhận dạng giọng nói (STT)** | [g-group-ai-lab/gipformer1.5-68M-rnnt](https://huggingface.co/g-group-ai-lab/gipformer1.5-68M-rnnt) (Zipformer RNN-T, ONNX int8) + [silero VAD](https://github.com/k2-fsa/sherpa-onnx) qua `sherpa-onnx` | MIT | 68M | 7 giây âm thanh → **0.16–0.19 s** |
 | **Đọc văn bản (TTS)** | [VieNeu-TTS v3 Turbo](https://github.com/pnnbao97/VieNeu-TTS) (ONNX, int8 nhờ AVX-VNNI), 25 giọng Bắc/Nam, 48 kHz | Apache 2.0 | ~100M | RTF **0.4–0.7** (nhanh hơn thời gian thực) |
 | **Embedding** | [AITeamVN/Vietnamese_Embedding_v2](https://huggingface.co/AITeamVN/Vietnamese_Embedding_v2) (ONNX, CLS + chuẩn hoá L2) | Apache 2.0 | 568M, 1024 chiều | 5 câu → 74 ms; nhận ra câu tiếng Anh cùng nghĩa |
-| **Rerank** | [AITeamVN/Vietnamese_Reranker](https://huggingface.co/AITeamVN/Vietnamese_Reranker) (cross-encoder) | Apache 2.0 | 568M | 32 đoạn → 0.69 s |
+| **Rerank** | [AITeamVN/Vietnamese_Reranker](https://huggingface.co/AITeamVN/Vietnamese_Reranker) (cross-encoder), xuất sang **ONNX int8** (544 MB, không cần torch) | Apache 2.0 | 568M | 35 đoạn → **0.26 s** (torch fp32: 9.5 s). So với fp32: các đoạn liên quan vẫn được nhận ra giống nhau, chênh lệch điểm ≤ 0.08 |
 
 Tổng dung lượng model khoảng 5 GB. Khi đã nạp đủ cả bốn model, dịch vụ dùng khoảng 5–6 GB RAM.
 
@@ -124,12 +124,34 @@ Cùng một prompt RAG: 3 đoạn bằng chứng tiếng Anh từ JNTO, câu h�
   - Theo dõi lượt 👍/👎.
   - Chạy test `pytest -m live` (gọi Luna và GPT-4o thật) trước khi phát hành.
 
+### Luồng xử lý một câu hỏi ([agent.py](../src/backend/app/ai/agent.py))
+
+| Bước | Cách làm | Thời gian đo (06/11/2026) |
+|---|---|---|
+| Router | Nhận diện quốc gia (có dấu / không dấu, loại trừ "phương pháp", "sinh nhật"…) và phân loại: `smalltalk`, `structured`, `rag` | < 5 ms |
+| `structured` | Thủ đô, tiền tệ, ngôn ngữ, láng giềng, số di sản lấy thẳng từ DB, **không gọi LLM** | TTFT ~0.04 s |
+| `smalltalk` | Luna với prompt riêng, không đưa thông tin văn hoá | TTFT ~1.0–1.7 s |
+| Truy xuất | pgvector + FTS không dấu (truy vấn OR) → RRF → rerank ONNX int8 (≤ 16 ứng viên, cắt 500 ký tự) → ngưỡng 0.08 | ~1.2 s |
+| Viết lại truy vấn | Luna chạy **song song** với truy xuất bằng câu gốc; chỉ dùng khi bằng chứng của câu gốc yếu (câu nối tiếp, câu hội thoại, so sánh nhiều nước) | +~1.2 s khi cần |
+| Sinh câu trả lời | Luna stream SSE; bộ lọc bỏ nhãn `[c#]` bịa ngay khi stream | TTFT tổng: **~2.0–2.3 s** (câu rõ ràng), **~3.4–3.9 s** (cần viết lại) |
+| Gợi ý + lưu log | Luna JSON (3 câu hỏi gợi ý) → `chat_logs`, câu bị từ chối vào hàng đợi biên tập | sau khi stream xong |
+
+**Vì sao cần viết lại truy vấn:** rerank (cross-encoder) chấm rất thấp câu hỏi dạng hội thoại tiếng Việt khi tài liệu là tiếng Anh. Ví dụ, cùng đoạn "Gifts and gift-giving":
+- câu "Còn chuyện tặng quà thì sao?" được 0.09;
+- câu "tặng quà ở Nhật Bản" được 0.94.
+
+Ngược lại, có đoạn chỉ đạt điểm cao với câu tiếng Việt gốc. Vì vậy hệ thống giữ cả hai loại truy vấn và lấy điểm cao nhất cho mỗi đoạn.
+
+**Kho kiến thức hiện tại:** 770 đoạn tài liệu tham khảo (Wikipedia, trang du lịch chính thức) và 461 đoạn di sản UNESCO.
+- Chưa có claim đã biên tập, nên mức tin cậy tối đa hiện là `inferred` (hiển thị "Suy luận từ nguồn").
+- Khi biên tập viên duyệt claim, chạy `worker.cli index` để đưa claim vào chỉ mục. Claim được ưu tiên vì đã qua kiểm chứng.
+
 ## 4. Chạy và cấu hình
 
 ```bash
 # Dịch vụ AI local (Python 3.12)
 cd src/ai-local
-python3.12 -m venv .venv && .venv/bin/pip install --extra-index-url https://download.pytorch.org/whl/cpu -e ".[rerank,dev]"
+python3.12 -m venv .venv && .venv/bin/pip install --extra-index-url https://download.pytorch.org/whl/cpu -e ".[export,dev]"
 .venv/bin/python -m ai_local.download          # tải ~5 GB model, một lần
 .venv/bin/uvicorn ai_local.main:app --port 8100
 ```
@@ -146,7 +168,7 @@ AI_LOCAL_URL=http://localhost:8100
 ```
 
 Khi chạy bằng Docker Compose:
-- Lần đầu tải model: `docker compose run --rm ai-local python -m ai_local.download`.
+- Lần đầu tải model: `docker compose --profile setup run --rm ai-local-setup`.
 - Model lưu trong volume `ai-models`.
 
 ## 5. Hướng tăng tốc tiếp (khi cần)
