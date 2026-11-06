@@ -1,0 +1,53 @@
+{
+  // Chạy app trong 4 terminal của VS Code: Ctrl+Shift+P → "Tasks: Run Task" → "CultureAtlas: chạy toàn bộ"
+  // Mỗi terminal chạy scripts/dev.sh <thành phần> (xem Guide.md, Cách A). Dừng: Ctrl+C trong terminal, hoặc "Tasks: Terminate Task".
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "CultureAtlas: chạy toàn bộ",
+      "dependsOn": ["1 · Database", "2 · Backend API", "3 · AI local", "4 · Frontend"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "1 · Database",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/dev.sh db",
+      "isBackground": true,
+      "presentation": { "group": "cultureatlas", "panel": "dedicated", "reveal": "always", "focus": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "2 · Backend API",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/dev.sh api",
+      "isBackground": true,
+      "presentation": { "group": "cultureatlas", "panel": "dedicated", "reveal": "always", "focus": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "3 · AI local",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/dev.sh ai",
+      "isBackground": true,
+      "presentation": { "group": "cultureatlas", "panel": "dedicated", "reveal": "always", "focus": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "4 · Frontend",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/dev.sh web",
+      "isBackground": true,
+      "presentation": { "group": "cultureatlas", "panel": "dedicated", "reveal": "always", "focus": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "CultureAtlas: chạy test",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/test.sh",
+      "group": "test",
+      "presentation": { "panel": "dedicated", "reveal": "always" },
+      "problemMatcher": []
+    }
+  ]
+}
