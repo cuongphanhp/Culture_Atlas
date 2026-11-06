@@ -2,10 +2,10 @@
 import time
 from datetime import UTC, datetime, timedelta
 
+import jwt  # PyJWT (python-jose bỏ vì không còn bảo trì, có CVE CRITICAL chưa vá)
 import pytest
-from jose import jwt
 
-from tests.conftest import ac, assert_problem, route
+from tests.conftest import TEST_JWT_SECRET, ac, assert_problem, route
 
 pytestmark = [pytest.mark.db, route("POST", "/api/auth/login")]
 
@@ -57,7 +57,7 @@ def test_admin_requires_token(client):
 @ac("AC15.2")
 def test_expired_or_forged_token_rejected(client):
     past = datetime.now(UTC) - timedelta(minutes=5)
-    expired = jwt.encode({"sub": "1", "role": "admin", "exp": past}, "test-secret", algorithm="HS256")
+    expired = jwt.encode({"sub": "1", "role": "admin", "exp": past}, TEST_JWT_SECRET, algorithm="HS256")
     forged = jwt.encode({"sub": "1", "role": "admin", "exp": past + timedelta(hours=2)}, "khong-phai-secret", algorithm="HS256")
     for tok in (expired, forged):
         assert_problem(client.get("/api/auth/me", headers={"Authorization": f"Bearer {tok}"}), 401)

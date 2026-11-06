@@ -1,32 +1,159 @@
+# CultureAtlas AI — chạy toàn bộ app bằng Docker (Guide.md, Cách B). Cấu hình theo docker-production-skill.md (mức 2).
+#   docker compose build
+#   docker compose --profile setup run --rm ai-local-setup     # lần đầu: tải model + xuất reranker ONNX vào volume ai-models
+#   docker compose up -d
+#
+# Mạng:
+#   edge     web ↔ api                                  (web + api mở cổng ra ngoài)
+#   backend  api, worker, db                            (có Internet: OpenAI, nguồn dữ liệu)
+#   ai       api, worker ↔ ai-local — internal, KHÔNG ra Internet (âm thanh người dùng không thể rời máy chủ)
+#   media    web, api, worker ↔ object-storage (MinIO) — web chỉ chuyển GET /media/* (nginx)
+# Lưu trữ: ảnh/video/file → object-storage (MinIO, S3); embedding → qdrant; còn lại (metadata, URL, văn bản) → db.
+# DB, MinIO, Qdrant chỉ mở cho 127.0.0.1 của máy chủ (cho Cách A / công cụ quản trị); AI local không mở cổng nào.
+name: culture
+
+x-hardening: &hardening
+  read_only: true
+  cap_drop: [ ALL ]
+  security_opt: [ "no-new-privileges:true" ]
+  restart: unless-stopped
+  logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+x-backend: &backend
+  <<: *hardening
+  image: culture-atlas/backend:${IMAGE_TAG:-local}
+  build: { context: ./src/backend, target: runtime }
+  env_file: .env
+  user: "10001:10001"
+  tmpfs: [ "/tmp:size=64m,mode=1777" ]
+
+x-storage-env: &storage-env
+  S3_ENDPOINT: "object-storage:9000"
+  QDRANT_URL: "http://qdrant:6333"
+
 services:
   db:
-    image: pgvector/pgvector:pg16
-    environment: { POSTGRES_DB: culture_atlas, POSTGRES_USER: atlas, POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-atlas} }
+    image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+    restart: unless-stopped
+    environment: { POSTGRES_DB: culture_atlas, POSTGRES_USER: atlas, POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-atlas}" }
     volumes: [ "pgdata:/var/lib/postgresql/data", "./src/database/culture_atlas.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro" ]
-    ports: [ "5432:5432" ]
-  api:
-    build: ./src/backend
-    env_file: .env
-    environment: { AI_LOCAL_URL: "http://ai-local:8100" }
-    depends_on: [ db, ai-local ]
-    ports: [ "8000:8000" ]
+    ports: [ "127.0.0.1:${DB_PORT:-5432}:5432" ]
+    networks: [ backend ]
+    # entrypoint của postgres cần đổi chủ thư mục rồi hạ quyền xuống user postgres → chỉ giữ đúng các capability đó
+    cap_drop: [ ALL ]
+    cap_add: [ CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID ]
+    security_opt: [ "no-new-privileges:true" ]
+    read_only: true
+    tmpfs: [ "/tmp:size=64m", "/var/run/postgresql:size=8m" ]
+    shm_size: 128m
+    deploy: { resources: { limits: { cpus: "2", memory: 1G, pids: 200 } } }
+    healthcheck: { test: [ "CMD-SHELL", "pg_isready -U atlas -d culture_atlas" ], interval: 3s, timeout: 3s, retries: 40, start_period: 10s }
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+  # Object storage S3 — MinIO build từ image phancuong12345/minio (src/object-storage/Dockerfile).
+  # Ngoại lệ bảo mật đã ghi nhận: docs/security-exceptions.md
+  object-storage:
+    <<: *hardening
+    image: culture-atlas/object-storage:${IMAGE_TAG:-local}
+    build: { context: ./src/object-storage }
+    user: "10001:10001"
+    environment:
+      MINIO_ROOT_USER: "${S3_ACCESS_KEY:?đặt S3_ACCESS_KEY trong .env}"
+      MINIO_ROOT_PASSWORD: "${S3_SECRET_KEY:?đặt S3_SECRET_KEY trong .env}"
+      MINIO_BROWSER_REDIRECT: "off"
+      MINIO_UPDATE: "off"
+    volumes: [ "object-data:/data" ]
+    tmpfs: [ "/tmp:size=64m,mode=1777" ]
+    ports: [ "127.0.0.1:${S3_PORT:-9000}:9000", "127.0.0.1:${S3_CONSOLE_PORT:-9001}:9001" ]
+    networks: [ media ]
+    deploy: { resources: { limits: { cpus: "2", memory: 1G, pids: 256 } } }
+
+  # Vector DB cho embedding của AI Guide (bản unprivileged, uid 1000)
+  qdrant:
+    <<: *hardening
+    image: mirror.gcr.io/qdrant/qdrant:v1.20.0-unprivileged@sha256:8c215051dc7bc15221b5f89c100a84a4b04d0dd8497fb73e6fa86fc948d1a41d
+    user: "1000:1000"
+    environment:
+      QDRANT__SERVICE__API_KEY: "${QDRANT_API_KEY:?đặt QDRANT_API_KEY trong .env}"
+      QDRANT__TELEMETRY_DISABLED: "true"
+    volumes: [ "qdrant-data:/qdrant/storage" ]
+    tmpfs: [ "/tmp:size=64m,mode=1777", "/qdrant/snapshots:size=64m,uid=1000,gid=1000" ]
+    ports: [ "127.0.0.1:${QDRANT_PORT:-6333}:6333" ]
+    networks: [ backend ]
+    healthcheck: { test: [ "CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/6333" ], interval: 5s, timeout: 3s, retries: 20 }
+    deploy: { resources: { limits: { cpus: "2", memory: 2G, pids: 256 } } }
+
   ai-local:
-    build: ./src/ai-local
-    environment: { AI_LOCAL_THREADS: "8" }
+    <<: *hardening
+    image: culture-atlas/ai-local:${IMAGE_TAG:-local}
+    build: { context: ./src/ai-local, target: runtime }
+    user: "10001:10001"
+    environment: { AI_LOCAL_THREADS: "${AI_LOCAL_THREADS:-12}", AI_LOCAL_PRELOAD: "1" }
     volumes: [ "ai-models:/models" ]
-    # Lần đầu: docker compose run --rm ai-local python -m ai_local.download
-    healthcheck: { test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8100/health')" ], interval: 10s, retries: 30 }
+    tmpfs: [ "/tmp:size=256m,mode=1777" ]
+    networks: [ ai ]
+    deploy: { resources: { limits: { cpus: "${AI_LOCAL_CPUS:-12}", memory: 6G, pids: 512 } } }
+
+  # Chạy MỘT LẦN: docker compose --profile setup run --rm ai-local-setup
+  ai-local-setup:
+    image: culture-atlas/ai-local-setup:${IMAGE_TAG:-local}
+    build: { context: ./src/ai-local, target: setup }
+    profiles: [ setup ]
+    user: "10001:10001"
+    read_only: true
+    cap_drop: [ ALL ]
+    security_opt: [ "no-new-privileges:true" ]
+    volumes: [ "ai-models:/models" ]
+    tmpfs: [ "/tmp:size=4g,mode=1777" ]
+    networks: [ backend ]          # cần Internet để tải model
+    deploy: { resources: { limits: { memory: 14G } } }   # xuất reranker cần ~11 GB RAM (một lần)
+
+  api:
+    <<: *backend
+    environment:
+      <<: *storage-env
+      AI_LOCAL_URL: "http://ai-local:8100"
+      DATABASE_URL: "postgresql+asyncpg://atlas:${POSTGRES_PASSWORD:-atlas}@db:5432/culture_atlas"
+    depends_on: { db: { condition: service_healthy }, ai-local: { condition: service_healthy }, qdrant: { condition: service_healthy } }
+    ports: [ "${API_PORT:-8000}:8000" ]
+    networks: [ edge, backend, ai, media ]
+    deploy: { resources: { limits: { cpus: "2", memory: 512M, pids: 256 } } }
+
   worker:
-    build: ./src/backend
-    command: python -m worker.scheduler
-    env_file: .env
-    depends_on: [ db ]
+    <<: *backend
+    command: python -m worker.scheduler          # đồng bộ định kỳ; chạy ngay: docker compose run --rm worker python -m worker.cli run-all
+    environment:
+      <<: *storage-env
+      WORKER_DATABASE_URL: "postgresql://atlas:${POSTGRES_PASSWORD:-atlas}@db:5432/culture_atlas"
+      WORKER_DATA_DIR: /data
+      AI_LOCAL_URL: "http://ai-local:8100"       # embedding khi lập chỉ mục RAG (worker.cli index)
+    volumes: [ "worker-data:/data" ]
+    depends_on: { db: { condition: service_healthy }, object-storage: { condition: service_healthy }, qdrant: { condition: service_healthy } }
+    networks: [ backend, ai, media ]
+    healthcheck: { disable: true }               # không chạy HTTP
+    deploy: { resources: { limits: { cpus: "1", memory: 1G, pids: 256 } } }
+
   web:
-    image: node:22-alpine
-    working_dir: /app
-    command: sh -c "npm ci && npx ng serve --host 0.0.0.0"
-    volumes: [ "./src/frontend:/app" ]
-    ports: [ "4200:4200" ]
+    <<: *hardening
+    image: culture-atlas/web:${IMAGE_TAG:-local}
+    build: { context: ./src/frontend, target: runtime }
+    user: "101:101"                              # user nginx của image nginx-unprivileged
+    tmpfs: [ "/tmp:size=32m,mode=1777" ]
+    depends_on: { api: { condition: service_started }, object-storage: { condition: service_healthy } }
+    ports: [ "${WEB_PORT:-4200}:8080" ]
+    networks: [ edge, media ]
+    deploy: { resources: { limits: { cpus: "1", memory: 128M, pids: 128 } } }
+
+networks:
+  edge:
+  backend:
+  ai:
+    internal: true
+  media:
+
 volumes:
   pgdata:
   ai-models:
+  worker-data:
+  object-data:
+  qdrant-data:

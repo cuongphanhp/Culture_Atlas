@@ -50,7 +50,7 @@ Mỗi test API khai báo endpoint mình cần bằng decorator, ví dụ `@route
 | `complete_json(name=...)` với tên `follow_ups`, `comparison`, `quiz_drafts` | `FakeLLM` có kịch bản theo tên tác vụ |
 | Cấu hình đọc từ biến môi trường `DATABASE_URL`, `JWT_SECRET`, `GUEST_DAILY_LIMIT` | conftest ghi đè các biến này cho môi trường test |
 | Khách được nhận diện bằng header `X-Client-Id` (nếu không có thì dùng IP) | Mỗi test là một khách riêng, rate limit không lẫn giữa các test |
-| JWT dùng HS256 với `JWT_SECRET`, có `exp` | Test tạo token hết hạn hoặc giả mạo (AC15.2) |
+| JWT dùng HS256 (thư viện **PyJWT**) với `JWT_SECRET` dài ≥ 32 byte, có `exp` | Test tạo token hết hạn hoặc giả mạo (AC15.2). Bỏ `python-jose` vì không còn bảo trì và có CVE CRITICAL |
 | Mọi lỗi trả `application/problem+json`. Lỗi validate trả **400**, vi phạm nghiệp vụ trả **422** | `assert_problem` |
 
 Khi đổi một quy ước, cập nhật `conftest.py`, `fakes.py` và bảng này **trong cùng commit**.

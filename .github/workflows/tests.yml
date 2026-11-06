@@ -6,22 +6,20 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
-    services:
-      db:
-        image: pgvector/pgvector:pg16
-        env: { POSTGRES_USER: atlas, POSTGRES_PASSWORD: atlas, POSTGRES_DB: postgres }
-        ports: [ "55432:5432" ]
-        options: >-
-          --health-cmd "pg_isready -U atlas" --health-interval 2s --health-timeout 3s --health-retries 30
-    env:
-      TEST_DATABASE_URL: postgresql://atlas:atlas@localhost:55432/culture_atlas_test
-    defaults: { run: { working-directory: src/backend } }
     steps:
       - uses: actions/checkout@v4
+      - name: docs/PROJECT_OVERVIEW.md khớp mã nguồn
+        run: python3 scripts/project_overview.py --check
+      - name: Hạ tầng test (PostgreSQL 55432, MinIO 59000, Qdrant 56333)
+        run: docker compose -f compose.test.yaml up -d --wait
       - uses: actions/setup-python@v5
         with: { python-version: "3.13" }
       - run: pip install -e ".[dev]"
+        working-directory: src/backend
+      - run: python -m ruff check .     # docstring + type hint (pyproject.toml [tool.ruff.lint])
+        working-directory: src/backend
       - run: python -m pytest -q
+        working-directory: src/backend
 
   ai-local:
     runs-on: ubuntu-latest
@@ -30,9 +28,33 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: sudo apt-get install -y ffmpeg
-      - run: pip install --extra-index-url https://download.pytorch.org/whl/cpu -e ".[dev]"
+      - run: pip install -e ".[dev]"   # PyAV kèm sẵn ffmpeg; không cần torch
+      - run: python -m ruff check .
       - run: python -m pytest -q    # engine giả; test model thật (-m models) chạy thủ công
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build checks (docker-production-skill.md §17)
+        run: for d in src/backend src/ai-local src/frontend src/object-storage; do docker build --check "$d"; done
+      - name: Build runtime images
+        run: |
+          docker build --target runtime -t culture-atlas/backend:ci src/backend
+          docker build --target runtime -t culture-atlas/ai-local:ci src/ai-local
+          docker build --target runtime -t culture-atlas/web:ci src/frontend
+      - name: Images run as non-root
+        run: |
+          for i in backend ai-local web; do
+            u=$(docker run --rm --entrypoint id culture-atlas/$i:ci -u); echo "$i uid=$u"; test "$u" != "0"
+          done
+      - name: CVE scan (CRITICAL fails the build)
+        run: |
+          for i in backend ai-local web; do
+            docker save culture-atlas/$i:ci -o "$RUNNER_TEMP/$i.tar"
+            docker run --rm -v "$RUNNER_TEMP":/scan:ro aquasec/trivy:latest image --quiet --scanners vuln \
+              --severity CRITICAL --exit-code 1 --input "/scan/$i.tar"
+          done
 
   frontend:
     runs-on: ubuntu-latest
