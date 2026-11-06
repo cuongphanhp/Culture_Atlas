@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 from worker.config import Settings
 from worker.core.http import PoliteSession, RobotsDisallowed
@@ -15,6 +15,8 @@ log = logging.getLogger(__name__)
 
 @dataclass
 class Context:
+    """Ngữ cảnh một lượt chạy: cấu hình, HTTP client lịch sự, các quốc gia cần lấy, giới hạn bản ghi."""
+
     settings: Settings
     http: PoliteSession
     countries: dict[str, str]
@@ -22,6 +24,8 @@ class Context:
 
 
 class Source(ABC):
+    """Một nguồn dữ liệu. Lớp con khai báo metadata (tên, giấy phép, cách truy cập) và cài `collect()`."""
+
     name: str = ""
     title: str = ""
     access: str = "api"          # api | html | browser | file
@@ -29,7 +33,7 @@ class Source(ABC):
     license: str = ""
     homepage: str = ""
 
-    def __init__(self, ctx: Context):
+    def __init__(self, ctx: Context) -> None:
         self.ctx = ctx
         self.run = RunLog(self.name)
         st = ctx.settings
@@ -46,6 +50,7 @@ class Source(ABC):
         """Sinh các bản ghi chuẩn hoá (đã lưu dữ liệu thô bên trong)."""
 
     def execute(self) -> RunLog:
+        """Chạy trọn một lượt: kiểm tra điều kiện, thu thập, ghi bản ghi, ghi nhật ký; lỗi không làm dừng worker."""
         ok, why = self.available()
         if not ok:
             self.run.status = "skipped"
@@ -59,7 +64,7 @@ class Source(ABC):
                         self.run.records_changed += 1
             except RobotsDisallowed as e:
                 self.run.skipped.append(f"robots.txt cấm: {e}")
-            except Exception as e:  # noqa: BLE001 — nhật ký lỗi, không làm sập cả lượt chạy
+            except Exception as e:
                 log.exception("[%s] lỗi", self.name)
                 self.run.error("collect", e)
         self.out.close()

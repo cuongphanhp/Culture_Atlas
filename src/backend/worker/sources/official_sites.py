@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import re
 import xml.etree.ElementTree as ET
+from collections.abc import Iterator
 from dataclasses import dataclass
 
 from bs4 import BeautifulSoup
@@ -27,6 +28,8 @@ EXCERPT = 300
 
 @dataclass(frozen=True)
 class SiteConfig:
+    """Một trang du lịch chính thức: sitemap, mẫu URL cần lấy / bỏ, CSS chờ khi trang dùng JavaScript."""
+
     country: str
     publisher: str
     sitemap: str
@@ -54,6 +57,7 @@ def parse_sitemap(xml_text: str) -> tuple[list[str], list[str]]:
 
 
 def extract_sections(html: str) -> tuple[str, list[tuple[str, str]]]:
+    """HTML trang → (tiêu đề, [(mục, văn bản)]); bỏ menu, footer, script."""
     soup = BeautifulSoup(html, "lxml")
     for bad in soup.select("script, style, noscript, nav, header, footer, aside, form, [aria-hidden=true]"):
         bad.decompose()
@@ -73,10 +77,13 @@ def extract_sections(html: str) -> tuple[str, list[tuple[str, str]]]:
 
 
 class OfficialTourismSites(Source):
+    """Trang du lịch quốc gia (JNTO, vietnam.travel): sitemap → trang văn hoá → trích đoạn ngắn."""
+
     name, title = "official_sites", "Official tourism sites (Selenium)"
     access, auth, license, homepage = "browser", "none", "All rights reserved — excerpts + links only", ""
 
     def _discover(self, cfg: SiteConfig, max_urls: int) -> list[str]:
+        """Duyệt sitemap (kể cả sitemap con) → các URL khớp mẫu `include`, tối đa `max_urls`."""
         todo, urls, seen = [cfg.sitemap], [], set()
         while todo and len(seen) < 30:
             sm = todo.pop(0)
@@ -87,11 +94,12 @@ class OfficialTourismSites(Source):
             self.raw.save(f"sitemap_{cfg.country}_{len(seen)}.xml", r.text)
             found, children = parse_sitemap(r.text)
             todo += children
-            inc, exc = re.compile(cfg.include, re.I), re.compile(cfg.exclude, re.I)
+            inc, exc = re.compile(cfg.include, re.IGNORECASE), re.compile(cfg.exclude, re.IGNORECASE)
             urls += [u for u in found if cfg.lang_prefix in u and inc.search(u) and not exc.search(u)]
         return list(dict.fromkeys(urls))[:max_urls]
 
-    def collect(self):
+    def collect(self) -> Iterator[DocumentRecord]:
+        """Sinh bản ghi chuẩn hoá cho từng quốc gia; payload thô được lưu qua self.raw."""
         max_pages = self.ctx.limit or 6
         sites = [s for s in SITES if s.country in self.ctx.countries]
         if not sites:

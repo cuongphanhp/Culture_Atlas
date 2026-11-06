@@ -1,3 +1,4 @@
+"""Smoke test: /api/health trả ok (không cần DB)."""
 from fastapi.testclient import TestClient
 
 from app.main import app

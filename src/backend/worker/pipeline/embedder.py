@@ -1,1 +1,3 @@
-"""Embedding đa ngôn ngữ (BGE-M3 / multilingual-E5), ghi entry_chunks.embedding."""
+"""Embedding. KHUNG — chưa dùng: indexer gọi dịch vụ AI local (indexer.http_embedder), vector lưu ở Qdrant
+(worker/core/vectors.py).
+"""

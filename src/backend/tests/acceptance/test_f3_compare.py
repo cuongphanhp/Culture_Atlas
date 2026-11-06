@@ -11,8 +11,7 @@ def compare(client, a, b, topic, lang="vi"):
 
 
 def cells(result):
-    for s in result["similarities"]:
-        yield s
+    yield from result["similarities"]
     for row in result["rows"]:
         yield row["a"]
         yield row["b"]

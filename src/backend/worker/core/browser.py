@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import logging
 import time
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Iterator
 
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
@@ -28,6 +28,7 @@ class ChallengeDetected(Exception):
 
 @contextmanager
 def chrome(settings: Settings) -> Iterator[webdriver.Chrome]:
+    """Chrome headless (Selenium) cho trang cần JavaScript; tự đóng khi ra khỏi `with`."""
     opts = webdriver.ChromeOptions()
     if settings.headless:
         opts.add_argument("--headless=new")

@@ -4,6 +4,8 @@ Europeana Search API (`EUROPEANA_WSKEY`). Phân trang bằng cursor, lọc `reus
 """
 from __future__ import annotations
 
+from collections.abc import Iterator
+
 from worker.core.models import MediaRecord, Provenance
 from worker.sources.base import Source
 
@@ -18,6 +20,7 @@ OPEN_RIGHTS = ("publicdomain", "/by/", "/by-sa/", "/zero/", "/mark/")
 
 
 def parse_item(it: dict, iso: str) -> MediaRecord | None:
+    """Một item Europeana → MediaRecord; chỉ giữ giấy phép mở (CC0 / PDM / CC BY / CC BY-SA)."""
     rights = (it.get("rights") or [""])[0]
     if not any(r in rights for r in OPEN_RIGHTS):
         return None
@@ -29,10 +32,13 @@ def parse_item(it: dict, iso: str) -> MediaRecord | None:
 
 
 class Europeana(Source):
+    """Europeana Search API: hiện vật văn hoá có ảnh, theo từ khoá từng quốc gia."""
+
     name, title = "europeana", "Europeana Search API"
     access, auth, license, homepage = "api", "api_key", "Per record (rights field)", "https://pro.europeana.eu/page/apis"
 
-    def collect(self):
+    def collect(self) -> Iterator[MediaRecord]:
+        """Sinh bản ghi chuẩn hoá cho từng quốc gia; payload thô được lưu qua self.raw."""
         key = self.ctx.settings.europeana_wskey
         target = self.ctx.limit or 12
         for iso in self.ctx.countries:

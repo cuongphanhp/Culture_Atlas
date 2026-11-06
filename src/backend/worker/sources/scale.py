@@ -5,6 +5,7 @@ Repo chưa công bố giấy phép → chỉ dùng tham khảo taxonomy / gợi 
 from __future__ import annotations
 
 import io
+from collections.abc import Iterator
 
 import openpyxl
 
@@ -18,6 +19,7 @@ SHEETS = {"IN": "India", "KR": "South Korea", "CN": "China", "TH": "Thailand", "
 
 
 def parse_workbook(data: bytes, aspect: str, countries: dict[str, str], limit: int | None) -> list[TopicRecord]:
+    """Một file Excel của SCALE (một khía cạnh) → TopicRecord cho các quốc gia cần lấy."""
     wb = openpyxl.load_workbook(io.BytesIO(data), read_only=True)
     out = []
     for iso in countries:
@@ -34,11 +36,14 @@ def parse_workbook(data: bytes, aspect: str, countries: dict[str, str], limit: i
 
 
 class ScaleCulturalData(Source):
+    """Bộ dữ liệu SCALE (Google Research): gợi ý chủ đề món ăn, lễ hội, trang phục, địa danh."""
+
     name, title = "scale", "SCALE Cultural Data (Google Research)"
     access, auth, license = "file", "none", "Unspecified — reference only"
     homepage = "https://github.com/google-research-datasets/SCALE-Cultural-Data"
 
-    def collect(self):
+    def collect(self) -> Iterator[TopicRecord]:
+        """Sinh bản ghi chuẩn hoá cho từng quốc gia; payload thô được lưu qua self.raw."""
         for aspect in ASPECTS:
             r = self.ctx.http.get(RAW.format(aspect=aspect))  # raw.githubusercontent.com — có kiểm tra robots.txt
             self.raw.save(f"{aspect}.xlsx", r.content)

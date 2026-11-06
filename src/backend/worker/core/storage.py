@@ -7,11 +7,10 @@ import re
 import time
 import traceback
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from worker.core.models import to_dict
-
 
 SECRET_PARAMS = re.compile(r"(?i)\b(api_key|api-key|apikey|wskey|key|token|access_token)=([^&\s'\"]+)")
 
@@ -22,23 +21,26 @@ def redact(text: str) -> str:
 
 
 def _slug(s: str) -> str:
+    """Tên file an toàn từ chuỗi bất kỳ."""
     return re.sub(r"[^A-Za-z0-9._-]+", "_", s)[:120]
 
 
 class RawStore:
     """`secrets`: giá trị khoá/token đang cấu hình — được thay bằng *** trước khi ghi (một số API nhúng khoá vào link trả về)."""
 
-    def __init__(self, root: Path, source: str, run_id: str, secrets: tuple[str, ...] = ()):
+    def __init__(self, root: Path, source: str, run_id: str, secrets: tuple[str, ...] = ()) -> None:
         self.dir = root / "raw" / source / run_id
         self.dir.mkdir(parents=True, exist_ok=True)
         self.secrets = tuple(s for s in secrets if s and len(s) >= 4)
 
     def _clean(self, text: str) -> str:
+        """Che khoá / token trước khi ghi xuống đĩa."""
         for s in self.secrets:
             text = text.replace(s, "***")
         return redact(text)
 
     def save(self, name: str, payload: str | bytes | dict | list) -> Path:
+        """Ghi payload thô của một request vào data/raw/<nguồn>/<run_id>/; dict/list → .json."""
         path = self.dir / _slug(name)
         if isinstance(payload, (dict, list)):
             path = path.with_suffix(".json")
@@ -51,6 +53,7 @@ class RawStore:
 
 
 def record_countries(d: dict) -> set[str]:
+    """Các mã quốc gia mà một bản ghi chuẩn hoá thuộc về."""
     return {c for c in [d.get("iso2"), d.get("country"), *(d.get("countries") or [])] if c}
 
 
@@ -60,7 +63,7 @@ class RecordWriter:
     Chỉ thay bản ghi của các quốc gia trong lượt chạy hiện tại; bản ghi của quốc gia khác được giữ nguyên.
     """
 
-    def __init__(self, root: Path, source: str, countries: set[str] | None = None):
+    def __init__(self, root: Path, source: str, countries: set[str] | None = None) -> None:
         self.path = root / "normalized" / f"{source}.jsonl"
         self.path.parent.mkdir(parents=True, exist_ok=True)
         kept: list[str] = []
@@ -76,11 +79,13 @@ class RecordWriter:
 
     @staticmethod
     def key(d: dict) -> str:
+        """Khoá khử trùng của bản ghi (loại + định danh + quốc gia + mục)."""
         ident = [d.get("kind"), d.get("iso2") or d.get("unesco_id") or d.get("url") or "", d.get("country"),
                  d.get("section"), d.get("item"), d.get("title")]
         return hashlib.sha1(json.dumps(ident, ensure_ascii=False).encode()).hexdigest()
 
-    def write(self, rec) -> bool:
+    def write(self, rec: object) -> bool:
+        """Ghi một bản ghi; trả False nếu trùng khoá với bản ghi đã có."""
         d = to_dict(rec)
         k = self.key(d)
         if k in self._seen:
@@ -91,6 +96,7 @@ class RecordWriter:
         return True
 
     def close(self) -> None:
+        """Đóng file JSONL."""
         self._fh.close()
 
 
@@ -98,9 +104,9 @@ class RecordWriter:
 class RunLog:
     """Tương ứng bảng ingestion_runs."""
     source_name: str
-    run_id: str = field(default_factory=lambda: datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"))
+    run_id: str = field(default_factory=lambda: datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ"))
     status: str = "running"
-    started_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    started_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     finished_at: str | None = None
     records_in: int = 0
     records_changed: int = 0
@@ -109,10 +115,12 @@ class RunLog:
     _t0: float = field(default_factory=time.monotonic, repr=False)
 
     def error(self, where: str, exc: BaseException) -> None:
+        """Ghi một lỗi (đã che khoá, cắt 500 ký tự)."""
         self.errors.append(redact(f"{where}: {type(exc).__name__}: {exc}")[:500])
 
     def finish(self, root: Path) -> Path:
-        self.finished_at = datetime.now(timezone.utc).isoformat()
+        """Kết thúc lượt chạy: tính trạng thái, ghi data/runs/<run_id>_<nguồn>.json."""
+        self.finished_at = datetime.now(UTC).isoformat()
         if self.status == "running":
             self.status = "failed" if self.errors and not self.records_changed else "succeeded"
         out = root / "runs" / f"{self.run_id}_{self.source_name}.json"
@@ -124,4 +132,5 @@ class RunLog:
 
 
 def format_exc() -> str:
+    """Traceback rút gọn (3 khung) để ghi log."""
     return traceback.format_exc(limit=3)

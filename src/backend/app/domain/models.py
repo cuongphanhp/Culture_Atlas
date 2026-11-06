@@ -1,1 +1,1 @@
-"""ORM: Country, CultureEntry, Claim, Source, ClaimSource, EntryChunk, Comparison, QuizQuestion, ChatLog, Feedback…"""
+"""ORM: Country, CultureEntry, Claim, Source, … KHUNG — chưa triển khai (API dùng SQL trực tiếp)."""

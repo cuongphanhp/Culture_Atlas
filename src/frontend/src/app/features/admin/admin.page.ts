@@ -1,7 +1,9 @@
+/** Trang quản trị nội dung (prototype): hàng đợi duyệt, nguồn dữ liệu, độ phủ. */
 import { Component, inject, signal } from '@angular/core';
 import { coverageCell } from '../../core/mock/mock-data';
 import { CultureService } from '../../core/services/culture.service';
 
+/** Trang /admin. */
 @Component({
   selector: 'ca-admin-page',
   templateUrl: './admin.page.html',
@@ -19,6 +21,7 @@ export class AdminPage {
     { label: 'Claim đã duyệt', value: '1.284', tone: 'teal' },
     { label: 'Citation correctness', value: '92%', tone: 'teal' },
   ];
+  /** Trạng thái đồng bộ của từng nguồn dữ liệu. */
   sources() {
     const state: Record<string, [string, string]> = {
       unesco_whc: ['published', 'Đã đồng bộ'], unesco_ich: ['published', 'Đã đồng bộ'], smithsonian: ['published', 'Đã đồng bộ (CC0)'],
@@ -26,6 +29,7 @@ export class AdminPage {
     };
     return Object.entries(this.svc.snapshotInfo.sources).map(([key, v]) => ({ key, ...v, state: state[key][0], stateLabel: state[key][1] }));
   }
+  /** Hàng đợi duyệt theo tab đang chọn. */
   rows() {
     const t = this.tab();
     return this.svc.reviewQueue.filter((r) => t === 'all' || r.origin === t);

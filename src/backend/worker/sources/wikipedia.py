@@ -5,6 +5,7 @@ rồi dùng BeautifulSoup tách theo mục (h2/h3), làm sạch chú thích [1],
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 
 from bs4 import BeautifulSoup
 
@@ -42,10 +43,13 @@ def parse_sections(html: str, min_chars: int = 200) -> list[tuple[str, str]]:
 
 
 class Wikipedia(Source):
+    """Wikipedia (Culture of …, Etiquette in …): tài liệu tham khảo cho RAG, CC BY-SA 4.0."""
+
     name, title = "wikipedia", "Wikipedia — etiquette & culture articles"
     access, auth, license, homepage = "api", "none", "CC BY-SA 4.0", "https://en.wikipedia.org"
 
     def _titles(self, iso: str, country: str) -> list[str]:
+        """Các bài cần lấy cho một nước."""
         candidates = [f"Etiquette in {country}", f"{DEMONYM[iso]} etiquette", f"Culture of {country}"]
         data = self.ctx.http.get_json(API, respect_robots=False, params={
             "action": "query", "format": "json", "titles": "|".join(candidates), "redirects": 1})
@@ -53,7 +57,8 @@ class Wikipedia(Source):
         found = [p["title"] for p in pages if "missing" not in p]
         return list(dict.fromkeys(found))[:2]
 
-    def collect(self):
+    def collect(self) -> Iterator[DocumentRecord]:
+        """Sinh bản ghi chuẩn hoá cho từng quốc gia; payload thô được lưu qua self.raw."""
         for iso, country in self.ctx.countries.items():
             for title in self._titles(iso, country):
                 data = self.ctx.http.get_json(API, respect_robots=False, params={

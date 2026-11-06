@@ -5,6 +5,7 @@ import logging
 import threading
 import time
 import urllib.robotparser
+from typing import Any
 from urllib.parse import urlparse
 
 import requests
@@ -23,12 +24,13 @@ class RobotsDisallowed(Exception):
 class RateLimiter:
     """Đảm bảo khoảng cách tối thiểu giữa hai request tới cùng một domain."""
 
-    def __init__(self, min_interval_s: float):
+    def __init__(self, min_interval_s: float) -> None:
         self.min_interval_s = min_interval_s
         self._last: dict[str, float] = {}
         self._lock = threading.Lock()
 
     def wait(self, host: str, interval_s: float | None = None) -> float:
+        """Chờ đủ khoảng cách tới request trước cùng domain; trả về số giây đã chờ."""
         interval = self.min_interval_s if interval_s is None else interval_s
         with self._lock:
             now = time.monotonic()
@@ -40,11 +42,14 @@ class RateLimiter:
 
 
 class RobotsCache:
-    def __init__(self, session: requests.Session, user_agent: str, timeout: float):
+    """Đọc và nhớ robots.txt theo domain (RFC 9309): bị chặn đọc / lỗi mạng → coi như cấm."""
+
+    def __init__(self, session: requests.Session, user_agent: str, timeout: float) -> None:
         self.session, self.user_agent, self.timeout = session, user_agent, timeout
         self._parsers: dict[str, urllib.robotparser.RobotFileParser] = {}
 
     def parser(self, url: str) -> urllib.robotparser.RobotFileParser:
+        """Bộ phân tích robots.txt của domain chứa `url` (tải một lần)."""
         p = urlparse(url)
         root = f"{p.scheme}://{p.netloc}"
         if root not in self._parsers:
@@ -63,9 +68,11 @@ class RobotsCache:
         return self._parsers[root]
 
     def allowed(self, url: str) -> bool:
+        """User-Agent của worker có được thu thập `url` không."""
         return self.parser(url).can_fetch(self.user_agent, url)
 
     def crawl_delay(self, url: str) -> float | None:
+        """Crawl-delay mà robots.txt yêu cầu (giây), None nếu không có."""
         d = self.parser(url).crawl_delay(self.user_agent)
         return float(d) if d else None
 
@@ -77,7 +84,7 @@ class PoliteSession:
     `respect_robots=False` vì việc dùng API được điều chỉnh bởi điều khoản API, không phải robots.txt.
     """
 
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": settings.user_agent, "Accept-Language": "en,vi;q=0.8"})
@@ -91,6 +98,7 @@ class PoliteSession:
 
     def get(self, url: str, *, respect_robots: bool = True, params: dict | None = None,
             headers: dict | None = None, min_interval_s: float | None = None) -> requests.Response:
+        """GET có kiểm tra robots.txt, giãn cách theo domain, retry; lỗi HTTP → ném requests.HTTPError."""
         if respect_robots and not self.robots.allowed(url):
             raise RobotsDisallowed(url)
         interval = min_interval_s
@@ -102,5 +110,6 @@ class PoliteSession:
         r.raise_for_status()
         return r
 
-    def get_json(self, url: str, **kw) -> dict | list:
+    def get_json(self, url: str, **kw: Any) -> dict | list:
+        """GET rồi parse JSON."""
         return self.get(url, **kw).json()

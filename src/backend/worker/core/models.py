@@ -7,6 +7,8 @@ from datetime import date
 
 @dataclass
 class Provenance:
+    """Nguồn gốc của một bản ghi: nguồn, URL gốc, giấy phép, ngày lấy."""
+
     source_name: str          # khoá nguồn, ví dụ "unesco_whc"
     source_url: str           # URL bản ghi gốc
     license: str              # giấy phép áp dụng cho bản ghi
@@ -15,6 +17,8 @@ class Provenance:
 
 @dataclass
 class CountryRecord:
+    """Quốc gia (Wikidata / REST Countries) → bảng countries."""
+
     iso2: str
     name_en: str
     capital: str | None = None
@@ -32,6 +36,8 @@ class CountryRecord:
 
 @dataclass
 class HeritageRecord:
+    """Di sản UNESCO (vật thể / phi vật thể) → heritage_items + heritage_item_countries."""
+
     unesco_id: str
     name: str
     type: str                 # tangible | intangible
@@ -49,6 +55,8 @@ class HeritageRecord:
 
 @dataclass
 class MediaRecord:
+    """Ảnh / hiện vật bảo tàng → media_assets (file chỉ lưu khi giấy phép cho phép, BR09)."""
+
     country: str
     title: str
     url: str                  # trang bản ghi gốc
@@ -78,6 +86,8 @@ class DocumentRecord:
 
 @dataclass
 class TopicRecord:
+    """Chủ đề văn hoá từ bộ dữ liệu SCALE (món ăn, lễ hội, trang phục, địa danh)."""
+
     country: str
     aspect: str               # cuisine | holidays_and_festivals | clothing_and_accessories | landmarks
     item: str
@@ -86,5 +96,6 @@ class TopicRecord:
     kind: str = "topic"
 
 
-def to_dict(rec) -> dict:
+def to_dict(rec: object) -> dict:
+    """Dataclass → dict (để ghi JSONL)."""
     return asdict(rec)

@@ -3,6 +3,7 @@ import {
   Category, ChatMessage, Comparison, Country, CultureEntry, HeritageItem, QuizQuestion, ReviewItem, Source,
 } from '../models/culture.models';
 
+/** 12 danh mục văn hoá (khớp enum category_code của DB). */
 export const CATEGORIES: Category[] = [
   { code: 'greetings', nameVi: 'Chào hỏi', icon: '🙏' },
   { code: 'etiquette', nameVi: 'Phép lịch sự', icon: '🤝' },
@@ -18,6 +19,7 @@ export const CATEGORIES: Category[] = [
   { code: 'taboos', nameVi: 'Điều kiêng kỵ', icon: '⚠️' },
 ];
 
+/** 10 quốc gia MVP. */
 export const COUNTRIES: Country[] = [
   { iso2: 'VN', isoNumeric: '704', nameVi: 'Việt Nam', nameEn: 'Vietnam', region: 'Đông Nam Á', capital: 'Hà Nội', languages: ['Tiếng Việt'], currency: 'Đồng (VND)', flag: '🇻🇳', coverage: 92, featured: true },
   { iso2: 'TH', isoNumeric: '764', nameVi: 'Thái Lan', nameEn: 'Thailand', region: 'Đông Nam Á', capital: 'Bangkok', languages: ['Tiếng Thái'], currency: 'Baht (THB)', flag: '🇹🇭', coverage: 71 },
@@ -31,6 +33,7 @@ export const COUNTRIES: Country[] = [
   { iso2: 'KE', isoNumeric: '404', nameVi: 'Kenya', nameEn: 'Kenya', region: 'Châu Phi cận Sahara', capital: 'Nairobi', languages: ['Tiếng Swahili', 'Tiếng Anh'], currency: 'Shilling (KES)', flag: '🇰🇪', coverage: 33 },
 ];
 
+/** Nguồn mẫu cho trích dẫn. */
 export const SOURCES: Source[] = [
   { id: 42, title: 'Japanese etiquette & manners', publisher: 'Japan National Tourism Organization', url: 'https://www.japan.travel', license: 'Trích dẫn ngắn – liên kết nguồn', reliabilityTier: 'official', retrievedAt: '2026-09-12' },
   { id: 43, title: 'Washoku, traditional dietary cultures of the Japanese', publisher: 'UNESCO Intangible Cultural Heritage', url: 'https://ich.unesco.org', license: 'Kiểm tra theo từng bản ghi', reliabilityTier: 'official', retrievedAt: '2026-09-02' },
@@ -43,6 +46,7 @@ export const SOURCES: Source[] = [
   { id: 71, title: 'World Heritage List — Japan', publisher: 'UNESCO World Heritage Centre', url: 'https://whc.unesco.org', license: 'CC BY-SA 4.0 (DataHub)', reliabilityTier: 'official', retrievedAt: '2026-08-30' },
 ];
 
+/** Bài viết mẫu kèm claim có nguồn. */
 export const ENTRIES: CultureEntry[] = [
   {
     id: 1201, countryIso: 'JP', category: 'gift_giving', title: 'Tặng quà ở Nhật Bản',
@@ -75,6 +79,7 @@ export const ENTRIES: CultureEntry[] = [
   },
 ];
 
+/** Mẹo cho người lần đầu đến. */
 export const FIRST_TIME_TIPS: Record<string, { text: string; sourceId: number }[]> = {
   JP: [
     { text: 'Cúi chào là cách chào phổ biến; không cần cúi sâu nếu bạn là khách.', sourceId: 42 },
@@ -85,6 +90,7 @@ export const FIRST_TIME_TIPS: Record<string, { text: string; sourceId: number }[
   ],
 };
 
+/** Di sản tiêu biểu theo nước. */
 export const HERITAGE: Record<string, HeritageItem[]> = {
   JP: [
     { id: 1, name: 'Himeji-jo', type: 'tangible', listType: 'Di sản Thế giới — Văn hoá', inscribedYear: 1993 },
@@ -95,6 +101,7 @@ export const HERITAGE: Record<string, HeritageItem[]> = {
   ],
 };
 
+/** Chủ đề nổi bật ở trang khám phá. */
 export const THEMES = [
   { title: 'Tết âm lịch ở châu Á', countries: 4, img: 'vn-tet' },
   { title: 'Trà trên thế giới', countries: 6, img: 'jp-tea' },
@@ -102,6 +109,7 @@ export const THEMES = [
   { title: 'Lễ hội ánh sáng', countries: 3, img: 'th-loykrathong' },
 ];
 
+/** Lễ hội trong tháng. */
 export const FESTIVALS_THIS_MONTH = [
   { name: 'Día de Muertos', country: 'MX', date: '1–2/11', flag: '🇲🇽', img: 'mx' },
   { name: 'Loy Krathong', country: 'TH', date: 'Tháng 11 (trăng tròn)', flag: '🇹🇭', img: 'th-loykrathong' },
@@ -109,6 +117,7 @@ export const FESTIVALS_THIS_MONTH = [
   { name: 'Shichi-Go-San', country: 'JP', date: '15/11', flag: '🇯🇵', img: 'jp-753' },
 ];
 
+/** Hội thoại mẫu của AI Guide. */
 export const SAMPLE_CHAT: ChatMessage[] = [
   { role: 'user', text: 'Văn hoá tặng quà ở Việt Nam và Nhật Bản khác nhau thế nào?' },
   {
@@ -130,6 +139,7 @@ export const SAMPLE_CHAT: ChatMessage[] = [
   },
 ];
 
+/** Danh sách hội thoại mẫu. */
 export const CHAT_SESSIONS: { title: string; messages: ChatMessage[] }[] = [
   { title: 'Tặng quà VN – JP', messages: SAMPLE_CHAT },
   { title: 'Lễ hội Diwali', messages: [
@@ -149,6 +159,7 @@ export const CHAT_SESSIONS: { title: string; messages: ChatMessage[] }[] = [
   ] },
 ];
 
+/** Bản so sánh mẫu VN – JP. */
 export const COMPARISON_VN_JP: Comparison = {
   countryA: 'VN', countryB: 'JP', topic: 'gift_giving', reviewedBy: 'editor_03',
   similarities: [
@@ -170,6 +181,7 @@ export const COMPARISON_VN_JP: Comparison = {
   insufficient: ['Con số / món quà kiêng kỵ ở Việt Nam — nguồn hiện có mâu thuẫn, chưa kết luận.'],
 };
 
+/** Câu hỏi quiz mẫu. */
 export const QUIZ: QuizQuestion[] = [
   {
     id: 1, countryIso: 'JP', category: 'gift_giving', difficulty: 'easy',
@@ -187,6 +199,7 @@ export const QUIZ: QuizQuestion[] = [
   },
 ];
 
+/** Hàng đợi duyệt mẫu. */
 export const REVIEW_QUEUE: ReviewItem[] = [
   { id: 901, type: 'quiz', title: '5 câu quiz "Phép lịch sự bàn ăn — Hàn Quốc"', country: 'KR', origin: 'ai_generated', status: 'draft', updatedAt: '2026-10-29' },
   { id: 902, type: 'comparison', title: 'So sánh Pháp – Việt Nam: Chào hỏi', country: 'FR', origin: 'ai_generated', status: 'in_review', updatedAt: '2026-10-29' },

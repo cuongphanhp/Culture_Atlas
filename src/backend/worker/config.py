@@ -14,6 +14,8 @@ MVP_COUNTRIES: dict[str, str] = {
 
 @dataclass(frozen=True)
 class Settings:
+    """Cấu hình worker (đọc biến môi trường WORKER_*, khoá API của các nguồn)."""
+
     data_dir: Path = field(default_factory=lambda: Path(os.getenv("WORKER_DATA_DIR", Path(__file__).resolve().parents[1] / "data")))
     user_agent: str = os.getenv(
         "WORKER_USER_AGENT", "CultureAtlasBot/0.1 (+https://github.com/cuongphanhp/Culture_Atlas; education project)")
@@ -30,6 +32,7 @@ class Settings:
 
 
 def countries_from_arg(arg: str | None) -> dict[str, str]:
+    """"JP,VN" → {ISO2: tên tiếng Anh}; rỗng → 10 nước MVP; mã lạ → thoát với thông báo."""
     if not arg:
         return dict(MVP_COUNTRIES)
     wanted = [c.strip().upper() for c in arg.split(",") if c.strip()]

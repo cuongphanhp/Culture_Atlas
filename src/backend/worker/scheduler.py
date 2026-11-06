@@ -21,6 +21,7 @@ SCHEDULE = {
 
 
 def job(names: str) -> None:
+    """Chạy nhóm nguồn rồi nạp lại DB."""
     cli(["run", *names.split()])
     cli(["load"])
 

@@ -1,6 +1,8 @@
 """Wikidata SPARQL — thông tin nền quốc gia (thủ đô, ngôn ngữ chính thức, tiền tệ, láng giềng, dân số). CC0, không cần xác thực."""
 from __future__ import annotations
 
+from collections.abc import Iterator
+
 from worker.core.models import CountryRecord, Provenance
 from worker.sources.base import Source
 
@@ -26,7 +28,13 @@ GROUP BY ?iso2 ?country ?countryLabel ?iso3 ?num ?capitalLabel ?population
 """
 
 
+def _split(b: dict, key: str) -> list[str]:
+    """Giá trị GROUP_CONCAT (phân tách bằng |) → danh sách đã sắp xếp."""
+    return sorted(x for x in b.get(key, {}).get("value", "").split("|") if x)
+
+
 def parse_bindings(rows: list[dict]) -> list[CountryRecord]:
+    """Kết quả SPARQL → CountryRecord (mỗi nước lấy dòng có dân số mới nhất)."""
     best: dict[str, dict] = {}
     for b in rows:
         iso = b["iso2"]["value"]
@@ -35,20 +43,22 @@ def parse_bindings(rows: list[dict]) -> list[CountryRecord]:
             best[iso] = {**b, "_pop": pop}
     out = []
     for iso, b in sorted(best.items()):
-        split = lambda k: sorted(x for x in b.get(k, {}).get("value", "").split("|") if x)
         out.append(CountryRecord(
             iso2=iso, name_en=b["countryLabel"]["value"], capital=b.get("capitalLabel", {}).get("value"),
-            languages=split("langs"), currencies=split("curs"), neighbors=split("neighbors"),
+            languages=_split(b, "langs"), currencies=_split(b, "curs"), neighbors=_split(b, "neighbors"),
             population=b["_pop"] or None, iso3=b.get("iso3", {}).get("value"), iso_numeric=b.get("num", {}).get("value"),
             provenance=Provenance("wikidata", b["country"]["value"], "CC0 1.0")))
     return out
 
 
 class WikidataCountries(Source):
+    """Wikidata SPARQL: thông tin cơ bản của quốc gia (CC0)."""
+
     name, title = "wikidata", "Wikidata — country facts (SPARQL)"
     access, auth, license, homepage = "api", "none", "CC0 1.0", "https://query.wikidata.org"
 
-    def collect(self):
+    def collect(self) -> Iterator[CountryRecord]:
+        """Sinh bản ghi chuẩn hoá cho từng quốc gia; payload thô được lưu qua self.raw."""
         values = " ".join(f'"{c}"' for c in self.ctx.countries)
         data = self.ctx.http.get_json(ENDPOINT, respect_robots=False, params={"query": QUERY % values, "format": "json"},
                                       headers={"Accept": "application/sparql-results+json"})

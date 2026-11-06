@@ -5,7 +5,7 @@ Không scrape whc.unesco.org / ich.unesco.org: robots.txt của hai trang này c
 from __future__ import annotations
 
 import ast
-import json
+from collections.abc import Iterator
 
 from worker.core.models import HeritageRecord, Provenance
 from worker.sources.base import Source
@@ -13,7 +13,8 @@ from worker.sources.base import Source
 API = "https://data.unesco.org/api/explore/v2.1/catalog/datasets"
 
 
-def _list(v) -> list:
+def _list(v: object) -> list:
+    """Trường danh sách của DataHub (list hoặc chuỗi "[...]") → list."""
     if isinstance(v, list):
         return v
     if isinstance(v, str) and v.startswith("["):
@@ -24,7 +25,8 @@ def _list(v) -> list:
     return []
 
 
-def _point(v) -> tuple[float | None, float | None]:
+def _point(v: object) -> tuple[float | None, float | None]:
+    """Toạ độ (dict hoặc chuỗi "{...}") → (lat, lng)."""
     if isinstance(v, dict):
         return v.get("lat"), v.get("lon")
     if isinstance(v, str) and v.startswith("{"):
@@ -37,6 +39,7 @@ def _point(v) -> tuple[float | None, float | None]:
 
 
 def _short(s: str | None, n: int = 600) -> str | None:
+    """Rút gọn văn bản tối đa `n` ký tự."""
     if not s or s == "None":
         return None
     s = " ".join(s.split())
@@ -44,6 +47,7 @@ def _short(s: str | None, n: int = 600) -> str | None:
 
 
 def parse_whc(row: dict, wanted: set[str]) -> HeritageRecord | None:
+    """Một dòng Danh sách Di sản Thế giới (whc001) → HeritageRecord vật thể, nếu thuộc nước cần lấy."""
     isos = [c.upper() for c in _list(row.get("iso_codes"))]
     hit = [c for c in isos if c in wanted]
     if not hit:
@@ -59,6 +63,7 @@ def parse_whc(row: dict, wanted: set[str]) -> HeritageRecord | None:
 
 
 def parse_ich(row: dict, wanted: set[str]) -> HeritageRecord | None:
+    """Một dòng di sản phi vật thể (ich001) → HeritageRecord, nếu thuộc nước cần lấy."""
     isos = [c.upper() for c in _list(row.get("countries"))]
     if not any(c in wanted for c in isos):
         return None
@@ -72,11 +77,14 @@ def parse_ich(row: dict, wanted: set[str]) -> HeritageRecord | None:
 
 
 class _UnescoDataset(Source):
+    """Tải trọn bộ dữ liệu UNESCO DataHub (export JSON) rồi lọc theo quốc gia."""
+
     dataset = ""
     parser = staticmethod(parse_whc)
     access, auth, license = "api", "none", "CC BY-SA 4.0"
 
-    def collect(self):
+    def collect(self) -> Iterator[HeritageRecord]:
+        """Sinh bản ghi chuẩn hoá cho từng quốc gia; payload thô được lưu qua self.raw."""
         meta = self.ctx.http.get_json(f"{API}/{self.dataset}", respect_robots=False)
         self.raw.save("dataset_meta", meta)
         rows = self.ctx.http.get_json(f"{API}/{self.dataset}/exports/json", respect_robots=False)
@@ -95,12 +103,16 @@ class _UnescoDataset(Source):
 
 
 class UnescoWorldHeritage(_UnescoDataset):
+    """Di sản thế giới UNESCO (vật thể) — CC BY-SA 4.0."""
+
     name, title, dataset = "unesco_whc", "UNESCO World Heritage List (DataHub whc001)", "whc001"
     homepage = "https://data.unesco.org/explore/dataset/whc001/"
     parser = staticmethod(parse_whc)
 
 
 class UnescoIntangibleHeritage(_UnescoDataset):
+    """Di sản văn hoá phi vật thể UNESCO — CC BY-SA 4.0."""
+
     name, title, dataset = "unesco_ich", "UNESCO Intangible Heritage Lists (DataHub ich001)", "ich001"
     homepage = "https://data.unesco.org/explore/dataset/ich001/"
     parser = staticmethod(parse_ich)

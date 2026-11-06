@@ -12,12 +12,14 @@ COUNTRY_PRIORITY = ("rest_countries", "wikidata")
 
 
 def read_jsonl(path: Path) -> list[dict]:
+    """Đọc file JSONL (không có file → [])."""
     if not path.exists():
         return []
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
 def merge_countries(by_source: dict[str, list[dict]]) -> dict[str, dict]:
+    """Gộp thông tin quốc gia từ nhiều nguồn: nguồn đứng trước trong COUNTRY_PRIORITY thắng."""
     merged: dict[str, dict] = {}
     for src in COUNTRY_PRIORITY:
         for rec in by_source.get(src, []):
@@ -32,6 +34,7 @@ def merge_countries(by_source: dict[str, list[dict]]) -> dict[str, dict]:
 
 
 def aggregate(data_dir: Path) -> dict:
+    """data/normalized/*.jsonl → data/aggregated/*.json + data/report.md; trả bảng tổng kết."""
     norm = data_dir / "normalized"
     by_source = {p.stem: read_jsonl(p) for p in sorted(norm.glob("*.jsonl"))}
     out_dir = data_dir / "aggregated"
@@ -77,13 +80,14 @@ def aggregate(data_dir: Path) -> dict:
 
 
 def render_report(s: dict, data_dir: Path) -> str:
+    """Báo cáo Markdown: ma trận quốc gia × nguồn + 20 lượt chạy gần nhất."""
     srcs = sorted(s["sources"])
     lines = ["# Ingestion report", "", "| Country | " + " | ".join(srcs) + " |", "|---|" + "---|" * len(srcs)]
     for iso, row in s["matrix"].items():
         if len(iso) == 2 and iso.isupper() and any(row.values()):
             lines.append(f"| {iso} | " + " | ".join(str(row.get(x, "—")) for x in srcs) + " |")
-    lines += ["", f"Totals: {s['countries']} countries · {s['heritage']} heritage items · {s['media']} media · "
-              f"{s['documents']} reference documents · {s['topics']} topic suggestions", "", "## Runs", ""]
+    lines += ["", (f"Totals: {s['countries']} countries · {s['heritage']} heritage items · {s['media']} media · "
+              f"{s['documents']} reference documents · {s['topics']} topic suggestions"), "", "## Runs", ""]
     for p in sorted((data_dir / "runs").glob("*.json"))[-20:]:
         r = json.loads(p.read_text(encoding="utf-8"))
         note = "; ".join((r.get("skipped") or []) + (r.get("errors") or []))[:180]

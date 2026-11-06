@@ -1,8 +1,10 @@
+/** Trang Culture Quiz (prototype): câu hỏi trắc nghiệm kèm giải thích có nguồn. */
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CultureService } from '../../core/services/culture.service';
 import { CiteChips } from '../../shared/components/badges';
 
+/** Trang /quiz. */
 @Component({
   selector: 'ca-quiz-page',
   imports: [RouterLink, CiteChips],
@@ -17,5 +19,6 @@ export class QuizPage {
   correct = computed(() => this.picked() === this.q().answerIndex);
   letters = ['A', 'B', 'C', 'D'];
 
+  /** Sang câu tiếp theo. */
   next() { this.index.update((i) => (i + 1) % this.svc.quiz.length); this.picked.set(null); }
 }

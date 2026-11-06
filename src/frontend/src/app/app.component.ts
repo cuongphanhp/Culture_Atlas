@@ -1,6 +1,8 @@
+/** Khung ứng dụng: thanh điều hướng trên cùng + router-outlet + chân trang. */
 import { Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
+/** Component gốc (ca-root). */
 @Component({
   selector: 'ca-root',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],

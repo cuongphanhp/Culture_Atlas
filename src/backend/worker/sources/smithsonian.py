@@ -4,6 +4,7 @@ Chỉ giữ media `usage.access == "CC0"`. Ảnh CC0 được tải về vì má
 """
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
 
 from requests import HTTPError
@@ -18,6 +19,7 @@ PAGE = 100
 
 
 def parse_row(row: dict, iso: str) -> MediaRecord | None:
+    """Một bản ghi Smithsonian Open Access → MediaRecord (chỉ hiện vật CC0 có ảnh)."""
     c = row.get("content", {})
     dnr = c.get("descriptiveNonRepeating", {})
     media = [m for m in dnr.get("online_media", {}).get("media", [])
@@ -33,10 +35,13 @@ def parse_row(row: dict, iso: str) -> MediaRecord | None:
 
 
 class SmithsonianOpenAccess(Source):
+    """Smithsonian Open Access API: hiện vật CC0 theo quốc gia (nghệ thuật, lịch sử văn hoá)."""
+
     name, title = "smithsonian", "Smithsonian Open Access"
     access, auth, license, homepage = "api", "api_key", "CC0 (Open Access records only)", "https://www.si.edu/openaccess"
 
-    def collect(self):
+    def collect(self) -> Iterator[MediaRecord]:
+        """Sinh bản ghi chuẩn hoá cho từng quốc gia; payload thô được lưu qua self.raw."""
         key = self.ctx.settings.smithsonian_api_key
         media_dir = self.ctx.settings.data_dir / "media" / "smithsonian"
         media_dir.mkdir(parents=True, exist_ok=True)
@@ -51,7 +56,9 @@ class SmithsonianOpenAccess(Source):
                     return
                 self.run.error(iso, e)
 
-    def _country(self, iso, country, headers, media_dir, target):
+    def _country(self, iso: str, country: str, headers: dict[str, str], media_dir: Path,
+                 target: int) -> Iterator[MediaRecord]:
+        """Phân trang API theo từng danh mục cho tới khi đủ `target` hiện vật của một nước."""
         got, seen = 0, set()
         for cat in CATEGORIES:
             start = 0

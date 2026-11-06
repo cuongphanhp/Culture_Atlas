@@ -1,5 +1,7 @@
+/** Bảng định tuyến: mỗi trang tải lười (lazy) từ app/features/*. */
 import { Routes } from '@angular/router';
 
+/** / khám phá · /countries/:iso · /guide · /compare · /quiz · /admin. */
 export const routes: Routes = [
   { path: '', title: 'CultureAtlas AI — Khám phá', loadComponent: () => import('./features/explorer/explorer.page').then((m) => m.ExplorerPage) },
   { path: 'countries/:iso', title: 'Hồ sơ quốc gia', loadComponent: () => import('./features/country/country.page').then((m) => m.CountryPage) },

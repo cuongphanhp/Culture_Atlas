@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 
 from worker.core.models import MediaRecord, Provenance
 from worker.sources.base import Source
@@ -12,10 +13,12 @@ ALLOWED = ("CC0", "CC BY", "CC BY-SA", "Public domain", "PD")
 
 
 def _clean(s: str) -> str:
+    """Bỏ thẻ HTML trong metadata của Commons."""
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", s or "")).strip()
 
 
 def parse_page(pg: dict, iso: str) -> MediaRecord | None:
+    """Một trang file Commons → MediaRecord; chỉ giữ giấy phép mở và URL ảnh thu nhỏ."""
     ii = (pg.get("imageinfo") or [{}])[0]
     meta = ii.get("extmetadata", {})
     lic = meta.get("LicenseShortName", {}).get("value", "")
@@ -29,10 +32,13 @@ def parse_page(pg: dict, iso: str) -> MediaRecord | None:
 
 
 class WikimediaCommons(Source):
+    """Wikimedia Commons API: ảnh minh hoạ theo chủ đề văn hoá của từng nước."""
+
     name, title = "wikimedia_commons", "Wikimedia Commons"
     access, auth, license, homepage = "api", "none", "Per file (CC0 / CC BY / CC BY-SA / PD)", "https://commons.wikimedia.org"
 
-    def collect(self):
+    def collect(self) -> Iterator[MediaRecord]:
+        """Sinh bản ghi chuẩn hoá cho từng quốc gia; payload thô được lưu qua self.raw."""
         per_topic = max(1, (self.ctx.limit or 8) // len(TOPICS))
         for iso, country in self.ctx.countries.items():
             for topic in TOPICS:
