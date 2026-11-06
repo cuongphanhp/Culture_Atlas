@@ -1,3 +1,4 @@
+"""Làm sạch văn bản trước khi đọc TTS (bỏ markdown, nhãn trích dẫn, ký tự đặc biệt)."""
 from ai_local.text import clean_for_speech, tidy_transcript
 
 

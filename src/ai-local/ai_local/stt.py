@@ -11,6 +11,8 @@ from ai_local.text import tidy_transcript
 
 
 class GipformerSTT:
+    """Nhận dạng tiếng Việt Gipformer (sherpa-onnx, transducer) + VAD để cắt câu dài."""
+
     model = "gipformer1.5-68M-rnnt"
 
     def __init__(self, paths: dict[str, str], threads: int, decoding: str, max_seconds: float) -> None:
@@ -29,6 +31,7 @@ class GipformerSTT:
         self.max_seconds = max_seconds
 
     def _segments(self, samples: np.ndarray) -> list[tuple[float, np.ndarray]]:
+        """Cắt âm thanh thành các đoạn có tiếng nói (VAD) kèm thời điểm bắt đầu."""
         vad = sherpa_onnx.VoiceActivityDetector(self.vad_cfg, buffer_size_in_seconds=self.max_seconds + 10)
         win = self.vad_cfg.silero_vad.window_size
         for i in range(0, len(samples), win):
@@ -42,6 +45,7 @@ class GipformerSTT:
         return out
 
     def transcribe(self, samples: np.ndarray) -> dict:
+        """Mẫu 16 kHz mono → {text, segments, duration, model}."""
         t0 = time.perf_counter()
         segs = self._segments(samples)
         streams = []
@@ -51,7 +55,7 @@ class GipformerSTT:
             streams.append(st)
         if streams:
             self.recognizer.decode_streams(streams)
-        items = [{"start": round(start, 2), "end": round(start + len(s) / STT_RATE, 2), "text": st.result.text.strip()}
+        items = [{"start": round(start, 2), "end": round(start + len(s) / STT_RATE, 2), "text": st.result.text.strip().lower()}
                  for (start, s), st in zip(segs, streams, strict=True) if st.result.text.strip()]
         return {
             "text": tidy_transcript(" ".join(i["text"] for i in items)),

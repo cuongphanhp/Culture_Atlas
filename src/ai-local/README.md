@@ -15,12 +15,12 @@ Lý do chọn từng model và số đo tốc độ: [docs/11-vietnamese-chat-st
 
 ## Cài đặt
 
-Cần Python 3.12 và `ffmpeg`.
+Cần Python 3.12. Không cần cài ffmpeg: PyAV đã kèm sẵn thư viện giải mã.
 
 ```bash
 python3.12 -m venv .venv
-.venv/bin/pip install --extra-index-url https://download.pytorch.org/whl/cpu -e ".[rerank,dev]"
-.venv/bin/python -m ai_local.download            # ~5 GB, một lần (stt tts embed rerank)
+.venv/bin/pip install --extra-index-url https://download.pytorch.org/whl/cpu -e ".[export,dev]"
+.venv/bin/python -m ai_local.download            # ~5 GB, một lần (stt tts embed rerank). Reranker được xuất sang ONNX int8
 .venv/bin/uvicorn ai_local.main:app --port 8100
 ```
 

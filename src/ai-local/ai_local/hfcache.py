@@ -16,6 +16,7 @@ ONNX_REPOS = [
 
 
 def materialize(repo_id: str) -> int:
+    """Thay symlink trong cache Hugging Face của `repo_id` bằng file thật (onnxruntime không đọc symlink)."""
     root = Path(HF_HUB_CACHE) / f"models--{repo_id.replace('/', '--')}" / "snapshots"
     n = 0
     for p in root.rglob("*") if root.exists() else []:
@@ -33,4 +34,5 @@ def materialize(repo_id: str) -> int:
 
 
 def materialize_all() -> int:
+    """materialize() cho mọi repo ONNX đang dùng; trả số file đã thay."""
     return sum(materialize(r) for r in ONNX_REPOS)

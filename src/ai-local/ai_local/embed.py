@@ -9,6 +9,8 @@ from tokenizers import Tokenizer
 
 
 class OnnxEmbedder:
+    """Embedding tiếng Việt (AITeamVN, 1024 chiều) chạy bằng onnxruntime trên CPU, không cần torch."""
+
     def __init__(self, model_dir: str, name: str, threads: int, max_tokens: int) -> None:
         d = Path(model_dir) / "onnx"
         self.tok = Tokenizer.from_file(str(d / "tokenizer.json"))
@@ -22,6 +24,7 @@ class OnnxEmbedder:
         self.dim = 1024
 
     def embed(self, texts: list[str], batch_size: int = 16) -> np.ndarray:
+        """Văn bản → ma trận (n, 1024) đã chuẩn hoá L2 (cosine = tích vô hướng)."""
         out = []
         for i in range(0, len(texts), batch_size):
             enc = self.tok.encode_batch(texts[i:i + batch_size])

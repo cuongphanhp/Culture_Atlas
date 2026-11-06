@@ -3,17 +3,20 @@ name = "culture-atlas-ai-local"
 version = "0.1.0"
 description = "Dịch vụ AI chạy local (CPU): nhận dạng giọng nói, đọc văn bản, embedding, rerank tiếng Việt"
 requires-python = ">=3.12,<3.13"
+# Lúc chạy chỉ cần ONNX Runtime — KHÔNG có torch. Docker cài theo requirements.lock (vieneu cài --no-deps để bỏ
+# gradio/librosa/scipy… mà đường chạy ONNX trên CPU không dùng tới).
 dependencies = [
-  "fastapi>=0.115", "uvicorn[standard]>=0.30", "python-multipart>=0.0.9", "pydantic-settings>=2.4",
-  "numpy>=1.26", "soundfile>=0.12", "huggingface_hub>=0.26",
-  "sherpa-onnx>=1.12", "sherpa-onnx-core>=1.12; python_version>='3.8'",
+  "fastapi>=0.115", "uvicorn>=0.30", "python-multipart>=0.0.9", "pydantic-settings>=2.4",
+  "numpy>=1.26", "soundfile>=0.12", "av>=14", "huggingface_hub>=0.26",
+  "sherpa-onnx>=1.12", "sherpa-onnx-core>=1.12",
   "onnxruntime>=1.20", "tokenizers>=0.20",
-  "vieneu>=3.8",
+  # phụ thuộc thật sự của VieNeu-TTS v3 Turbo (ONNX/CPU)
+  "vieneu>=3.8", "sea-g2p>=0.9.1", "soxr", "kaldi-native-fbank>=1.20", "PyYAML",
 ]
 
 [project.optional-dependencies]
-# Reranker cross-encoder chỉ có trọng số safetensors → cần torch (bản CPU)
-rerank = ["torch>=2.4", "transformers>=4.45"]
+# Chỉ để xuất reranker (safetensors) sang ONNX int8 một lần: python -m ai_local.download rerank
+export = ["torch>=2.4", "transformers>=4.45", "onnx>=1.16"]
 dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.6"]
 
 [tool.setuptools.packages.find]
@@ -26,3 +29,11 @@ markers = [
   "ac(*ids): mã tiêu chí chấp nhận (docs/06-acceptance-criteria.md)",
 ]
 addopts = "-m 'not models' -rfE"
+
+# Quy ước code giống src/backend: docstring + type hint đầy đủ cho code ứng dụng; test được miễn.
+[tool.ruff.lint]
+extend-select = ["D1", "ANN"]
+ignore = ["D105", "D107", "ANN401"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D", "ANN"]

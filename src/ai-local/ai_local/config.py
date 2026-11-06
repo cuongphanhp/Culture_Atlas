@@ -8,6 +8,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """Cấu hình dịch vụ (biến môi trường AI_LOCAL_*): model, số luồng, giới hạn đầu vào."""
+
     model_config = SettingsConfigDict(env_prefix="AI_LOCAL_", env_file=None)
 
     models_dir: Path = Path(os.environ.get("HF_HOME", Path.home() / ".cache/huggingface")) / "ai-local"
