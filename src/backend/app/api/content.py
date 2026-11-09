@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.core.db import get_db
+from app.core.security import AuthUser, optional_user
 from app.repositories import country_repo, entry_repo, feedback_repo, heritage_repo
 from app.schemas.ai import CategoryCode
 from app.schemas.content import (
@@ -95,6 +96,8 @@ async def list_festivals(db: Db, month: Annotated[int, Query(ge=1, le=12)], lang
 
 
 @router.post("/feedback", response_model=Feedback, status_code=201, tags=["Feedback"])
-async def create_feedback(db: Db, body: FeedbackCreate) -> dict[str, Any]:
-    """Báo cáo sai / góp ý → `open`, chờ biên tập viên xử lý (AC14)."""
-    return await feedback_repo.create_feedback(db, body.targetType, body.targetId, body.type, body.comment)
+async def create_feedback(db: Db, body: FeedbackCreate,
+                          user: Annotated[AuthUser | None, Depends(optional_user)]) -> dict[str, Any]:
+    """Báo cáo sai / góp ý → `open`, chờ biên tập viên xử lý (AC14). Khách gửi được; đã đăng nhập thì ghi người gửi."""
+    return await feedback_repo.create_feedback(db, body.targetType, body.targetId, body.type, body.comment,
+                                               user.id if user else None)

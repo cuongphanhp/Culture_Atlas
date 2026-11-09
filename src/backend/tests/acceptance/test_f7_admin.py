@@ -71,6 +71,50 @@ def test_admin_changes_role(client, login, db):
     assert_problem(client.patch("/api/admin/users/3", json={"role": "admin"}, headers=login("editor")), 403)
 
 
+@route("PATCH", "/api/admin/users/{id}")
+@ac("AC15.1")
+def test_admin_cannot_demote_or_lock_self(client, login):
+    h = login("admin")
+    assert_problem(client.patch("/api/admin/users/1", json={"role": "editor"}, headers=h), 422)
+    assert_problem(client.patch("/api/admin/users/1", json={"isActive": False}, headers=h), 422)
+    assert_problem(client.patch("/api/admin/users/999", json={"role": "editor"}, headers=h), 404)
+
+
+@route("PATCH", "/api/admin/users/{id}")
+@route("GET", "/api/auth/me")
+@ac("AC15.2")
+def test_locked_user_token_stops_working_immediately(client, login):
+    editor = login("editor")
+    assert client.patch("/api/admin/users/2", json={"isActive": False}, headers=login("admin")).status_code == 200
+    assert_problem(client.get("/api/auth/me", headers=editor), 401)
+    assert_problem(client.post("/api/auth/login", json={"email": "editor@test.local", "password": "Passw0rd!"}), 401)
+
+
+@route("GET", "/api/auth/me")
+@ac("AC15.2")
+def test_token_of_unknown_user_or_bad_header_rejected(client):
+    future = datetime.now(UTC) + timedelta(hours=1)
+    ghost = jwt.encode({"sub": "999", "role": "admin", "exp": future}, TEST_JWT_SECRET, algorithm="HS256")
+    no_exp = jwt.encode({"sub": "1", "role": "admin"}, TEST_JWT_SECRET, algorithm="HS256")
+    for header in (f"Bearer {ghost}", f"Bearer {no_exp}", "Bearer khong-phai-jwt"):
+        assert_problem(client.get("/api/auth/me", headers={"Authorization": header}), 401)
+
+
+@ac("AC15.1")
+def test_login_refused_when_jwt_secret_too_short(client, monkeypatch):
+    from app.core.config import get_settings
+    monkeypatch.setattr(get_settings(), "jwt_secret", "change-me")
+    assert_problem(client.post("/api/auth/login", json={"email": "admin@test.local", "password": "Passw0rd!"}), 503)
+
+
+@route("POST", "/api/feedback")
+@ac("AC14.2")
+def test_feedback_records_logged_in_user(client, login, db):
+    r = client.post("/api/feedback", json={"targetType": "entry", "targetId": 1, "type": "other"}, headers=login("learner"))
+    assert r.status_code == 201
+    assert db.execute("SELECT user_id FROM feedback WHERE id = %s", (r.json()["id"],)).fetchone() == (3,)
+
+
 # ── US16 — Duyệt nội dung ──
 @route("POST", "/api/admin/review/{targetType}/{id}/decision")
 @route("GET", "/api/entries/{id}")

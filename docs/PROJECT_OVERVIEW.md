@@ -21,7 +21,7 @@ Nguyên tắc cốt lõi: **"có nguồn hoặc không khẳng định"**.
 | **F2 AI Cultural Guide**: hỏi đáp tiếng Việt, stream, trích dẫn, nhiều lượt, 3 mức giải thích, giọng nói, gợi ý câu hỏi theo quốc gia + mối quan tâm | `/guide` | **Chạy thật** (`/api/ai/*`) |
 | F3 So sánh văn hoá 2 nước | `/compare` | Prototype giao diện |
 | F5 Culture Quiz | `/quiz` | Prototype giao diện |
-| F7 Quản trị nội dung: duyệt, nguồn, độ phủ | `/admin` | Prototype giao diện |
+| F7 Quản trị nội dung: duyệt, nguồn, độ phủ | `/admin` | Prototype giao diện. **Đăng nhập JWT + phân quyền chạy thật** (`/api/auth/*`, `/api/admin/users`); các API duyệt còn lại ở P3 |
 | F8 Thu thập dữ liệu từ 10 nguồn mở | worker CLI | **Chạy thật** |
 | F9 Giọng nói (STT/TTS local) | trong `/guide` | **Chạy thật** |
 | F10 Lưu trữ: file ở MinIO, embedding ở Qdrant | — | **Chạy thật** |
@@ -106,6 +106,7 @@ DB, MinIO và Qdrant chỉ mở cổng trên `127.0.0.1`.
 - Âm thanh của người dùng không lưu, không gửi ra ngoài.
 - Khoá và token che bằng `***` trong log và dữ liệu thô.
 - Không mở MinIO ra ngoài `127.0.0.1`.
+- Đăng nhập: JWT HS256 (`JWT_SECRET` ≥ 32 byte, thiếu thì `/api/auth/login` trả 503), mật khẩu Argon2. Mỗi request đọc lại người dùng từ DB nên khoá tài khoản / đổi vai trò có hiệu lực ngay. Phân quyền bằng `require_role("editor" | "admin")` ([security.py](../src/backend/app/core/security.py)).
 
 Quy tắc đầy đủ: [CLAUDE.md](../CLAUDE.md).
 
@@ -125,6 +126,7 @@ Quy tắc đầy đủ: [CLAUDE.md](../CLAUDE.md).
 
 Ghi ngắn, mới nhất ở trên.
 
+- **2026-11-09** — Auth JWT + RBAC (AC15): `POST /api/auth/login`, `GET /api/auth/me`, `GET/PATCH /api/admin/users` (chỉ admin; admin không tự hạ quyền / tự khoá). Báo cáo sai ghi người gửi khi đã đăng nhập. Biến mới `JWT_TTL_MINUTES`.
 - **2026-11-09** — Content API (AC01–AC05, AC14): quốc gia + độ phủ, hồ sơ, bài viết, claim + bằng chứng, nguồn, di sản, tìm kiếm không dấu, chủ đề (thẻ `theme`), lễ hội theo tháng (thẻ `month`), báo cáo sai. SQL nằm ở `app/repositories/*`, tìm kiếm ở `app/services/content_service.py`.
 - **2026-11-06** — Câu hỏi gợi ý của AI Guide theo quốc gia và chủ đề người dùng quan tâm (AC10.3, AC10.4):
   - Thêm `GET /api/ai/suggestions` và ngân hàng câu hỏi `prompts/suggestions_vi.json`.
@@ -312,9 +314,9 @@ _Prompt và dữ liệu tĩnh của AI Guide._
 | File | Chức năng |
 |---|---|
 | [__init__.py](../src/backend/app/api/__init__.py) | Các router HTTP (FastAPI) — mỗi file một nhóm endpoint của docs/api/openapi.yaml. |
-| [admin.py](../src/backend/app/api/admin.py) | Admin API (editor/admin): review-queue, entries, claims, sources, feedback, coverage, ai/drafts, ingestion, benchmark, users. |
+| [admin.py](../src/backend/app/api/admin.py) | Admin API (JWT, vai trò editor/admin). Đã có: users (admin). Còn lại (P3): review-queue, entries, claims, sources, feedback, coverage, ai/drafts, ingestion, benchmark. |
 | [ai.py](../src/backend/app/api/ai.py) | AI API. - POST /chat (SSE mặc định; Accept: application/json → một ChatAnswer), POST /chat/messages/{id}/rating - GET /suggestions — câu hỏi gợi ý theo quốc gia + chủ… |
-| [auth.py](../src/backend/app/api/auth.py) | POST /login, GET /me. |
+| [auth.py](../src/backend/app/api/auth.py) | Auth API: POST /login (email + mật khẩu → JWT), GET /me (người dùng của token). Xem app/core/security.py. |
 | [content.py](../src/backend/app/api/content.py) | Content API (không gọi LLM, chỉ nội dung `published`): countries, entries, heritage, search, sources, themes, festivals, feedback. Quiz (P3) chưa có. |
 
 #### `src/backend/app/core/`
@@ -326,7 +328,7 @@ _Prompt và dữ liệu tĩnh của AI Guide._
 | [db.py](../src/backend/app/core/db.py) | Kết nối PostgreSQL async (SQLAlchemy + asyncpg). Dùng câu SQL tường minh qua text(). |
 | [errors.py](../src/backend/app/core/errors.py) | Lỗi theo RFC 7807 (application/problem+json). Lỗi validate → 400; vi phạm nghiệp vụ → 422. |
 | [rate_limit.py](../src/backend/app/core/rate_limit.py) | Giới hạn lượt hỏi AI cho khách theo anon_key (BR12, AC06.3) — đếm chat_logs trong ngày, không cần Redis. |
-| [security.py](../src/backend/app/core/security.py) | JWT (Bearer), băm mật khẩu Argon2, dependency require_role("editor" \| "admin"). KHUNG — chưa triển khai (P2). |
+| [security.py](../src/backend/app/core/security.py) | JWT (Bearer, HS256 qua PyJWT), băm mật khẩu Argon2, dependency lấy người dùng và require_role (AC15). |
 
 #### `src/backend/app/domain/`
 
@@ -347,6 +349,7 @@ _Prompt và dữ liệu tĩnh của AI Guide._
 | [entry_repo.py](../src/backend/app/repositories/entry_repo.py) | culture_entries, claims, claim_sources, sources: bài viết đã xuất bản, claim kèm bằng chứng, chi tiết nguồn. |
 | [feedback_repo.py](../src/backend/app/repositories/feedback_repo.py) | feedback: báo cáo sai / góp ý của người dùng (AC14). AI Guide tự ghi loại `unanswered` trong app/ai/agent.py. |
 | [heritage_repo.py](../src/backend/app/repositories/heritage_repo.py) | heritage_items: di sản UNESCO theo quốc gia / loại, kèm ghi công theo giấy phép của nguồn (AC04.1, AC04.2). |
+| [user_repo.py](../src/backend/app/repositories/user_repo.py) | users: danh sách người dùng và đổi vai trò / khoá tài khoản (chỉ admin gọi, AC15.1). |
 
 #### `src/backend/app/schemas/`
 
@@ -355,6 +358,7 @@ _Prompt và dữ liệu tĩnh của AI Guide._
 | [__init__.py](../src/backend/app/schemas/__init__.py) | Pydantic DTO của API — khớp components.schemas trong docs/api/openapi.yaml. |
 | [admin.py](../src/backend/app/schemas/admin.py) | EntryUpsert, ClaimUpsert, SourceUpsert, ReviewDecision, IngestionRun. KHUNG — chưa triển khai (P2). |
 | [ai.py](../src/backend/app/schemas/ai.py) | Schema của AI API (xem docs/api/openapi.yaml: ChatRequest, ChatAnswer, Citation). |
+| [auth.py](../src/backend/app/schemas/auth.py) | Schema của Auth API và quản lý người dùng (docs/api/openapi.yaml: TokenResponse, User, UserRole). |
 | [content.py](../src/backend/app/schemas/content.py) | Pydantic DTO cho Content API — khớp components.schemas trong docs/api/openapi.yaml. |
 
 #### `src/backend/app/services/`

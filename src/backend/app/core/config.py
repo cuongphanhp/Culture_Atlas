@@ -20,7 +20,8 @@ class Settings(BaseSettings):
 
     app_env: str = "dev"
     database_url: str = "postgresql+asyncpg://atlas:atlas@localhost:5432/culture_atlas"
-    jwt_secret: str = "change-me"
+    jwt_secret: str = "change-me"          # ≥ 32 byte, nếu không thì đăng nhập trả 503 (app/core/security.py)
+    jwt_ttl_minutes: int = 60
     guest_daily_limit: int = 10
 
     # LLM — chỉ OpenAI: GPT-6 Luna (chính) + GPT-4o (dự phòng). Xem docs/11-vietnamese-chat-stack.md
