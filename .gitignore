@@ -10,3 +10,4 @@ src/backend/data/
 .ruff_cache/
 *.egg-info/
 src/ai-local/models/
+*.pptx
