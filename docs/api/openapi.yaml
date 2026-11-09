@@ -268,7 +268,10 @@ paths:
       tags: [AI]
       operationId: compareCultures
       summary: So sánh 2 quốc gia × 1 chủ đề
-      description: Trả bản đã duyệt (cache) nếu có; nếu không, sinh bản nháp gắn `reviewed = false`.
+      description: |
+        Trả bản đã duyệt (cache) nếu có; nếu không, sinh bản nháp gắn `reviewed = false` và lưu lại
+        (mỗi bộ A, B, chủ đề, ngôn ngữ chỉ gọi LLM một lần, nên không trừ lượt hỏi của khách).
+        Ô không đủ bằng chứng là `null`; ô của nước A chỉ dùng nguồn về nước A (B tương tự).
       requestBody:
         required: true
         content:
@@ -278,7 +281,8 @@ paths:
       responses:
         '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Comparison' } } } }
         '400': { $ref: '#/components/responses/BadRequest' }
-        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '503': { $ref: '#/components/responses/Unavailable' }
 
   /ai/transcribe:
     post:

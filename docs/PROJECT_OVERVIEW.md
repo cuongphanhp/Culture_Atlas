@@ -19,7 +19,7 @@ Nguyên tắc cốt lõi: **"có nguồn hoặc không khẳng định"**.
 | F1 Khám phá: bản đồ thế giới, tìm kiếm, thẻ quốc gia, chủ đề, lễ hội theo tháng | `/` | **Content API chạy thật** (`/api/countries`, `/api/search`, `/api/themes`, `/api/festivals`). Giao diện vẫn dùng dữ liệu mẫu + snapshot nguồn thật (nối API ở P3) |
 | F1 Hồ sơ quốc gia: ảnh, mẹo lần đầu, bài viết theo danh mục, di sản UNESCO, báo cáo sai | `/countries/:iso` | Như trên (`/api/countries/{iso}`, `/api/entries/{id}`, `/api/heritage`, `/api/sources/{id}`, `/api/feedback`) |
 | **F2 AI Cultural Guide**: hỏi đáp tiếng Việt, stream, trích dẫn, nhiều lượt, 3 mức giải thích, giọng nói, gợi ý câu hỏi theo quốc gia + mối quan tâm | `/guide` | **Chạy thật** (`/api/ai/*`) |
-| F3 So sánh văn hoá 2 nước | `/compare` | Prototype giao diện |
+| F3 So sánh văn hoá 2 nước | `/compare` | **API chạy thật** (`POST /api/ai/compare`: bản đã duyệt hoặc nháp AI có nguồn). Giao diện vẫn là prototype (nối API ở P3) |
 | F5 Culture Quiz | `/quiz` | Prototype giao diện |
 | F7 Quản trị nội dung: duyệt, nguồn, độ phủ | `/admin` | Prototype giao diện. **Đăng nhập JWT + phân quyền chạy thật** (`/api/auth/*`, `/api/admin/users`); các API duyệt còn lại ở P3 |
 | F8 Thu thập dữ liệu từ 10 nguồn mở | worker CLI | **Chạy thật** |
@@ -71,6 +71,13 @@ DB, MinIO và Qdrant chỉ mở cổng trên `127.0.0.1`.
    - Theo quốc gia và chủ đề người dùng quan tâm.
    - LLM viết; LLM lỗi thì lấy từ ngân hàng câu hỏi.
    - Ghi `chat_logs`.
+
+### Luồng so sánh văn hoá ([comparison_service.py](../src/backend/app/services/comparison_service.py))
+
+1. Tìm bản đã lưu theo (A, B, chủ đề, ngôn ngữ), cả hai chiều. Bản `published` trả ngay, không gọi LLM; bản nháp cũng được dùng lại.
+2. Chưa có: truy xuất bằng chứng riêng cho từng nước, LLM điền bảng theo nhãn `[c#]`.
+3. Kiểm từng ô: ô của nước A chỉ nhận nguồn về A; điểm giống cần nguồn của cả hai nước. Không đạt → `null` ("Chưa đủ nguồn để kết luận").
+4. Lưu `comparisons` ở trạng thái `draft`, `origin = ai_generated` để biên tập viên duyệt. Không có bằng chứng nào → không gọi LLM, không lưu.
 
 ### Luồng dữ liệu ([worker/cli.py](../src/backend/worker/cli.py))
 
@@ -126,6 +133,7 @@ Quy tắc đầy đủ: [CLAUDE.md](../CLAUDE.md).
 
 Ghi ngắn, mới nhất ở trên.
 
+- **2026-11-09** — So sánh văn hoá `POST /api/ai/compare` (AC11): cache bản đã duyệt, sinh nháp AI có nguồn theo từng nước, ô thiếu nguồn là `null`. Prompt `prompts/compare_vi.txt`, schema `app/schemas/compare.py`.
 - **2026-11-09** — Auth JWT + RBAC (AC15): `POST /api/auth/login`, `GET /api/auth/me`, `GET/PATCH /api/admin/users` (chỉ admin; admin không tự hạ quyền / tự khoá). Báo cáo sai ghi người gửi khi đã đăng nhập. Biến mới `JWT_TTL_MINUTES`.
 - **2026-11-09** — Content API (AC01–AC05, AC14): quốc gia + độ phủ, hồ sơ, bài viết, claim + bằng chứng, nguồn, di sản, tìm kiếm không dấu, chủ đề (thẻ `theme`), lễ hội theo tháng (thẻ `month`), báo cáo sai. SQL nằm ở `app/repositories/*`, tìm kiếm ở `app/services/content_service.py`.
 - **2026-11-06** — Câu hỏi gợi ý của AI Guide theo quốc gia và chủ đề người dùng quan tâm (AC10.3, AC10.4):
@@ -305,6 +313,7 @@ _Prompt và dữ liệu tĩnh của AI Guide._
 
 | File | Chức năng |
 |---|---|
+| [compare_vi.txt](../src/backend/app/ai/prompts/compare_vi.txt) | System prompt so sánh văn hoá: mỗi ô chỉ dựa trên bằng chứng của đúng nước đó, thiếu thì để trống. |
 | [smalltalk_vi.txt](../src/backend/app/ai/prompts/smalltalk_vi.txt) | System prompt cho chào hỏi / hỏi về trợ lý (không đưa thông tin văn hoá). |
 | [suggestions_vi.json](../src/backend/app/ai/prompts/suggestions_vi.json) | Ngân hàng câu hỏi gợi ý theo quốc gia × chủ đề (app/ai/suggestions.py). |
 | [system_vi.txt](../src/backend/app/ai/prompts/system_vi.txt) | System prompt RAG: chỉ trả lời theo bằng chứng, trích dẫn [c#]. |
@@ -359,6 +368,7 @@ _Prompt và dữ liệu tĩnh của AI Guide._
 | [admin.py](../src/backend/app/schemas/admin.py) | EntryUpsert, ClaimUpsert, SourceUpsert, ReviewDecision, IngestionRun. KHUNG — chưa triển khai (P2). |
 | [ai.py](../src/backend/app/schemas/ai.py) | Schema của AI API (xem docs/api/openapi.yaml: ChatRequest, ChatAnswer, Citation). |
 | [auth.py](../src/backend/app/schemas/auth.py) | Schema của Auth API và quản lý người dùng (docs/api/openapi.yaml: TokenResponse, User, UserRole). |
+| [compare.py](../src/backend/app/schemas/compare.py) | Schema của POST /api/ai/compare (docs/api/openapi.yaml: CompareRequest, SourcedText, Comparison). |
 | [content.py](../src/backend/app/schemas/content.py) | Pydantic DTO cho Content API — khớp components.schemas trong docs/api/openapi.yaml. |
 
 #### `src/backend/app/services/`
@@ -366,7 +376,7 @@ _Prompt và dữ liệu tĩnh của AI Guide._
 | File | Chức năng |
 |---|---|
 | [__init__.py](../src/backend/app/services/__init__.py) | Nghiệp vụ ghép nhiều bảng / nhiều bước: tìm kiếm (content), so sánh văn hoá. Quiz / Review: KHUNG (P3). |
-| [comparison_service.py](../src/backend/app/services/comparison_service.py) | Trả bản so sánh đã duyệt nếu có, nếu không gọi AI sinh nháp (BR07). KHUNG — chưa triển khai (P2). |
+| [comparison_service.py](../src/backend/app/services/comparison_service.py) | So sánh văn hoá 2 quốc gia × 1 chủ đề (F3, AC11): trả bản đã lưu nếu có, nếu không thì AI sinh bản nháp (BR07). |
 | [content_service.py](../src/backend/app/services/content_service.py) | Tìm kiếm nội dung (AC05): quốc gia, bài viết đã xuất bản, di sản UNESCO, chủ đề — gõ không dấu vẫn tìm được. |
 | [quiz_service.py](../src/backend/app/services/quiz_service.py) | Phục vụ quiz đã duyệt, chấm điểm, giải thích kèm nguồn. KHUNG — chưa triển khai (P2). |
 | [review_service.py](../src/backend/app/services/review_service.py) | Duyệt / từ chối, tạo revision, kích hoạt re-index chunk. KHUNG — chưa triển khai (P2). |

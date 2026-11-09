@@ -1,8 +1,8 @@
 """AI API.
 - POST /chat (SSE mặc định; Accept: application/json → một ChatAnswer), POST /chat/messages/{id}/rating
 - GET /suggestions — câu hỏi gợi ý theo quốc gia + chủ đề người dùng quan tâm (không gọi LLM, không tính lượt)
-- Giọng nói: POST /transcribe, POST /speech, GET /voices (dịch vụ AI local)
-Còn lại (P2): POST /compare."""
+- POST /compare — so sánh 2 nước × 1 chủ đề (app/services/comparison_service.py)
+- Giọng nói: POST /transcribe, POST /speech, GET /voices (dịch vụ AI local)"""
 from __future__ import annotations
 
 import json
@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, File, Query, Request, UploadFile
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.ai.agent import ChatAgent, ChatInput, session_questions
 from app.ai.llm_adapter import LLMAdapter, LLMUnavailable, get_llm
@@ -27,10 +28,12 @@ from app.ai.router import find_countries, load_countries
 from app.ai.suggestions import available_categories, interests_of, suggest
 from app.ai.vector_store import VectorSearch, get_vector_store
 from app.core.config import get_settings
-from app.core.db import get_engine
+from app.core.db import get_db, get_engine
 from app.core.errors import ProblemError
 from app.core.rate_limit import client_key, consume
 from app.schemas.ai import CategoryCode, ChatRequest, RatingRequest, SuggestionsResponse
+from app.schemas.compare import CompareRequest, Comparison
+from app.services import comparison_service
 
 router = APIRouter()
 LocalAI = Annotated[LocalAIClient, Depends(get_local_ai)]
@@ -110,6 +113,18 @@ async def suggestions(request: Request,
         available = await available_categories(conn, iso) if iso else set()
     items = suggest(iso, asked, n=limit, available=available, countries=mentioned, focus=category)
     return {"country": iso, "interests": interests_of(asked, category)[:3], "questions": [s.to_dict() for s in items]}
+
+
+@router.post("/compare", response_model=Comparison)
+async def compare(body: CompareRequest, db: Annotated[AsyncConnection, Depends(get_db)],
+                  llm: Annotated[LLMAdapter, Depends(get_llm)], embedder: Annotated[Embedder, Depends(get_embedder)],
+                  local: LocalAI, vstore: Annotated[VectorSearch, Depends(get_vector_store)]) -> dict[str, Any]:
+    """So sánh 2 quốc gia × 1 chủ đề (AC11). Bản đã duyệt trả từ cache; chưa có thì AI sinh bản nháp có nguồn.
+
+    Không trừ lượt hỏi của khách: mỗi bộ (A, B, chủ đề, ngôn ngữ) chỉ gọi LLM một lần rồi dùng lại bản đã lưu.
+    """
+    return await comparison_service.compare(db, llm, embedder, local, vstore, body.countryA, body.countryB,
+                                            body.topic, body.lang)
 
 
 @router.post("/chat/messages/{message_id}/rating", status_code=204)

@@ -47,3 +47,4 @@ class SuggestionsResponse(BaseModel):
     country: str | None
     interests: list[CategoryCode]
     questions: list[SuggestedQuestion]
+

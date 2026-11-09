@@ -78,6 +78,7 @@ FILE_NOTES: dict[str, str] = {
     "src/backend/tests/fixtures/seed.sql": "Dữ liệu mẫu nạp lại trước mỗi test cần DB.",
     "src/backend/eval/benchmark/questions.jsonl": "Bộ câu hỏi benchmark chất lượng AI Guide.",
     "src/backend/app/ai/prompts/system_vi.txt": "System prompt RAG: chỉ trả lời theo bằng chứng, trích dẫn [c#].",
+    "src/backend/app/ai/prompts/compare_vi.txt": "System prompt so sánh văn hoá: mỗi ô chỉ dựa trên bằng chứng của đúng nước đó, thiếu thì để trống.",
     "src/backend/app/ai/prompts/smalltalk_vi.txt": "System prompt cho chào hỏi / hỏi về trợ lý (không đưa thông tin văn hoá).",
     "src/backend/app/ai/prompts/suggestions_vi.json": "Ngân hàng câu hỏi gợi ý theo quốc gia × chủ đề (app/ai/suggestions.py).",
     "src/ai-local/Dockerfile": "Image AI local: target setup (có torch, xuất ONNX) và runtime (không torch).",

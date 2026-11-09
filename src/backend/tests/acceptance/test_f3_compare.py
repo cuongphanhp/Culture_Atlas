@@ -61,3 +61,60 @@ def test_same_country_rejected(client):
 @ac("AC11.4")
 def test_unknown_topic_rejected(client):
     assert_problem(compare(client, "VN", "JP", "weather"), 400)
+
+
+@ac("AC11.1")
+def test_reversed_pair_served_from_cache_with_swapped_columns(client, fake_llm):
+    c = compare(client, "JP", "VN", "gift_giving").json()
+    assert c["reviewed"] is True and (c["countryA"], c["countryB"]) == ("JP", "VN")
+    assert c["rows"][0]["a"]["text"] == "Trao và nhận bằng hai tay." and c["rows"][1]["b"] is None
+    assert fake_llm.calls == []
+
+
+@ac("AC11.3")
+def test_generated_draft_is_reused_without_new_llm_call(client, fake_llm):
+    first = compare(client, "VN", "FR", "food_dining").json()
+    calls = len(fake_llm.calls)
+    again = compare(client, "VN", "FR", "food_dining").json()
+    assert len(fake_llm.calls) == calls, "bản nháp đã lưu phải được dùng lại"
+    assert again["reviewed"] is False and again["rows"] == first["rows"]
+
+
+@ac("AC11.2")
+def test_no_evidence_at_all_means_no_llm_call_and_no_draft(client, fake_llm, db):
+    c = compare(client, "KE", "FR", "taboos").json()
+    assert c["rows"] == [] and c["similarities"] == [] and c["insufficient"]
+    assert fake_llm.calls == []
+    assert db.execute("SELECT count(*) FROM comparisons WHERE topic = 'taboos'").fetchone() == (0,)
+
+
+@ac("AC11.3")
+def test_llm_outage_returns_503_and_stores_nothing(client, fake_llm, db):
+    fake_llm.fail = True
+    assert_problem(compare(client, "VN", "FR", "food_dining"), 503)
+    assert db.execute("SELECT count(*) FROM comparisons WHERE topic = 'food_dining'").fetchone() == (0,)
+
+
+@ac("AC11.4")
+def test_unknown_country_is_404(client):
+    assert_problem(compare(client, "VN", "ZZ", "gift_giving"), 404)
+
+
+@ac("AC11.2")
+def test_cells_only_accept_evidence_of_their_own_country():
+    """LLM lấy bằng chứng của nước B điền vào ô nước A, hoặc nêu điểm giống chỉ dựa trên một nước → null / bỏ."""
+    from app.ai.retrieval import Evidence
+    from app.services.comparison_service import _Country, validate
+    vn, jp = _Country(1, "VN", "Việt Nam", "Vietnam"), _Country(3, "JP", "Nhật Bản", "Japan")
+    ev = [Evidence("c1", 1, "claim", "VN text", "VN", 4, "t", "p", "u", "l", 1.0),
+          Evidence("c2", 2, "claim", "JP text", "JP", 1, "t", "p", "u", "l", 1.0)]
+    raw = {"similarities": [{"text": "Chỉ dựa trên VN", "evidence": ["c1"]}, {"text": "Cả hai [c1][c2]", "evidence": ["c1", "c2"]}],
+           "rows": [{"aspect": "Trao quà", "a": {"text": "Dùng bằng chứng JP", "evidence": ["c2"]},
+                     "b": {"text": "Hai tay [c2]", "evidence": ["c2", "c2"]}},
+                    {"aspect": "Gói quà", "a": {"text": "Nhãn bịa", "evidence": ["c9"]}, "b": {"text": "", "evidence": []}}],
+           "context": "", "caveats": [], "insufficient": []}
+    out = validate(raw, vn, jp, ev, "vi")
+    assert out["similarities"] == [{"text": "Cả hai", "sourceIds": [4, 1]}]
+    assert out["rows"][0] == {"aspect": "Trao quà", "a": None, "b": {"text": "Hai tay", "sourceIds": [1]}}
+    assert out["rows"][1]["a"] is None and out["rows"][1]["b"] is None
+    assert out["insufficient"] == ["Trao quà (Việt Nam)", "Gói quà (Việt Nam)", "Gói quà (Nhật Bản)"]
