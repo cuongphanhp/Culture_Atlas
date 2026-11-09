@@ -1,1 +1,1 @@
-"""Nghiệp vụ Content / Quiz / Review / Compare. KHUNG — chưa triển khai (P2)."""
+"""Nghiệp vụ ghép nhiều bảng / nhiều bước: tìm kiếm (content), so sánh văn hoá. Quiz / Review: KHUNG (P3)."""

@@ -136,6 +136,17 @@ def test_search_finds_published_entries_only(client):
 
 @route("GET", "/api/search")
 @ac("AC05.1")
+def test_search_filters_and_pagination(client):
+    items = client.get("/api/search", params={"q": "qua tang"}).json()["items"]
+    assert any(i["kind"] == "theme" and i["id"] == "qua-tang" for i in items)
+    only_entries = client.get("/api/search", params={"q": "tang qua", "category": "gift_giving", "country": "VN"}).json()
+    assert [(i["kind"], i["id"]) for i in only_entries["items"]] == [("entry", "4")]
+    page = client.get("/api/search", params={"q": "nhat ban", "pageSize": 1, "page": 2}).json()
+    assert page["page"] == 2 and len(page["items"]) == 1 and page["total"] >= 3
+
+
+@route("GET", "/api/search")
+@ac("AC05.1")
 def test_search_query_too_short(client):
     assert_problem(client.get("/api/search", params={"q": "a"}), 400)
 
@@ -177,10 +188,14 @@ def test_invalid_feedback_rejected(client, payload):
 @route("GET", "/api/themes")
 def test_themes_endpoint(client):
     r = client.get("/api/themes")
-    assert r.status_code == 200 and isinstance(r.json(), list)
+    assert r.status_code == 200
+    assert r.json() == [{"slug": "qua-tang", "title": "Quà tặng", "countryCount": 2}], "chủ đề chỉ có bài nháp không được hiện"
 
 
 @route("GET", "/api/festivals")
 def test_festivals_by_month(client):
-    assert client.get("/api/festivals", params={"month": 2}).status_code == 200
+    feb = client.get("/api/festivals", params={"month": 2}).json()
+    assert feb == [{"entryId": 6, "name": "Tết Nguyên Đán", "country": "VN", "dateText": "Cuối tháng 1 – giữa tháng 2 dương lịch"}]
+    assert client.get("/api/festivals", params={"month": 2, "lang": "en"}).json()[0]["name"] == "Lunar New Year (Tết)"
+    assert client.get("/api/festivals", params={"month": 7}).json() == []
     assert_problem(client.get("/api/festivals", params={"month": 13}), 400)

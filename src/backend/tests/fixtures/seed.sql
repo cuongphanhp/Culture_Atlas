@@ -86,6 +86,14 @@ INSERT INTO comparisons (id, country_a_id, country_b_id, topic, language, result
     "insufficient": ["Gói quà ở Việt Nam"]
   }', 'published', 'editor', 2, now());
 
+-- Lễ hội theo tháng (F1.8): bài festivals gắn thẻ kind 'month' (tên "1".."12"); chủ đề (F1.7): thẻ kind 'theme'.
+-- Bài 6 không có claim nên không ảnh hưởng độ phủ / chỉ mục RAG. Thẻ "Trà" chỉ gắn bài nháp → không được hiện.
+INSERT INTO culture_entries (id, country_id, category, slug, title_vi, title_en, summary, period, status, origin, version) VALUES
+  (6, 1, 'festivals', 'tet', 'Tết Nguyên Đán', 'Lunar New Year (Tết)', 'Lễ hội đón năm mới âm lịch.',
+   'Cuối tháng 1 – giữa tháng 2 dương lịch', 'published', 'editor', 1);
+INSERT INTO tags (id, name, kind) VALUES (1, 'Quà tặng', 'theme'), (2, 'Trà', 'theme'), (3, '1', 'month'), (4, '2', 'month');
+INSERT INTO entry_tags (entry_id, tag_id) VALUES (1, 1), (4, 1), (3, 2), (6, 3), (6, 4);
+
 INSERT INTO feedback (id, target_type, target_id, type, comment, status) VALUES
   (1, 'claim', 3, 'factual_error', 'Cần thêm nguồn về hoa cúc.', 'open');
 
@@ -108,4 +116,5 @@ SELECT setval('heritage_items_id_seq',  (SELECT MAX(id) FROM heritage_items));
 SELECT setval('quiz_questions_id_seq',  (SELECT MAX(id) FROM quiz_questions));
 SELECT setval('comparisons_id_seq',     (SELECT MAX(id) FROM comparisons));
 SELECT setval('feedback_id_seq',        (SELECT MAX(id) FROM feedback));
+SELECT setval('tags_id_seq',            (SELECT MAX(id) FROM tags));
 SELECT setval('source_documents_id_seq', (SELECT MAX(id) FROM source_documents));

@@ -16,8 +16,8 @@ Nguyên tắc cốt lõi: **"có nguồn hoặc không khẳng định"**.
 
 | Tính năng | Trang | Trạng thái |
 |---|---|---|
-| F1 Khám phá: bản đồ thế giới, tìm kiếm, thẻ quốc gia | `/` | Giao diện chạy bằng dữ liệu mẫu + snapshot nguồn thật; Content API chưa làm (P2) |
-| F1 Hồ sơ quốc gia: ảnh, mẹo lần đầu, bài viết theo danh mục, di sản UNESCO | `/countries/:iso` | Như trên |
+| F1 Khám phá: bản đồ thế giới, tìm kiếm, thẻ quốc gia, chủ đề, lễ hội theo tháng | `/` | **Content API chạy thật** (`/api/countries`, `/api/search`, `/api/themes`, `/api/festivals`). Giao diện vẫn dùng dữ liệu mẫu + snapshot nguồn thật (nối API ở P3) |
+| F1 Hồ sơ quốc gia: ảnh, mẹo lần đầu, bài viết theo danh mục, di sản UNESCO, báo cáo sai | `/countries/:iso` | Như trên (`/api/countries/{iso}`, `/api/entries/{id}`, `/api/heritage`, `/api/sources/{id}`, `/api/feedback`) |
 | **F2 AI Cultural Guide**: hỏi đáp tiếng Việt, stream, trích dẫn, nhiều lượt, 3 mức giải thích, giọng nói, gợi ý câu hỏi theo quốc gia + mối quan tâm | `/guide` | **Chạy thật** (`/api/ai/*`) |
 | F3 So sánh văn hoá 2 nước | `/compare` | Prototype giao diện |
 | F5 Culture Quiz | `/quiz` | Prototype giao diện |
@@ -125,6 +125,7 @@ Quy tắc đầy đủ: [CLAUDE.md](../CLAUDE.md).
 
 Ghi ngắn, mới nhất ở trên.
 
+- **2026-11-09** — Content API (AC01–AC05, AC14): quốc gia + độ phủ, hồ sơ, bài viết, claim + bằng chứng, nguồn, di sản, tìm kiếm không dấu, chủ đề (thẻ `theme`), lễ hội theo tháng (thẻ `month`), báo cáo sai. SQL nằm ở `app/repositories/*`, tìm kiếm ở `app/services/content_service.py`.
 - **2026-11-06** — Câu hỏi gợi ý của AI Guide theo quốc gia và chủ đề người dùng quan tâm (AC10.3, AC10.4):
   - Thêm `GET /api/ai/suggestions` và ngân hàng câu hỏi `prompts/suggestions_vi.json`.
   - Trang quốc gia truyền `?category=` sang AI Guide.
@@ -314,7 +315,7 @@ _Prompt và dữ liệu tĩnh của AI Guide._
 | [admin.py](../src/backend/app/api/admin.py) | Admin API (editor/admin): review-queue, entries, claims, sources, feedback, coverage, ai/drafts, ingestion, benchmark, users. |
 | [ai.py](../src/backend/app/api/ai.py) | AI API. - POST /chat (SSE mặc định; Accept: application/json → một ChatAnswer), POST /chat/messages/{id}/rating - GET /suggestions — câu hỏi gợi ý theo quốc gia + chủ… |
 | [auth.py](../src/backend/app/api/auth.py) | POST /login, GET /me. |
-| [content.py](../src/backend/app/api/content.py) | Content API (không gọi LLM): countries, entries, heritage, search, sources, themes, festivals, quizzes, feedback. |
+| [content.py](../src/backend/app/api/content.py) | Content API (không gọi LLM, chỉ nội dung `published`): countries, entries, heritage, search, sources, themes, festivals, feedback. Quiz (P3) chưa có. |
 
 #### `src/backend/app/core/`
 
@@ -340,11 +341,12 @@ _Prompt và dữ liệu tĩnh của AI Guide._
 
 | File | Chức năng |
 |---|---|
-| [__init__.py](../src/backend/app/repositories/__init__.py) | Lớp truy cập dữ liệu. KHUNG — chưa triển khai (P2); truy vấn hiện nằm trong app/ai/*. |
+| [__init__.py](../src/backend/app/repositories/__init__.py) | Lớp truy cập dữ liệu: câu SQL tường minh, trả dict đúng hình dạng DTO của API. Truy vấn RAG nằm ở app/ai/*. |
 | [chunk_repo.py](../src/backend/app/repositories/chunk_repo.py) | Truy vấn entry_chunks. KHUNG — chưa dùng: tìm kiếm lai (Qdrant + FTS, gộp RRF) nằm ở app/ai/retrieval.py. |
-| [country_repo.py](../src/backend/app/repositories/country_repo.py) | Truy vấn countries + v_coverage. KHUNG — chưa triển khai (P2). |
-| [entry_repo.py](../src/backend/app/repositories/entry_repo.py) | culture_entries, claims, claim_sources, entry_revisions. KHUNG — chưa triển khai (P2). |
-| [feedback_repo.py](../src/backend/app/repositories/feedback_repo.py) | feedback, chat_logs. KHUNG — chưa triển khai (P2); AI Guide ghi trực tiếp trong app/ai/agent.py. |
+| [country_repo.py](../src/backend/app/repositories/country_repo.py) | Truy vấn countries + v_coverage: danh sách quốc gia có độ phủ, hồ sơ quốc gia (danh mục, điều cần biết). |
+| [entry_repo.py](../src/backend/app/repositories/entry_repo.py) | culture_entries, claims, claim_sources, sources: bài viết đã xuất bản, claim kèm bằng chứng, chi tiết nguồn. |
+| [feedback_repo.py](../src/backend/app/repositories/feedback_repo.py) | feedback: báo cáo sai / góp ý của người dùng (AC14). AI Guide tự ghi loại `unanswered` trong app/ai/agent.py. |
+| [heritage_repo.py](../src/backend/app/repositories/heritage_repo.py) | heritage_items: di sản UNESCO theo quốc gia / loại, kèm ghi công theo giấy phép của nguồn (AC04.1, AC04.2). |
 
 #### `src/backend/app/schemas/`
 
@@ -353,15 +355,15 @@ _Prompt và dữ liệu tĩnh của AI Guide._
 | [__init__.py](../src/backend/app/schemas/__init__.py) | Pydantic DTO của API — khớp components.schemas trong docs/api/openapi.yaml. |
 | [admin.py](../src/backend/app/schemas/admin.py) | EntryUpsert, ClaimUpsert, SourceUpsert, ReviewDecision, IngestionRun. KHUNG — chưa triển khai (P2). |
 | [ai.py](../src/backend/app/schemas/ai.py) | Schema của AI API (xem docs/api/openapi.yaml: ChatRequest, ChatAnswer, Citation). |
-| [content.py](../src/backend/app/schemas/content.py) | Pydantic DTO cho Content API — khớp components.schemas trong docs/api/openapi.yaml. KHUNG — chưa triển khai (P2). |
+| [content.py](../src/backend/app/schemas/content.py) | Pydantic DTO cho Content API — khớp components.schemas trong docs/api/openapi.yaml. |
 
 #### `src/backend/app/services/`
 
 | File | Chức năng |
 |---|---|
-| [__init__.py](../src/backend/app/services/__init__.py) | Nghiệp vụ Content / Quiz / Review / Compare. KHUNG — chưa triển khai (P2). |
+| [__init__.py](../src/backend/app/services/__init__.py) | Nghiệp vụ ghép nhiều bảng / nhiều bước: tìm kiếm (content), so sánh văn hoá. Quiz / Review: KHUNG (P3). |
 | [comparison_service.py](../src/backend/app/services/comparison_service.py) | Trả bản so sánh đã duyệt nếu có, nếu không gọi AI sinh nháp (BR07). KHUNG — chưa triển khai (P2). |
-| [content_service.py](../src/backend/app/services/content_service.py) | Hồ sơ quốc gia, bài viết, tìm kiếm — chỉ nội dung published (BR02). KHUNG — chưa triển khai (P2). |
+| [content_service.py](../src/backend/app/services/content_service.py) | Tìm kiếm nội dung (AC05): quốc gia, bài viết đã xuất bản, di sản UNESCO, chủ đề — gõ không dấu vẫn tìm được. |
 | [quiz_service.py](../src/backend/app/services/quiz_service.py) | Phục vụ quiz đã duyệt, chấm điểm, giải thích kèm nguồn. KHUNG — chưa triển khai (P2). |
 | [review_service.py](../src/backend/app/services/review_service.py) | Duyệt / từ chối, tạo revision, kích hoạt re-index chunk. KHUNG — chưa triển khai (P2). |
 

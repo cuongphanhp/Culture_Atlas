@@ -97,6 +97,13 @@ erDiagram
     culture_entries ||--o{ entry_revisions : versions
 ```
 
+**Thẻ (`tags.kind`)** — Content API đọc hai loại thẻ, chỉ tính bài `published`:
+
+| `kind` | `name` | Dùng ở |
+|---|---|---|
+| `theme` | Tên chủ đề xuyên quốc gia, ví dụ "Trà" | `GET /api/themes` (F1.7), slug = tên bỏ dấu nối bằng `-` |
+| `month` | Số tháng `"1"`…`"12"`, gắn vào bài danh mục `festivals` | `GET /api/festivals?month=` (F1.8); cột `period` của bài mô tả thời điểm |
+
 ## 3. RAG, AI và phản hồi
 
 ```mermaid
